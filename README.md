@@ -107,7 +107,7 @@ SDA_IMAGE=da0-da0/dao-app-sda:v0.0.2
 
 These commands will build the images for the specified platforms. Just replace `linux/arm64` and `linux/amd64` with your machine's platform and the intended platform for the image, respectively.
 
-**\*Important:** Please note that building images for cross-platform architectures can take a significant amount of time, as the build process needs to compile and package the image for the target platform. Be patient and let the build process complete. You can grab a cup of coffee or take a short break while you wait!\*
+**Important:** Please note that building images for cross-platform architectures can take a significant amount of time, as the build process needs to compile and package the image for the target platform. Be patient and let the build process complete. You can grab a cup of coffee or take a short break while you wait!
 
 ## Contributing
 
