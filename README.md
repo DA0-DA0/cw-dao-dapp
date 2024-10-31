@@ -82,13 +82,31 @@ If something is misconfigured, check out the docs for
 | [`types`](./packages/types)         | Types used across packages.                                                                           |
 | [`utils`](./packages/utils)         | Utility functions used across packages.                                                               |
 
-## Docker 
-set the image name & tag. build the image:
 
+
+### Building Docker Images
+
+To create a dockerized image, simply run the following commands:
+
+#### For DAPP
 ```sh
-# Ensure BUILDPLATFORM is set to your machines platform, and TARGETPLATFORM is set for platform intended to run image:
-SDA_IMAGE=da0-da0/dao-app-sda:v0.0.2 DAPP_IMAGE=da0-da0/dao-app-dapp:v0.0.2 docker-compose build --build-arg BUILDPLATFORM=linux/arm64 --build-arg TARGETPLATFORM=linux/amd64
+docker-compose build dapp --build-arg BUILDPLATFORM=linux/arm64 --build-arg TARGETPLATFORM=linux/amd64
 ```
+
+#### For SDA
+```sh
+docker-compose build sda --build-arg BUILDPLATFORM=linux/arm64 --build-arg TARGETPLATFORM=linux/amd64
+```
+
+**Note:** Set the `DAPP_IMAGE` and `SDA_IMAGE` environment variables to your desired image names, e.g.:
+```bash
+DAPP_IMAGE=da0-da0/dao-app-dapp:v0.0.2
+SDA_IMAGE=da0-da0/dao-app-sda:v0.0.2
+```
+
+These commands will build the images for the specified platforms. Just replace `linux/arm64` and `linux/amd64` with your machine's platform and the intended platform for the image, respectively.
+
+***Important:** Please note that building images for cross-platform architectures can take a significant amount of time, as the build process needs to compile and package the image for the target platform. Be patient and let the build process complete. You can grab a cup of coffee or take a short break while you wait!*
 
 ## Contributing
 
