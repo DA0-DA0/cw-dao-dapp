@@ -32,7 +32,6 @@ import {
   ibcRpcClientForChainSelector,
   nativeBalancesSelector,
   nativeDelegatedBalanceSelector,
-  nativeDenomBalanceSelector,
   nativeUnstakingDurationSecondsSelector,
 } from './chain'
 import { isDaoSelector } from './contract'
@@ -245,43 +244,16 @@ export const genericTokenBalancesSelector = selectorFamily<
 
 export const genericTokenBalanceSelector = selectorFamily<
   GenericTokenBalance,
-  Parameters<typeof genericTokenSelector>[0] & {
-    address: string
-  }
+  Parameters<typeof tokenQueries.balance>[1]
 >({
   key: 'genericTokenBalance',
   get:
-    ({ address, ...params }) =>
+    (params) =>
     async ({ get }) => {
-      const token = get(genericTokenSelector(params))
-
-      let balance = '0'
-      if (token.type === TokenType.Native) {
-        balance = get(
-          nativeDenomBalanceSelector({
-            chainId: params.chainId,
-            walletAddress: address,
-            denom: params.denomOrAddress,
-          })
-        ).amount
-      } else if (token.type === TokenType.Cw20) {
-        balance = get(
-          Cw20BaseSelectors.balanceSelector({
-            contractAddress: params.denomOrAddress,
-            chainId: params.chainId,
-            params: [
-              {
-                address,
-              },
-            ],
-          })
-        ).balance
-      }
-
-      return {
-        token,
-        balance,
-      }
+      const queryClient = get(queryClientAtom)
+      return await queryClient.fetchQuery(
+        tokenQueries.balance(queryClient, params)
+      )
     },
 })
 

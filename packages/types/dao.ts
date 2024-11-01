@@ -665,3 +665,65 @@ export type PendingDaoRewards = {
    */
   rewards: GenericTokenBalanceAndValue[]
 }
+
+/**
+ * A reward distribution with v2.5.0 recovery information.
+ */
+export type DistributionWithV250RecoveryInfo = {
+  /**
+   * Distribution.
+   */
+  distribution: DaoRewardDistribution
+  /**
+   * Distributed rewards that have not yet been claimed (i.e. pending /
+   * claimable).
+   */
+  claimable: HugeDecimal
+  /**
+   * Undistributed rewards.
+   */
+  undistributed: HugeDecimal
+}
+
+/**
+ * A token with its v2.5.0 recovery information aggregated over all reward
+ * distributions.
+ */
+export type TokenWithV250RecoveryInfo = {
+  /**
+   * Token.
+   */
+  token: GenericToken
+  /**
+   * Distributed rewards that have not yet been claimed (i.e. pending /
+   * claimable).
+   */
+  claimable: HugeDecimal
+  /**
+   * Undistributed rewards.
+   */
+  undistributed: HugeDecimal
+  /**
+   * Missed rewards.
+   */
+  missed: HugeDecimal
+}
+
+/**
+ * v2.5.0 reward distributor recovery information.
+ */
+export type V250RewardDistributorRecoveryInfo = {
+  /**
+   * Reward distributions with their v2.5.0 recovery information.
+   */
+  distributions: DistributionWithV250RecoveryInfo[]
+  /**
+   * Tokens with their v2.5.0 recovery information aggregated over all reward
+   * distributions.
+   */
+  tokens: TokenWithV250RecoveryInfo[]
+  /**
+   * The addresses with claimable rewards.
+   */
+  addressesWithClaimableRewards: string[]
+}

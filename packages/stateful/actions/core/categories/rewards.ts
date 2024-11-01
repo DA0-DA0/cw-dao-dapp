@@ -22,6 +22,7 @@ export const makeRewardsActionCategory: ActionCategoryMaker = ({
           ActionKey.WithdrawRewardDistribution,
           ActionKey.PauseRewardDistribution,
           ActionKey.ResumeRewardDistribution,
+          ActionKey.FixRewardDistributor,
         ],
       }
     : null

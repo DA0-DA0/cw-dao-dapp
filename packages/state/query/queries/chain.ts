@@ -206,18 +206,17 @@ export const fetchBlockTimestamp = async ({
 /**
  * Fetch the native token balance for a given address.
  */
-export const fetchNativeBalance = async ({
+export const fetchBalance = async ({
   chainId,
   address,
+  denom,
 }: {
   chainId: string
   address: string
+  denom: string
 }): Promise<Coin> => {
   const client = await stargateClientRouter.connect(chainId)
-  return await client.getBalance(
-    address,
-    getNativeTokenForChainId(chainId).denomOrAddress
-  )
+  return await client.getBalance(address, denom)
 }
 
 /**
@@ -1318,12 +1317,20 @@ export const chainQueries = {
       queryFn: () => fetchBlockTimestamp(options),
     }),
   /**
+   * Fetch the balance for a given address and denom.
+   */
+  balance: (options: Parameters<typeof fetchBalance>[0]) =>
+    queryOptions({
+      queryKey: ['chain', 'balance', options],
+      queryFn: () => fetchBalance(options),
+    }),
+  /**
    * Fetch the native token balance for a given address.
    */
-  nativeBalance: (options?: Parameters<typeof fetchNativeBalance>[0]) =>
-    queryOptions({
-      queryKey: ['chain', 'nativeBalance', options],
-      queryFn: options ? () => fetchNativeBalance(options) : skipToken,
+  nativeBalance: (options: Omit<Parameters<typeof fetchBalance>[0], 'denom'>) =>
+    chainQueries.balance({
+      ...options,
+      denom: getNativeTokenForChainId(options.chainId).denomOrAddress,
     }),
   /**
    * Fetch the sum of native tokens staked across all validators.

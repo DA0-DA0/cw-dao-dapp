@@ -420,4 +420,28 @@ export const daoQueries = {
       queryKey: ['dao', 'searchProposals', options],
       queryFn: () => searchDaoProposals(options),
     }),
+  /**
+   * List all DAO members.
+   */
+  listMembers: (
+    queryClient: QueryClient,
+    {
+      chainId,
+      address,
+    }: {
+      chainId: string
+      address: string
+    }
+  ) =>
+    indexerQueries.queryContract<
+      {
+        address: string
+        votingPowerPercent: number
+      }[]
+    >(queryClient, {
+      chainId,
+      contractAddress: address,
+      formula: 'daoCore/listMembers',
+      noFallback: true,
+    }),
 }

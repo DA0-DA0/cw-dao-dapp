@@ -3,6 +3,7 @@ import { QueryClient, queryOptions } from '@tanstack/react-query'
 import {
   ChainId,
   GenericToken,
+  GenericTokenBalance,
   GenericTokenSource,
   GenericTokenWithUsdPrice,
   TokenType,
@@ -371,6 +372,54 @@ export const fetchTokenSource = async (
 }
 
 /**
+ * Fetch the balance for any token.
+ */
+export const fetchTokenBalance = (
+  queryClient: QueryClient,
+  {
+    chainId,
+    type,
+    denomOrAddress,
+    address,
+  }: GenericTokenSource & {
+    address: string
+  }
+): Promise<GenericTokenBalance> =>
+  Promise.all([
+    queryClient.fetchQuery(
+      tokenQueries.info(queryClient, { chainId, type, denomOrAddress })
+    ),
+    type === TokenType.Native
+      ? queryClient
+          .fetchQuery(
+            chainQueries.balance({
+              chainId,
+              address,
+              denom: denomOrAddress,
+            })
+          )
+          .then(({ amount }) => amount)
+      : type === TokenType.Cw20
+      ? queryClient
+          .fetchQuery(
+            cw20BaseQueries.balance(queryClient, {
+              chainId,
+              contractAddress: denomOrAddress,
+              args: {
+                address,
+              },
+            })
+          )
+          .then(({ balance }) => balance)
+      : '0',
+  ]).then(
+    ([token, balance]): GenericTokenBalance => ({
+      token,
+      balance,
+    })
+  )
+
+/**
  * Fetch the logo URL for a cw20 token if it exists. Returns null if not found.
  */
 export const fetchCw20LogoUrl = async (
@@ -494,6 +543,17 @@ export const tokenQueries = {
     queryOptions({
       queryKey: ['token', 'source', options],
       queryFn: () => fetchTokenSource(queryClient, options),
+    }),
+  /**
+   * Fetch the balance for any token.
+   */
+  balance: (
+    queryClient: QueryClient,
+    options: Parameters<typeof fetchTokenBalance>[1]
+  ) =>
+    queryOptions({
+      queryKey: ['token', 'balance', options],
+      queryFn: () => fetchTokenBalance(queryClient, options),
     }),
   /**
    * Fetch the logo URL for a cw20 token if it exists.

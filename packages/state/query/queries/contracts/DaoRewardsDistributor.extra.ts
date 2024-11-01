@@ -4,10 +4,13 @@ import uniq from 'lodash.uniq'
 import { HugeDecimal } from '@dao-dao/math'
 import {
   DaoRewardDistribution,
+  DistributionWithV250RecoveryInfo,
   GenericTokenBalanceAndValue,
   GenericTokenWithUsdPrice,
   PendingDaoRewards,
   TokenType,
+  TokenWithV250RecoveryInfo,
+  V250RewardDistributorRecoveryInfo,
 } from '@dao-dao/types'
 import {
   DistributionPendingRewards,
@@ -19,8 +22,10 @@ import {
   getRewardDistributorStorageItemKey,
   serializeTokenSource,
   tokenSourcesEqual,
+  tokensEqual,
 } from '@dao-dao/utils'
 
+import { daoQueries } from '../dao'
 import { indexerQueries } from '../indexer'
 import { tokenQueries } from '../token'
 import { daoDaoCoreQueries } from './DaoDaoCore'
@@ -369,6 +374,200 @@ export const fetchPendingDaoRewards = async (
   }
 }
 
+/**
+ * Fetch v2.5.0 distributions recovery information.
+ */
+export const fetchV250DistributionRecoveryInfo = async (
+  queryClient: QueryClient,
+  {
+    chainId,
+    address,
+    daoAddress,
+  }: {
+    chainId: string
+    address: string
+    daoAddress: string
+  }
+): Promise<V250RewardDistributorRecoveryInfo> => {
+  const [
+    /**
+     * All current DAO members.
+     */
+    daoMembers,
+    /**
+     * All addresses that have claimed rewards or changed voting power since the
+     * reward distribution was created.
+     */
+    userRewardStateMap,
+  ] = await Promise.all([
+    queryClient.fetchQuery(
+      daoQueries.listMembers(queryClient, {
+        chainId,
+        address: daoAddress,
+      })
+    ),
+    queryClient.fetchQuery(
+      indexerQueries.queryContract<
+        Record<
+          string,
+          {
+            pending_rewards: Record<string, string>
+            accounted_for_rewards_puvp: Record<string, string>
+          }
+        >
+      >(queryClient, {
+        chainId,
+        contractAddress: address,
+        formula: 'map',
+        args: {
+          key: 'ur',
+        },
+        noFallback: true,
+      })
+    ),
+  ])
+
+  /**
+   * The set of all current DAO members and all addresses that have claimed
+   * rewards or changed voting power since the reward distribution was created
+   * contains every address that may have pending rewards. This is because all
+   * current DAO members may have pending rewards, and all past DAO members that
+   * are no longer DAO members but were eligible for rewards at some point in
+   * the past must have triggered a voting power change event and thus will show
+   * up in the userRewardStateMap of the distributor.
+   */
+  const allAddresses = uniq([
+    ...daoMembers.map(({ address }) => address),
+    ...Object.keys(userRewardStateMap),
+  ])
+
+  /**
+   * Pending rewards for each address.
+   */
+  const allPendingRewards: {
+    address: string
+    pending: DistributionPendingRewards[]
+  }[] = []
+  const batch = 20
+  for (let i = 0; i < allAddresses.length; i += batch) {
+    const page = await Promise.all(
+      allAddresses.slice(i, i + batch).map(async (recipient) => {
+        const { pending_rewards: pending } = await queryClient.fetchQuery(
+          daoRewardsDistributorExtraQueries.listAllPendingRewards(queryClient, {
+            chainId,
+            address,
+            recipient,
+          })
+        )
+
+        return {
+          address: recipient,
+          pending,
+        }
+      })
+    )
+
+    allPendingRewards.push(...page)
+  }
+
+  const distributions = await queryClient
+    .fetchQuery(
+      daoRewardsDistributorExtraQueries.distributions(queryClient, {
+        chainId,
+        address,
+      })
+    )
+    .then((distributions) =>
+      Promise.all(
+        distributions.map(
+          async (distribution): Promise<DistributionWithV250RecoveryInfo> => {
+            const undistributed = await queryClient
+              .fetchQuery(
+                daoRewardsDistributorQueries.undistributedRewards({
+                  chainId,
+                  contractAddress: address,
+                  args: {
+                    id: distribution.id,
+                  },
+                })
+              )
+              .then(HugeDecimal.from)
+
+            // Sum all pending rewards for this distribution.
+            const claimable = allPendingRewards.reduce(
+              (acc, { pending }) =>
+                acc.plus(
+                  pending.find((p) => p.id === distribution.id)
+                    ?.pending_rewards || HugeDecimal.zero
+                ),
+              HugeDecimal.zero
+            )
+
+            return {
+              distribution,
+              claimable,
+              undistributed,
+            }
+          }
+        )
+      )
+    )
+
+  const tokens = await Promise.all(
+    distributions
+      // Combine all values from each distribution by token.
+      .reduce((acc, { distribution: { token }, claimable, undistributed }) => {
+        const existing = acc.find((t) => tokensEqual(t.token, token))
+        if (existing) {
+          existing.claimable = existing.claimable.plus(claimable)
+          existing.undistributed = existing.undistributed.plus(undistributed)
+        } else {
+          acc.push({ token, claimable, undistributed })
+        }
+        return acc
+      }, [] as Omit<TokenWithV250RecoveryInfo, 'missed'>[])
+      // Calculate the missed rewards for each token.
+      .map(async (info): Promise<TokenWithV250RecoveryInfo> => {
+        const { balance: distributorBalance } = await queryClient.fetchQuery(
+          tokenQueries.balance(queryClient, {
+            chainId,
+            type: info.token.type,
+            denomOrAddress: info.token.denomOrAddress,
+            address,
+          })
+        )
+
+        // Missed rewards are the difference between what should be distributed
+        // and what was actually distributed. In other words, it's whatever is
+        // left in the distributor after accounting for all undistributed and
+        // pending rewards.
+        const missed = HugeDecimal.from(distributorBalance)
+          .minus(info.undistributed)
+          .minus(info.claimable)
+
+        return {
+          ...info,
+          missed,
+        }
+      })
+  )
+
+  /**
+   * Addresses with claimable rewards.
+   */
+  const addressesWithClaimableRewards = allPendingRewards
+    .filter(({ pending }) =>
+      pending.some(({ pending_rewards }) => pending_rewards !== '0')
+    )
+    .map(({ address }) => address)
+
+  return {
+    distributions,
+    tokens,
+    addressesWithClaimableRewards,
+  }
+}
+
 export const daoRewardsDistributorExtraQueries = {
   /**
    * Fetch a reward distribution.
@@ -429,5 +628,20 @@ export const daoRewardsDistributorExtraQueries = {
     queryOptions({
       queryKey: ['daoRewardsDistributorExtra', 'pendingDaoRewards', options],
       queryFn: () => fetchPendingDaoRewards(queryClient, options),
+    }),
+  /**
+   * Fetch v2.5.0 distributions recovery information.
+   */
+  v250DistributionRecoveryInfo: (
+    queryClient: QueryClient,
+    options: Parameters<typeof fetchV250DistributionRecoveryInfo>[1]
+  ) =>
+    queryOptions({
+      queryKey: [
+        'daoRewardsDistributorExtra',
+        'v250DistributionRecoveryInfo',
+        options,
+      ],
+      queryFn: () => fetchV250DistributionRecoveryInfo(queryClient, options),
     }),
 }

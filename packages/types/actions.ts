@@ -116,6 +116,7 @@ export enum ActionKey {
   WithdrawRewardDistribution = 'withdrawRewardDistribution',
   PauseRewardDistribution = 'pauseRewardDistribution',
   ResumeRewardDistribution = 'resumeRewardDistribution',
+  FixRewardDistributor = 'fixRewardDistributor',
 }
 
 export type ActionAndData<
