@@ -671,6 +671,10 @@ export type PendingDaoRewards = {
  */
 export type DistributionWithV250RecoveryInfo = {
   /**
+   * Distributor.
+   */
+  distributor: DaoRewardDistributor
+  /**
    * Distribution.
    */
   distribution: DaoRewardDistribution
@@ -691,9 +695,17 @@ export type DistributionWithV250RecoveryInfo = {
  */
 export type TokenWithV250RecoveryInfo = {
   /**
+   * Distributor.
+   */
+  distributor: DaoRewardDistributor
+  /**
    * Token.
    */
   token: GenericToken
+  /**
+   * Distributor contract balance.
+   */
+  balance: HugeDecimal
   /**
    * Distributed rewards that have not yet been claimed (i.e. pending /
    * claimable).
@@ -714,16 +726,57 @@ export type TokenWithV250RecoveryInfo = {
  */
 export type V250RewardDistributorRecoveryInfo = {
   /**
-   * Reward distributions with their v2.5.0 recovery information.
+   * Aggregated recovery information for all reward distributors.
    */
-  distributions: DistributionWithV250RecoveryInfo[]
+  data: {
+    /**
+     * Distributor contract on v2.5.0.
+     */
+    distributor: DaoRewardDistributor
+    /**
+     * Reward distributions with their v2.5.0 recovery information.
+     */
+    distributions: DistributionWithV250RecoveryInfo[]
+    /**
+     * Tokens with their v2.5.0 recovery information aggregated over all reward
+     * distributions.
+     */
+    tokens: TokenWithV250RecoveryInfo[]
+  }[]
   /**
-   * Tokens with their v2.5.0 recovery information aggregated over all reward
-   * distributions.
+   * Which step the recovery is on.
+   *
+   * Step 1: All linearly emitting distributions are paused and undistributed
+   * funds are withdrawn.
+   *
+   * Step 2: All distributor contracts are upgraded, the missed rewards are
+   * force withdrawn, the distributions are re-funded with the missed rewards,
+   * and all distributions are unpaused.
    */
-  tokens: TokenWithV250RecoveryInfo[]
-  /**
-   * The addresses with claimable rewards.
-   */
-  addressesWithClaimableRewards: string[]
+  step:
+    | {
+        step: 1
+        /**
+         * All linearly emitting distributions that need to be paused.
+         */
+        needsPause: DistributionWithV250RecoveryInfo[]
+        /**
+         * All distributions with undistributed funds.
+         */
+        needsWithdraw: DistributionWithV250RecoveryInfo[]
+      }
+    | {
+        step: 2
+        /**
+         * All distributor contracts that need to be upgraded.
+         */
+        needsUpgrade: DaoRewardDistributor[]
+        /**
+         * All tokens with missed rewards.
+         */
+        needsForceWithdraw: TokenWithV250RecoveryInfo[]
+      }
+    | {
+        step: 'done'
+      }
 }

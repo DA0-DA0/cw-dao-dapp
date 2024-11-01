@@ -1,6 +1,3 @@
-import { useQueries } from '@tanstack/react-query'
-import uniq from 'lodash.uniq'
-
 import {
   contractQueries,
   daoRewardsDistributorExtraQueries,
@@ -9,9 +6,7 @@ import { ActionBase, WrenchEmoji, useActionOptions } from '@dao-dao/stateless'
 import {
   ContractVersion,
   DaoRewardDistributor,
-  TokenWithV250RecoveryInfo,
   UnifiedCosmosMsg,
-  V250RewardDistributorRecoveryInfo,
 } from '@dao-dao/types'
 import {
   ActionComponent,
@@ -21,13 +16,9 @@ import {
   ActionOptions,
   ProcessedMessage,
 } from '@dao-dao/types/actions'
-import {
-  getDaoRewardDistributors,
-  makeCombineQueryResultsIntoLoadingDataWithError,
-  parseContractVersion,
-  tokensEqual,
-} from '@dao-dao/utils'
+import { getDaoRewardDistributors, parseContractVersion } from '@dao-dao/utils'
 
+import { useQueryLoadingDataWithError } from '../../../../hooks'
 import {
   FixRewardDistributorComponent,
   FixRewardDistributorData,
@@ -68,50 +59,15 @@ export class FixRewardDistributorAction extends ActionBase<FixRewardDistributorD
         queryClient,
       } = useActionOptions()
 
-      const recovery = useQueries({
-        queries: action.distributors.map(({ address }) =>
-          daoRewardsDistributorExtraQueries.v250DistributionRecoveryInfo(
-            queryClient,
-            {
-              chainId,
-              address,
-              daoAddress,
-            }
-          )
-        ),
-        combine: makeCombineQueryResultsIntoLoadingDataWithError({
-          transform: (info): V250RewardDistributorRecoveryInfo => {
-            // Combine each distributor's recovery info.
-            const distributions = info.flatMap((i) => i.distributions)
-            const tokens = info.reduce((acc, { tokens }) => {
-              tokens.forEach(({ token, claimable, missed, undistributed }) => {
-                const existing = acc.find((t) => tokensEqual(t.token, token))
-                if (existing) {
-                  existing.claimable = existing.claimable.plus(claimable)
-                  existing.missed = existing.missed.plus(missed)
-                  existing.undistributed =
-                    existing.undistributed.plus(undistributed)
-                } else {
-                  acc.push({ token, claimable, missed, undistributed })
-                }
-              })
-              return acc
-            }, [] as TokenWithV250RecoveryInfo[])
-            const addressesWithClaimableRewards = uniq(
-              info.flatMap(
-                ({ addressesWithClaimableRewards }) =>
-                  addressesWithClaimableRewards
-              )
-            )
-
-            return {
-              distributions,
-              tokens,
-              addressesWithClaimableRewards,
-            }
-          },
-        }),
-      })
+      const recovery = useQueryLoadingDataWithError(
+        daoRewardsDistributorExtraQueries.v250DistributionRecoveryInfo(
+          queryClient,
+          {
+            chainId,
+            daoAddress,
+          }
+        )
+      )
 
       return (
         <FixRewardDistributorComponent
