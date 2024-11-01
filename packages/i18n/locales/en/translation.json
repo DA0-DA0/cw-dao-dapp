@@ -1575,7 +1575,7 @@
     "winningOptionTooltip": "This is the winning option.",
     "withdrawFromRebalancerDescription": "Withdraw funds from the rebalancer.",
     "withdrawRewardDistributionDescription": "Withdraw undistributed funds from an existing reward distribution.",
-    "withdrawRewardDistributionExplanation": "This action withdraws undistributed funds from an active distribution. Rewards that have already been distributed but not yet claimed can still be claimed and will not be withdrawn.",
+    "withdrawRewardDistributionExplanation": "This action withdraws undistributed funds from a distribution. Rewards that have already been distributed but not yet claimed can still be claimed and will not be withdrawn.",
     "withdrawStakingRewards": "Withdraw staking rewards",
     "withdrawTokenSwapDescription": "Withdraw funds from a token swap that has not yet completed.",
     "wouldYouLikeToSearchQuestion": "Would you like to search for a DAO?",

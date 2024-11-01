@@ -7,6 +7,16 @@ import {
 import { getFilteredDaoItemsByPrefix } from './dao'
 
 /**
+ * Get a unique key that identifies a distribution.
+ *
+ * @param address Reward distributor contract address.
+ * @param id Reward distribution ID.
+ * @returns A unique key that identifies the distribution.
+ */
+export const getRewardDistributionKey = (address: string, id: number): string =>
+  [address, id].join(':')
+
+/**
  * Get the key in the DAO storage items map for a reward distributor contract.
  *
  * @param id A unique identifier for the reward distributor contract.
@@ -28,9 +38,10 @@ export const getRewardDistributorSavedEmissionRateStorageItemKey = (
   address: string,
   id: number
 ): string =>
-  [DAO_REWARD_DISTRIBUTOR_SAVED_EMISSION_RATE_ITEM_NAMESPACE, address, id].join(
-    ':'
-  )
+  [
+    DAO_REWARD_DISTRIBUTOR_SAVED_EMISSION_RATE_ITEM_NAMESPACE,
+    getRewardDistributionKey(address, id),
+  ].join(':')
 
 /**
  * Get the DAO reward distributors from the DAO storage items.

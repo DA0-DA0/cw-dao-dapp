@@ -40,7 +40,10 @@ import {
   ProposalResponse as SingleChoiceProposalResponse,
   VetoConfig,
 } from './contracts/DaoProposalSingle.v2'
-import { DistributionState } from './contracts/DaoRewardsDistributor'
+import {
+  DistributionState,
+  EmissionRate,
+} from './contracts/DaoRewardsDistributor'
 import { Config as NeutronCwdSubdaoTimelockSingleConfig } from './contracts/NeutronCwdSubdaoTimelockSingle'
 import { VotingVault } from './contracts/NeutronVotingRegistry'
 import { InstantiateMsg as SecretDaoDaoCoreInstantiateMsg } from './contracts/SecretDaoDaoCore'
@@ -751,7 +754,8 @@ export type V250RewardDistributorRecoveryInfo = {
    *
    * Step 2: All distributor contracts are upgraded, the missed rewards are
    * force withdrawn, the distributions are re-funded with the missed rewards,
-   * and all distributions are unpaused.
+   * and all distributions are resumed. Optionally, the resumed distributions
+   * can be re-funded.
    */
   step:
     | {
@@ -775,6 +779,15 @@ export type V250RewardDistributorRecoveryInfo = {
          * All tokens with missed rewards.
          */
         needsForceWithdraw: TokenWithV250RecoveryInfo[]
+        /**
+         * Which distributions can be resumed.
+         */
+        canBeResumed: (DistributionWithV250RecoveryInfo & {
+          /**
+           * Emission rate of the distribution that will be resumed.
+           */
+          savedEmissionRate: EmissionRate
+        })[]
       }
     | {
         step: 'done'

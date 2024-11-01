@@ -13,6 +13,7 @@ import {
   PolytoneProxies,
 } from '@dao-dao/types'
 import { InstantiateMsg as DaoDaoCoreInstantiateMsg } from '@dao-dao/types/contracts/DaoDaoCore'
+import { EmissionRate } from '@dao-dao/types/contracts/DaoRewardsDistributor'
 
 import { getSupportedChainConfig } from './chain'
 import { convertDurationToHumanReadableString } from './conversion'
@@ -189,22 +190,26 @@ export const daoSourcesEqual = (a: DaoSource, b: DaoSource): boolean =>
  */
 export const getHumanReadableRewardDistributionLabel = (
   t: TFunction,
-  distribution: DaoRewardDistribution
+  distribution: DaoRewardDistribution,
+  /**
+   * Override emission rate display.
+   */
+  emissionRate: EmissionRate = distribution.active_epoch.emission_rate
 ): string =>
   `${distribution.token.symbol} / ${
-    'immediate' in distribution.active_epoch.emission_rate
+    'immediate' in emissionRate
       ? t('title.immediate')
-      : 'paused' in distribution.active_epoch.emission_rate
+      : 'paused' in emissionRate
       ? t('title.paused')
       : t('info.amountEveryDuration', {
           amount: HugeDecimal.from(
-            distribution.active_epoch.emission_rate.linear.amount
+            emissionRate.linear.amount
           ).toInternationalizedHumanReadableString({
             decimals: distribution.token.decimals,
           }),
           duration: convertDurationToHumanReadableString(
             t,
-            distribution.active_epoch.emission_rate.linear.duration
+            emissionRate.linear.duration
           ),
         })
   }`

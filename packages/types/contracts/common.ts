@@ -455,3 +455,11 @@ export interface PubKey {
   type: string
   value: Binary
 }
+
+export type UncheckedDenom =
+  | {
+      native: string
+    }
+  | {
+      cw20: string
+    }

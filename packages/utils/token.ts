@@ -8,6 +8,8 @@ import {
   PfmMemo,
   SortFn,
   TokenCardInfo,
+  TokenType,
+  UncheckedDenom,
 } from '@dao-dao/types'
 
 import { getChainForChainName, getIbcTransferInfoFromChannel } from './chain'
@@ -212,3 +214,20 @@ const compareHugeDecimalAscending = (a: HugeDecimal, b: HugeDecimal): number =>
 
 const compareHugeDecimalDescending = (a: HugeDecimal, b: HugeDecimal): number =>
   a.eq(b) ? 0 : a.gt(b) ? -1 : 1
+
+/**
+ * Convert GenericToken into UncheckedDenom for contract calls.
+ */
+export const tokenToUncheckedDenom = (token: GenericToken): UncheckedDenom => {
+  if (token.type === TokenType.Native) {
+    return {
+      native: token.denomOrAddress,
+    }
+  } else if (token.type === TokenType.Cw20) {
+    return {
+      cw20: token.denomOrAddress,
+    }
+  }
+
+  throw new Error('Unsupported token type')
+}

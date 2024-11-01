@@ -22,7 +22,9 @@ import {
 import {
   deserializeTokenSource,
   getDaoRewardDistributors,
+  getRewardDistributorSavedEmissionRateStorageItemKey,
   getRewardDistributorStorageItemKey,
+  objectMatchesStructure,
   parseContractVersion,
   serializeTokenSource,
   tokenSourcesEqual,
@@ -633,6 +635,32 @@ export const fetchV250DistributionRecoveryInfo = async (
         needsUpgrade: distributors,
         needsForceWithdraw: data.flatMap(({ tokens }) =>
           tokens.flatMap((t) => (t.missed.isPositive() ? t : []))
+        ),
+        canBeResumed: data.flatMap(({ distributions }) =>
+          distributions.flatMap((d) => {
+            const savedEmissionRate = JSON.parse(
+              daoItems[
+                getRewardDistributorSavedEmissionRateStorageItemKey(
+                  d.distributor.address,
+                  d.distribution.id
+                )
+              ] || '{}'
+            )
+
+            return 'paused' in d.distribution.active_epoch.emission_rate &&
+              objectMatchesStructure(savedEmissionRate, {
+                linear: {
+                  amount: {},
+                  continuous: {},
+                  duration: {},
+                },
+              })
+              ? {
+                  ...d,
+                  savedEmissionRate,
+                }
+              : []
+          })
         ),
       }
     : {

@@ -117,10 +117,17 @@ export class CreateRewardDistributionAction extends ActionBase<CreateRewardDistr
 
     this.instantiate2Action = new Instantiate2Action(this.options)
     this.manageStorageItemsAction = new ManageStorageItemsAction(this.options)
+  }
+
+  async setup() {
+    await Promise.all([
+      this.instantiate2Action.setup(),
+      this.manageStorageItemsAction.setup(),
+    ])
 
     this.defaults = {
       type: TokenType.Native,
-      denomOrAddress: getNativeTokenForChainId(options.chain.chainId)
+      denomOrAddress: getNativeTokenForChainId(this.options.chain.chainId)
         .denomOrAddress,
       immediate: false,
       rate: {
@@ -133,11 +140,6 @@ export class CreateRewardDistributionAction extends ActionBase<CreateRewardDistr
       initialFunds: '0',
       openFunding: true,
     }
-  }
-
-  async setup() {
-    await this.instantiate2Action.setup()
-    await this.manageStorageItemsAction.setup()
   }
 
   async encode({
