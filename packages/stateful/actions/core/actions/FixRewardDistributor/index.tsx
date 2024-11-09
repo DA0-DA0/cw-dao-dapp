@@ -25,6 +25,7 @@ import {
   getRewardDistributionKey,
   parseContractVersion,
   tokenToUncheckedDenom,
+  versionGte,
 } from '@dao-dao/utils'
 
 import { useQueryLoadingDataWithError } from '../../../../hooks'
@@ -95,6 +96,19 @@ export class FixRewardDistributorAction extends ActionBase<FixRewardDistributorD
   constructor(options: ActionOptions) {
     if (options.context.type !== ActionContextType.Dao) {
       throw new Error('Only DAOs can setup reward distributions')
+    }
+    if (options.chainContext.type !== ActionChainContextType.Supported) {
+      throw new Error('Unsupported chain')
+    }
+
+    // Reward distributor is fixed in v2.6.0.
+    if (
+      !versionGte(
+        options.chainContext.config.latestVersion,
+        ContractVersion.V260
+      )
+    ) {
+      throw new Error('Unsupported chain version')
     }
 
     super(options, {
