@@ -285,7 +285,7 @@ export const SpendComponent: ActionComponent<SpendOptions> = ({
       ? t('error.unknownDenom', { denom: spendDenom })
       : balance.toHumanReadable(decimals).lt(spendAmount)
       ? t('error.insufficientFundsWarning', {
-          amount: balance.toInternationalizedHumanReadableString({
+          amount: balance.toFormattedString({
             decimals,
           }),
           tokenSymbol: symbol,
@@ -415,9 +415,7 @@ export const SpendComponent: ActionComponent<SpendOptions> = ({
                         description:
                           t('title.balance') +
                           ': ' +
-                          HugeDecimal.from(
-                            balance
-                          ).toInternationalizedHumanReadableString({
+                          HugeDecimal.from(balance).toFormattedString({
                             decimals: token.decimals,
                           }),
                       })),
@@ -670,11 +668,11 @@ export const SpendComponent: ActionComponent<SpendOptions> = ({
                       fee: neutronTransferFee.data
                         .map(({ token, balance }) =>
                           t('format.token', {
-                            amount: HugeDecimal.from(
-                              balance
-                            ).toInternationalizedHumanReadableString({
-                              decimals: token.decimals,
-                            }),
+                            amount: HugeDecimal.from(balance).toFormattedString(
+                              {
+                                decimals: token.decimals,
+                              }
+                            ),
                             symbol: token.symbol,
                           })
                         )
@@ -913,13 +911,13 @@ const NobleTariff = ({
       {t('info.nobleTariffApplied', {
         feePercent: formatPercentOf100(feeDecimal * 100),
         tokenSymbol: symbol,
-        maxFee: maxFee.toInternationalizedHumanReadableString({
+        maxFee: maxFee.toFormattedString({
           decimals,
         }),
-        fee: fee.toInternationalizedHumanReadableString({
+        fee: fee.toFormattedString({
           decimals,
         }),
-        output: amount.minus(fee).toInternationalizedHumanReadableString({
+        output: amount.minus(fee).toFormattedString({
           decimals,
         }),
       })}

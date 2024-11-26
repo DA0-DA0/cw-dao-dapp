@@ -14,6 +14,7 @@ import {
 import { useTranslation } from 'react-i18next'
 
 import { PopupTrigger } from '@dao-dao/types'
+import { toAccessibleImageUrl } from '@dao-dao/utils'
 
 import { useSearchFilter, useUpdatingRef } from '../../hooks'
 import { Button } from '../buttons/Button'
@@ -260,7 +261,9 @@ export const FilterableItemPopup = <T extends FilterableItem>({
                       item.iconClassName
                     )}
                     style={{
-                      backgroundImage: `url(${item.iconUrl})`,
+                      backgroundImage: `url(${toAccessibleImageUrl(
+                        item.iconUrl
+                      )})`,
                     }}
                   />
                 ) : null}

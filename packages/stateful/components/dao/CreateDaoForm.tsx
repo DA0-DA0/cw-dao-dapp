@@ -37,7 +37,6 @@ import {
   StatusCard,
   Tooltip,
   TooltipInfoIcon,
-  useAppContext,
   useCachedLoadable,
   useDaoIfAvailable,
   useDaoNavHelpers,
@@ -49,7 +48,6 @@ import {
   ContractVersion,
   CreateDaoContext,
   CreateDaoCustomValidator,
-  DaoPageMode,
   DaoParentInfo,
   DaoTabId,
   GovernanceProposalActionData,
@@ -100,7 +98,6 @@ import {
   CwAdminFactoryHooks,
   SecretCwAdminFactoryHooks,
   useAwaitNextBlock,
-  useFollowingDaos,
   useGenerateInstantiate2,
   useQuerySyncedRecoilState,
   useWallet,
@@ -210,9 +207,6 @@ export const InnerCreateDaoForm = ({
   ]
 
   const { goToDao, goToDaoProposal } = useDaoNavHelpers()
-  const { setFollowing } = useFollowingDaos()
-
-  const { mode } = useAppContext()
 
   const [daoCreatedCardProps, setDaoCreatedCardProps] = useRecoilState(
     daoCreatedCardPropsAtom
@@ -822,14 +816,6 @@ export const InnerCreateDaoForm = ({
             )
             .catch(() => ({ info: { version: 'unknown' } }))
           const coreVersion = parseContractVersion(info.version)
-
-          // Don't set following on SDA. Only dApp.
-          if (mode !== DaoPageMode.Sda) {
-            setFollowing({
-              chainId,
-              coreAddress,
-            })
-          }
 
           // New wallet balances will not appear until the next block.
           awaitNextBlock().then(refreshBalances)

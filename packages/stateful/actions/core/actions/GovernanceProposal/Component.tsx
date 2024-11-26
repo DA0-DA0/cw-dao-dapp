@@ -380,14 +380,12 @@ export const GovernanceProposalComponent: ActionComponent<
 
                 <p className="caption-text max-w-sm">
                   {t('info.govDepositDescription', {
-                    amount:
-                      depositVotingMin.toInternationalizedHumanReadableString({
-                        decimals: minDepositTokenDecimals,
-                      }),
-                    minAmount:
-                      depositSubmitMin.toInternationalizedHumanReadableString({
-                        decimals: minDepositTokenDecimals,
-                      }),
+                    amount: depositVotingMin.toFormattedString({
+                      decimals: minDepositTokenDecimals,
+                    }),
+                    minAmount: depositSubmitMin.toFormattedString({
+                      decimals: minDepositTokenDecimals,
+                    }),
                     symbol:
                       selectedMinDepositToken?.token.symbol ?? t('info.tokens'),
                   })}
@@ -417,12 +415,9 @@ export const GovernanceProposalComponent: ActionComponent<
                         !selectedMinDepositToken ||
                         depositTokenBalance.gte(value) ||
                         t('error.insufficientBalance', {
-                          amount:
-                            depositTokenBalance.toInternationalizedHumanReadableString(
-                              {
-                                decimals: minDepositTokenDecimals,
-                              }
-                            ),
+                          amount: depositTokenBalance.toFormattedString({
+                            decimals: minDepositTokenDecimals,
+                          }),
                           tokenSymbol: selectedMinDepositToken.token.symbol,
                         }),
                     ],

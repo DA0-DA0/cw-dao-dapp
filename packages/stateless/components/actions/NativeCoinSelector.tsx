@@ -137,7 +137,7 @@ export const NativeCoinSelector = ({
       ? t('error.unknownDenom', { denom: watchDenom })
       : balance.toHumanReadable(decimals).lt(watchAmount)
       ? insufficientFundsWarning(
-          balance.toInternationalizedHumanReadableString({
+          balance.toFormattedString({
             decimals,
           }),
           symbol
@@ -179,9 +179,7 @@ export const NativeCoinSelector = ({
                       description:
                         t('title.balance') +
                         ': ' +
-                        HugeDecimal.from(
-                          balance
-                        ).toInternationalizedHumanReadableString({
+                        HugeDecimal.from(balance).toFormattedString({
                           decimals: token.decimals,
                         }),
                     })),

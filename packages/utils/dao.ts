@@ -204,7 +204,7 @@ export const getHumanReadableRewardDistributionLabel = (
       : t('info.amountEveryDuration', {
           amount: HugeDecimal.from(
             emissionRate.linear.amount
-          ).toInternationalizedHumanReadableString({
+          ).toFormattedString({
             decimals: distribution.token.decimals,
           }),
           duration: convertDurationToHumanReadableString(

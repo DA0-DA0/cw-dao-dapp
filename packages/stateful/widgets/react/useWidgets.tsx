@@ -59,9 +59,10 @@ export const useWidgets = ({
           }
 
           // Fill component with loaded values.
-          const WidgetComponent = () => (
-            <widget.Renderer variables={(daoWidget.values || {}) as any} />
-          )
+          const WidgetComponent = () =>
+            widget.Renderer ? (
+              <widget.Renderer variables={(daoWidget.values || {}) as any} />
+            ) : null
 
           return {
             title: t('widgetTitle.' + widget.id),

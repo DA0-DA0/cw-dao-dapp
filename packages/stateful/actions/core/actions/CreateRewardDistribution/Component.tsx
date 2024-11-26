@@ -99,7 +99,7 @@ export const CreateRewardDistributionComponent: ActionComponent<
       : initialFunds &&
         selectedBalance.toHumanReadable(decimals).lt(initialFunds)
       ? t('error.insufficientFundsWarning', {
-          amount: selectedBalance.toInternationalizedHumanReadableString({
+          amount: selectedBalance.toFormattedString({
             decimals,
           }),
           tokenSymbol: selectedToken.token.symbol,
@@ -157,9 +157,7 @@ export const CreateRewardDistributionComponent: ActionComponent<
                     description:
                       t('title.balance') +
                       ': ' +
-                      HugeDecimal.from(
-                        balance
-                      ).toInternationalizedHumanReadableString({
+                      HugeDecimal.from(balance).toFormattedString({
                         decimals: token.decimals,
                       }),
                   })),

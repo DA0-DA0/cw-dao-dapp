@@ -120,7 +120,7 @@ export const DaoTokenDepositModal = ({
 
         toast.success(
           t('success.depositedTokenIntoDao', {
-            amount: amount.toInternationalizedHumanReadableString({
+            amount: amount.toFormattedString({
               decimals: token.decimals,
             }),
             tokenSymbol: token.symbol,

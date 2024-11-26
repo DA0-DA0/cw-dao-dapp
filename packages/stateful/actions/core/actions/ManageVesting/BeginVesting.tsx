@@ -297,7 +297,7 @@ export const BeginVesting: ActionComponent<BeginVestingOptions> = ({
     .toHumanReadable(selectedDecimals)
     .lt(watchAmount)
     ? t('error.insufficientFundsWarning', {
-        amount: selectedBalance.toInternationalizedHumanReadableString({
+        amount: selectedBalance.toFormattedString({
           decimals: selectedDecimals,
         }),
         tokenSymbol:
@@ -402,9 +402,7 @@ export const BeginVesting: ActionComponent<BeginVestingOptions> = ({
                     description:
                       t('title.balance') +
                       ': ' +
-                      HugeDecimal.from(
-                        balance
-                      ).toInternationalizedHumanReadableString({
+                      HugeDecimal.from(balance).toFormattedString({
                         decimals: token.decimals,
                       }),
                   })),

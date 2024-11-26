@@ -6,15 +6,19 @@ import {
   ActionCategoryMaker,
   ActionComponentProps,
   ActionMaker,
+  ActionMatch,
   ActionOptions,
   ImplementedAction,
+  ProcessedMessage,
 } from './actions'
+import { UnifiedCosmosMsg } from './contracts'
 
 export enum WidgetId {
   MintNft = 'mint_nft',
   Press = 'press',
   RetroactiveCompensation = 'retroactive',
   VestingPayments = 'vesting',
+  VoteDelegation = 'vote_delegation',
 }
 
 export enum WidgetLocation {
@@ -22,6 +26,8 @@ export enum WidgetLocation {
   Home = 'home',
   // Widget is displayed in its own tab. `Icon` must be provided as well.
   Tab = 'tab',
+  // Widget is manually integrated.
+  Manual = 'manual',
 }
 
 export enum WidgetVisibilityContext {
@@ -94,11 +100,44 @@ export type Widget<Variables extends Record<string, unknown> = any> = {
   /**
    * Component that renders the widget.
    */
-  Renderer: ComponentType<WidgetRendererProps<Variables>>
+  Renderer?: ComponentType<WidgetRendererProps<Variables>>
   /**
    * Component that allows the user to edit the widget's variables in an action.
    */
   Editor?: ComponentType<WidgetEditorProps<Variables>>
+  /**
+   * Encode and match additional messages when using the ManageWidgets action to
+   * set/update the widget.
+   */
+  editAction?: {
+    /**
+     * Encode additional messages when using the ManageWidgets action to
+     * set/update the widget.
+     */
+    encode: (
+      data: Variables,
+      options: ActionOptions
+    ) =>
+      | UnifiedCosmosMsg
+      | UnifiedCosmosMsg[]
+      | Promise<UnifiedCosmosMsg | UnifiedCosmosMsg[]>
+    /**
+     * Match additional messages when using the ManageWidgets action to
+     * set/update the widget. This should match the number of messages encoded
+     * by the above `encode` function (i.e. excluding the initial ManageWidgets
+     * message).
+     *
+     * The messages passed exclude the initial ManageWidgets message.
+     */
+    match: (
+      data: Variables,
+      /**
+       * Messages excluding the initial ManageWidgets message.
+       */
+      messages: ProcessedMessage[],
+      options: ActionOptions
+    ) => ActionMatch | Promise<ActionMatch>
+  }
   /**
    * Actions that are available in proposals when this widget is enabled.
    */

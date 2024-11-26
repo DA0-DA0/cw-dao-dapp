@@ -5,8 +5,10 @@ Author: [@NoahSaso](https://github.com/NoahSaso)
 ## Widgets
 
 - [MintNft](./widgets/MintNft)
+- [Press](./widgets/Press)
 - [RetroactiveCompensation](./widgets/RetroactiveCompensation)
 - [VestingPayments](./widgets/VestingPayments)
+- [VoteDelegation](./widgets/VoteDelegation)
 
 ## Layout
 

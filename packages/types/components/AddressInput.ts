@@ -14,7 +14,8 @@ import {
   Validate,
 } from 'react-hook-form'
 
-import { Entity, StatefulEntityDisplayProps } from './EntityDisplay'
+import { Entity } from '../entity'
+import { StatefulEntityDisplayProps } from './EntityDisplay'
 
 export interface AddressInputProps<
   FV extends FieldValues = FieldValues,

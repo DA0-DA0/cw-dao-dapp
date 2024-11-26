@@ -48,7 +48,7 @@ export class EnableRetroactiveCompensationAction extends ActionBase<{}> {
     return this.manageWidgetsAction.setup()
   }
 
-  encode(): UnifiedCosmosMsg {
+  encode(): Promise<UnifiedCosmosMsg[]> {
     return this.manageWidgetsAction.encode({
       mode: 'set',
       id: WidgetId.RetroactiveCompensation,

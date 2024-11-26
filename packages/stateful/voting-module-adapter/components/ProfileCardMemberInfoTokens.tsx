@@ -293,10 +293,9 @@ export const ProfileCardMemberInfoTokens = ({
             !onlyOneToken
               ? t('button.claimYourTokens')
               : t('button.claimNumTokens', {
-                  amount:
-                    claimableBalance.toInternationalizedHumanReadableString({
-                      decimals: loadingTokens.data[0].token.decimals,
-                    }),
+                  amount: claimableBalance.toFormattedString({
+                    decimals: loadingTokens.data[0].token.decimals,
+                  }),
                   tokenSymbol: onlyTokenSymbol,
                 })}
           </Button>

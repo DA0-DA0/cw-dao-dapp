@@ -106,7 +106,7 @@ export const ProfileCardMemberInfo = ({
 
       toast.success(
         t('success.claimedTokens', {
-          amount: sumClaimsAvailable.toInternationalizedHumanReadableString({
+          amount: sumClaimsAvailable.toFormattedString({
             decimals: governanceToken.decimals,
           }),
           tokenSymbol: governanceToken.symbol,

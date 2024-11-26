@@ -358,7 +358,7 @@ export const ConfigureRebalancerComponent: ActionComponent<
                   ? t('format.token', {
                       amount: HugeDecimal.from(
                         serviceFee.data.balance
-                      ).toInternationalizedHumanReadableString({
+                      ).toFormattedString({
                         decimals: serviceFee.data.token.decimals,
                       }),
                       symbol: serviceFee.data.token.symbol,

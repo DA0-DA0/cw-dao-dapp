@@ -64,7 +64,7 @@ export class ConfigureVestingPaymentsAction extends ActionBase<VestingPaymentsWi
         }
   }
 
-  encode(data: VestingPaymentsWidgetData): UnifiedCosmosMsg {
+  encode(data: VestingPaymentsWidgetData): Promise<UnifiedCosmosMsg[]> {
     return this.manageWidgetsAction.encode({
       mode: 'set',
       id: WidgetId.VestingPayments,

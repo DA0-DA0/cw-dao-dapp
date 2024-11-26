@@ -172,9 +172,7 @@ const InnerGovProposalStatusAndInfo = ({
       Value: (props) => (
         <p {...props}>
           {t('format.token', {
-            amount: HugeDecimal.from(
-              currentDepositAmount
-            ).toInternationalizedHumanReadableString({
+            amount: HugeDecimal.from(currentDepositAmount).toFormattedString({
               decimals: depositToken.decimals,
             }),
             symbol: depositToken.symbol,
@@ -243,7 +241,7 @@ const InnerGovProposalStatusAndInfo = ({
 
       toast.success(
         t('success.deposited', {
-          amount: depositValue.toInternationalizedHumanReadableString({
+          amount: depositValue.toFormattedString({
             decimals: depositToken.decimals,
           }),
           tokenSymbol: depositToken.symbol,

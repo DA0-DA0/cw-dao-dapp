@@ -182,7 +182,7 @@ export const ManageStakingComponent: ActionComponent<
         (sourceValidatorStaked.isZero()
           ? t('error.nothingStaked')
           : t('error.stakeInsufficient', {
-              amount: maxAmount.toInternationalizedHumanReadableString({
+              amount: maxAmount.toFormattedString({
                 decimals: nativeToken.decimals,
               }),
               tokenSymbol: nativeToken.symbol,
@@ -208,7 +208,7 @@ export const ManageStakingComponent: ActionComponent<
         (sourceValidatorStaked.isZero()
           ? t('error.nothingStaked')
           : t('error.stakeInsufficient', {
-              amount: maxAmount.toInternationalizedHumanReadableString({
+              amount: maxAmount.toFormattedString({
                 decimals: nativeToken.decimals,
               }),
               tokenSymbol: nativeToken.symbol,
@@ -256,7 +256,7 @@ export const ManageStakingComponent: ActionComponent<
     maxAmount.toHumanReadable(nativeToken.decimals).lt(amount) &&
     type === StakingActionType.Delegate
       ? t('error.insufficientFundsWarning', {
-          amount: maxAmount.toInternationalizedHumanReadableString({
+          amount: maxAmount.toFormattedString({
             decimals: nativeToken.decimals,
           }),
           tokenSymbol: nativeToken.symbol,

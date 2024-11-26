@@ -228,7 +228,7 @@ export const TierCard = ({
                     .times(tierVotingWeight)
                     .div(members.length)
                     .div(100)
-                    .toInternationalizedHumanReadableString({
+                    .toFormattedString({
                       decimals: NEW_DAO_TOKEN_DECIMALS,
                     }),
                   tokenSymbol: data.newInfo.symbol || t('info.tokens'),

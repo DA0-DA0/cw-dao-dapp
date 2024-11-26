@@ -311,7 +311,7 @@ const ProposalDepositReview = ({
         amount: HugeDecimal.fromHumanReadable(
           amount,
           decimals
-        ).toInternationalizedHumanReadableString({
+        ).toFormattedString({
           decimals,
         }),
         symbol,

@@ -319,10 +319,9 @@ const StakeUnstakeModesBody = ({
               amount={amount}
               className="mt-2"
               label={t('button.stakeAllButProposalDeposit', {
-                proposalDeposit:
-                  proposalDeposit.toInternationalizedHumanReadableString({
-                    decimals: tokenDecimals,
-                  }),
+                proposalDeposit: proposalDeposit.toFormattedString({
+                  decimals: tokenDecimals,
+                }),
                 tokenSymbol,
               })}
               loadingMax={loadingMax}

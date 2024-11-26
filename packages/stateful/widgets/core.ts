@@ -4,6 +4,7 @@ import {
   PressWidget,
   RetroactiveCompensationWidget,
   VestingPaymentsWidget,
+  VoteDelegationWidget,
 } from './widgets'
 
 // Add widgets here.
@@ -12,6 +13,7 @@ export const getWidgets = (chainId: string): readonly Widget[] =>
     // MintNftWidget,
     VestingPaymentsWidget,
     RetroactiveCompensationWidget,
+    VoteDelegationWidget,
     PressWidget,
   ].filter(
     (widget) => !widget.isChainSupported || widget.isChainSupported(chainId)

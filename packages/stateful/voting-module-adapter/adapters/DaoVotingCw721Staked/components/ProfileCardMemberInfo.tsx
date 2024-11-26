@@ -153,9 +153,7 @@ export const ProfileCardMemberInfo = ({
 
       toast.success(
         t('success.claimedTokens', {
-          amount: HugeDecimal.from(
-            claimsAvailable.length
-          ).toInternationalizedHumanReadableString(),
+          amount: HugeDecimal.from(claimsAvailable.length).toFormattedString(),
           tokenSymbol: collectionInfo.symbol,
         })
       )

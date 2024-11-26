@@ -290,6 +290,7 @@ export type CodeIdConfig = {
   DaoProposalMultiple: number
   DaoProposalSingle: number
   DaoRewardsDistributor: number
+  DaoVoteDelegation: number
   DaoVotingCw4: number
   DaoVotingCw721Staked: number
   DaoVotingTokenStaked: number

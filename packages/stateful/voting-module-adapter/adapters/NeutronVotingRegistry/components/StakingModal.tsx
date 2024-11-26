@@ -193,7 +193,7 @@ const InnerStakingModal = ({
           setAmount(HugeDecimal.zero)
           toast.success(
             t('success.stakedTokens', {
-              amount: amount.toInternationalizedHumanReadableString({
+              amount: amount.toFormattedString({
                 decimals: selectedVault.bondToken.decimals,
               }),
               tokenSymbol: selectedVault.bondToken.symbol,
@@ -239,7 +239,7 @@ const InnerStakingModal = ({
           setAmount(HugeDecimal.zero)
           toast.success(
             t('success.unstakedTokens', {
-              amount: amount.toInternationalizedHumanReadableString({
+              amount: amount.toFormattedString({
                 decimals: selectedVault.bondToken.decimals,
               }),
               tokenSymbol: selectedVault.bondToken.symbol,

@@ -203,7 +203,7 @@ const InnerStakingModal = ({
 
           toast.success(
             t('success.stakedTokens', {
-              amount: amount.toInternationalizedHumanReadableString({
+              amount: amount.toFormattedString({
                 decimals: governanceToken.decimals,
               }),
               tokenSymbol: governanceToken.symbol,
@@ -286,7 +286,7 @@ const InnerStakingModal = ({
           setAmount(HugeDecimal.zero)
           toast.success(
             t('success.unstakedTokens', {
-              amount: amount.toInternationalizedHumanReadableString({
+              amount: amount.toFormattedString({
                 decimals: governanceToken.decimals,
               }),
               tokenSymbol: governanceToken.symbol,
@@ -343,11 +343,9 @@ const InnerStakingModal = ({
 
           toast.success(
             t('success.claimedTokens', {
-              amount: sumClaimsAvailable.toInternationalizedHumanReadableString(
-                {
-                  decimals: governanceToken.decimals,
-                }
-              ),
+              amount: sumClaimsAvailable.toFormattedString({
+                decimals: governanceToken.decimals,
+              }),
               tokenSymbol: governanceToken.symbol,
             })
           )

@@ -53,7 +53,7 @@ export const CommunityPoolDepositComponent: ActionComponent<
       ? t('error.unknownDenom', { denom: spendDenom })
       : selectedBalance.toHumanReadable(selectedDecimals).lt(spendAmount)
       ? t('error.insufficientFundsWarning', {
-          amount: selectedBalance.toInternationalizedHumanReadableString({
+          amount: selectedBalance.toFormattedString({
             decimals: selectedDecimals,
           }),
           tokenSymbol: symbol,
@@ -90,9 +90,7 @@ export const CommunityPoolDepositComponent: ActionComponent<
                     description:
                       t('title.balance') +
                       ': ' +
-                      HugeDecimal.from(
-                        balance
-                      ).toInternationalizedHumanReadableString({
+                      HugeDecimal.from(balance).toFormattedString({
                         decimals: token.decimals,
                       }),
                   })),

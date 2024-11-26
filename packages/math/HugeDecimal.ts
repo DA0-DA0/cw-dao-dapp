@@ -258,19 +258,20 @@ export class HugeDecimal {
   }
 
   /**
-   * Returns an internationalized human-readable string with abbreviation of
-   * large numbers.
+   * Returns a formatted (human-readable) string with abbreviation of large
+   * numbers, with internationalization support.
    *
-   * @returns an internationalized human-readable string
+   * @returns a formatted human-readable string
    */
-  toInternationalizedHumanReadableString({
-    decimals = 0,
+  toFormattedString({
+    decimals,
     showFullAmount = true,
     minDecimals = 0,
+    maxNonZeroDecimals,
   }: {
     /**
-     * The number of decimals used to make this number human-readable. Defaults
-     * to 0.
+     * The number of decimals used to make this number human-readable, if
+     * present.
      */
     decimals?: number
     /**
@@ -283,18 +284,30 @@ export class HugeDecimal {
      * number of non-zero decimal places less than or equal to `decimals`.
      */
     minDecimals?: number
+    /**
+     * The maximum number of nonzero decimal places to show after the decimal
+     * point.
+     */
+    maxNonZeroDecimals?: number
   } = {}): string {
     // Get the decimal separator for the current locale.
     const decimalSeparator = (1.1).toLocaleString()[1]
 
-    const human = this.toHumanReadable(decimals)
+    const value = decimals === undefined ? this : this.toHumanReadable(decimals)
 
     // Use BigInt for integer part of the number, and add the decimals manually.
     // If the number is too large to fit within the size of Number, must use
     // this BigInt approach even when not showing the full amount.
-    if (showFullAmount || human.gte(Number.MAX_SAFE_INTEGER)) {
-      const int = human.trunc()
-      const dec = human.minus(int)
+    if (showFullAmount || value.gte(Number.MAX_SAFE_INTEGER)) {
+      const value =
+        decimals === undefined ? this : this.toHumanReadable(decimals)
+
+      const int = value.trunc()
+      const dec = value.minus(int)
+
+      const decString =
+        dec.value.toFormat({ decimalSeparator }).split(decimalSeparator)[1] ||
+        ''
 
       // Show at least minDecimals, up to the exact number of decimal places in
       // the original number, if showing the full amount. If not showing the
@@ -302,13 +315,20 @@ export class HugeDecimal {
       // above), and thus none (0) of the actual decimal places are shown, since
       // the large part of the number will be abbreviated (e.g. 1,234.5678 gets
       // converted into 1.23K, and the 0.5678 are hidden).
-      const decimalPlacesToShow = showFullAmount
-        ? Math.max(
-            dec.value.toFormat({ decimalSeparator }).split(decimalSeparator)[1]
-              ?.length ?? 0,
-            minDecimals
-          )
+      let decimalPlacesToShow = showFullAmount
+        ? Math.max(decString.length, minDecimals)
         : 0
+
+      // Cap the number of decimal places to show at the sum of the initial
+      // zeroes and the maximum number of nonzero decimals.
+      if (maxNonZeroDecimals) {
+        // Count zeroes at the beginning of the decimal part.
+        const initialZeroDecimals = decString.match(/^0*/g)?.[0]?.length ?? 0
+        decimalPlacesToShow = Math.min(
+          decimalPlacesToShow,
+          initialZeroDecimals + maxNonZeroDecimals
+        )
+      }
 
       const intStr = BigInt(int.toFixed(0)).toLocaleString(
         undefined,
@@ -336,13 +356,14 @@ export class HugeDecimal {
     // If entire number can fit within the size of Number and not showing the
     // full amount, use Number for compact internationalized formatting.
     else {
-      const human = this.toHumanReadableNumber(decimals)
-      return human.toLocaleString(undefined, {
+      const valueNum = value.toNumber()
+      return valueNum.toLocaleString(undefined, {
         notation: 'compact',
-        minimumFractionDigits: minDecimals || (human >= 1000 ? 2 : undefined),
+        minimumFractionDigits:
+          minDecimals || (valueNum >= 1000 ? 2 : undefined),
         maximumFractionDigits: Math.max(
           minDecimals,
-          human >= 1000 ? 2 : decimals
+          valueNum >= 1000 ? 2 : decimals || 0
         ),
       })
     }

@@ -74,7 +74,7 @@ export const FundRewardDistributionComponent: ActionComponent<
           .toHumanReadable(selectedDistribution.token.decimals)
           .lt(amount)
       ? t('error.insufficientFundsWarning', {
-          amount: selectedBalance.toInternationalizedHumanReadableString({
+          amount: selectedBalance.toFormattedString({
             decimals: selectedDistribution.token.decimals,
           }),
           tokenSymbol: selectedDistribution.token.symbol,

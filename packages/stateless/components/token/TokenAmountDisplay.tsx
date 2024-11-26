@@ -106,7 +106,7 @@ export const TokenAmountDisplay = ({
 
   const minDecimals = showAllDecimals ? decimals : 0
 
-  const amountDisplay = amount.toInternationalizedHumanReadableString({
+  const amountDisplay = amount.toFormattedString({
     decimals,
     showFullAmount,
     minDecimals,
@@ -130,7 +130,7 @@ export const TokenAmountDisplay = ({
               translateOrOmitSymbol(
                 // eslint-disable-next-line i18next/no-literal-string
                 'format.token',
-                amount.toInternationalizedHumanReadableString({
+                amount.toFormattedString({
                   decimals,
                   showFullAmount: true,
                 })

@@ -43,7 +43,7 @@ export const MigrateContractComponent: ActionComponent<MigrateOptions> = ({
   return (
     <>
       <p className="secondary-text max-w-prose">
-        <Trans key="form.migrateDescription">
+        <Trans i18nKey="form.migrateDescription">
           This will{' '}
           <a
             className="underline"

@@ -156,3 +156,7 @@ export {
   SecretCw4GroupClient,
   SecretCw4GroupQueryClient,
 } from './SecretCw4Group'
+export {
+  DaoVoteDelegationClient,
+  DaoVoteDelegationQueryClient,
+} from './DaoVoteDelegation'

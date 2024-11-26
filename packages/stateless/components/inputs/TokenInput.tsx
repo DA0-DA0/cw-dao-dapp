@@ -106,7 +106,7 @@ export const TokenInput = <
           <p className="min-w-[4rem] grow truncate text-left">
             {readOnly &&
               amountField &&
-              amount.toInternationalizedHumanReadableString({
+              amount.toFormattedString({
                 decimals: selectedToken.decimals,
               }) +
                 (amountField.unit ? amountField.unit : '') +

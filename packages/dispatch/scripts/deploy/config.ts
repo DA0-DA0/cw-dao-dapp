@@ -86,6 +86,7 @@ export const deploySets: DeploySet[] = [
       'dao_proposal_multiple',
       'dao_proposal_single',
       'dao_rewards_distributor',
+      'dao_vote_delegation',
       'dao_voting_cw4',
     ],
   },
@@ -104,7 +105,7 @@ export const deploySets: DeploySet[] = [
     type: 'always',
     contracts: [
       {
-        file: 'cw_vesting-staking',
+        file: 'cw_vesting',
         alias: 'cw_vesting',
       },
     ],
@@ -232,7 +233,7 @@ export const deploySets: DeploySet[] = [
     type: 'always',
     contracts: [
       {
-        file: 'cw_tokenfactory_issuer-osmosis',
+        file: 'cw_tokenfactory_issuer',
         alias: 'cw_tokenfactory_issuer',
       },
     ],

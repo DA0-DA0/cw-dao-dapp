@@ -142,7 +142,7 @@ export const InstantiateTokenSwap: ActionComponent<
           .lt(counterparty.amount) && (
           <p className="caption-text text-text-interactive-warning-body">
             {t('error.counterpartyBalanceInsufficient', {
-              amount: counterpartyMax.toInternationalizedHumanReadableString({
+              amount: counterpartyMax.toFormattedString({
                 decimals: counterpartyDecimals,
               }),
               tokenSymbol: counterpartySymbol,
@@ -178,7 +178,7 @@ export const InstantiateTokenSwap: ActionComponent<
               (value) =>
                 selfMax.toHumanReadable(selfDecimals).gte(value) ||
                 t('error.treasuryInsufficient', {
-                  amount: selfMax.toInternationalizedHumanReadableString({
+                  amount: selfMax.toFormattedString({
                     decimals: selfDecimals,
                   }),
                   tokenSymbol: selfSymbol,

@@ -95,24 +95,72 @@ export class ManageWidgetsAction extends ActionBase<ManageWidgetsData> {
     return this.manageStorageItemsAction.setup()
   }
 
-  encode({ mode, id, values }: ManageWidgetsData): UnifiedCosmosMsg {
-    return this.manageStorageItemsAction.encode({
-      setting: mode === 'set',
-      key: getWidgetStorageItemKey(id),
-      value: JSON.stringify(values),
-    })
+  async encode({
+    mode,
+    id,
+    values,
+  }: ManageWidgetsData): Promise<UnifiedCosmosMsg[]> {
+    const setting = mode === 'set'
+    const msgs = [
+      this.manageStorageItemsAction.encode({
+        setting,
+        key: getWidgetStorageItemKey(id),
+        value: JSON.stringify(values),
+      }),
+    ]
+
+    // Optionally add additional widget messages when updating a widget.
+    if (setting) {
+      const widget = getWidgets(this.options.chain.chainId).find(
+        (w) => w.id === id
+      )
+      if (widget?.editAction) {
+        msgs.push(
+          ...[await widget.editAction.encode(values, this.options)].flat()
+        )
+      }
+    }
+
+    return msgs
   }
 
-  match(messages: ProcessedMessage[]): ActionMatch {
+  async match(messages: ProcessedMessage[]): Promise<ActionMatch> {
     const manageStorageItemsMatch =
       this.manageStorageItemsAction.match(messages)
     if (!manageStorageItemsMatch) {
       return manageStorageItemsMatch
     }
 
+    const { setting, key, value } =
+      this.manageStorageItemsAction.decode(messages)
+
     // Ensure this is setting or removing a widget item.
-    const { key } = this.manageStorageItemsAction.decode(messages)
-    return key.startsWith(getWidgetStorageItemKey(''))
+    if (!key.startsWith(getWidgetStorageItemKey(''))) {
+      return false
+    }
+
+    // Optionally match additional widget messages when updating a widget.
+    if (setting) {
+      const widgetId = key.substring(DAO_WIDGET_ITEM_NAMESPACE.length)
+      const widget = getWidgets(this.options.chain.chainId).find(
+        (w) => w.id === widgetId
+      )
+      if (widget?.editAction && messages.length > 1) {
+        const values = JSON.parse(value)
+        const widgetMatch = await widget.editAction.match(
+          values,
+          messages.slice(1),
+          this.options
+        )
+        if (widgetMatch) {
+          // Match the first ManageWidgets message, and then match the number of
+          // additional messages encoded by the widget's edit action.
+          return 1 + (widgetMatch === true ? 1 : widgetMatch)
+        }
+      }
+    }
+
+    return true
   }
 
   decode(messages: ProcessedMessage[]): ManageWidgetsData {
