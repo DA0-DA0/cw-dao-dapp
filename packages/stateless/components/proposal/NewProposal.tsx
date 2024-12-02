@@ -193,7 +193,7 @@ export const NewProposal = <
 
   return (
     <form
-      className="flex flex-col gap-6"
+      className="flex flex-col gap-8"
       noValidate={holdingAltForSimulation || holdingShiftForForce}
       onSubmit={handleSubmit(onSubmitForm, onSubmitError)}
     >
@@ -201,7 +201,7 @@ export const NewProposal = <
 
       {!actionsReadOnlyMode && proposalModuleSelector}
 
-      <div className="-mt-4 mb-2">
+      <div className="-mt-6">
         <ProposalDaoInfoCards />
       </div>
 

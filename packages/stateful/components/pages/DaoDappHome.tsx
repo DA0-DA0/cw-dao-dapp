@@ -154,12 +154,13 @@ export const DaoDappHome = () => {
   const { t } = useTranslation()
   const { getDaoProposalPath } = useDaoNavHelpers()
 
+  const dao = useDao()
   const {
     chainId,
     coreAddress,
     name,
-    info: { contractAdmin, supportedFeatures, parentDao },
-  } = useDao()
+    info: { contractAdmin, parentDao },
+  } = dao
 
   const { isMember = false } = useMembership()
   // We won't use this value unless there's a parent, so the undefined DAO
@@ -173,7 +174,7 @@ export const DaoDappHome = () => {
     // parent.
     isMemberOfParent &&
     // Only v2+ DAOs support SubDAOs.
-    supportedFeatures[Feature.SubDaos] &&
+    dao.supports(Feature.SubDaos) &&
     // Only show if the parent has not already registered this as a SubDAO.
     parentDao &&
     !parentDao.registeredSubDao

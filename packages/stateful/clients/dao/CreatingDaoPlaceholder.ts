@@ -17,7 +17,7 @@ import {
   TotalPowerAtHeightResponse,
   VotingPowerAtHeightResponse,
 } from '@dao-dao/types/contracts/DaoDaoCore'
-import { getChainForChainId, getSupportedFeatures } from '@dao-dao/utils'
+import { getChainForChainId } from '@dao-dao/utils'
 
 import { DaoBase } from './base'
 
@@ -44,7 +44,6 @@ export class CreatingDaoPlaceholder extends DaoBase {
       chainId: options.chainId,
       coreAddress: options.coreAddress,
       coreVersion: options.coreVersion,
-      supportedFeatures: getSupportedFeatures(options.coreVersion),
       votingModuleAddress: '',
       votingModuleInfo: {
         contract: '',

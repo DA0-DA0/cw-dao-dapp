@@ -77,9 +77,7 @@ export class ManageStorageItemsAction extends ActionBase<ManageStorageItemsData>
       matchPriority: -90,
     })
 
-    this.valueKey = options.context.dao.info.supportedFeatures[
-      Feature.StorageItemValueKey
-    ]
+    this.valueKey = options.context.dao.supports(Feature.StorageItemValueKey)
       ? 'value'
       : 'addr'
   }

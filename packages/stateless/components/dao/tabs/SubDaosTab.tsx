@@ -37,16 +37,11 @@ export const SubDaosTab = ({
   ButtonLink,
 }: SubDaosTabProps) => {
   const { t } = useTranslation()
-  const {
-    coreAddress,
-    coreVersion,
-    name,
-    info: { supportedFeatures },
-  } = useDao()
+  const dao = useDao()
   const { getDaoPath } = useDaoNavHelpers()
 
   const subDaosSupported =
-    coreVersion === ContractVersion.Gov || supportedFeatures[Feature.SubDaos]
+    dao.coreVersion === ContractVersion.Gov || dao.supports(Feature.SubDaos)
 
   return (
     <>
@@ -61,7 +56,7 @@ export const SubDaosTab = ({
           title={
             !subDaosSupported
               ? t('error.daoFeatureUnsupported', {
-                  name,
+                  name: dao.name,
                   feature: t('title.subDaos'),
                 })
               : !isMember
@@ -72,7 +67,7 @@ export const SubDaosTab = ({
           <ButtonLink
             className="shrink-0"
             disabled={!isMember || !subDaosSupported}
-            href={getDaoPath(coreAddress, 'create')}
+            href={getDaoPath(dao.coreAddress, 'create')}
           >
             <Add className="!h-4 !w-4" />
             <span className="hidden md:inline">{t('button.newSubDao')}</span>
@@ -86,7 +81,7 @@ export const SubDaosTab = ({
           Icon={Upgrade}
           actionNudge={t('info.submitUpgradeProposal')}
           body={t('error.daoFeatureUnsupported', {
-            name,
+            name: dao.name,
             feature: t('title.subDaos'),
           })}
           buttonLabel={t('button.proposeUpgrade')}

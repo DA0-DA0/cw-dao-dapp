@@ -4,7 +4,7 @@ import { FetchQueryOptions } from '@tanstack/react-query'
 
 import { CheckedDepositInfo, Coin, Duration } from '../contracts/common'
 import { PreProposeModule, ProposalModuleInfo } from '../dao'
-import { ContractVersion } from '../features'
+import { ContractVersion, Feature } from '../features'
 import { IDaoBase } from './dao'
 
 export interface IProposalModuleBase<
@@ -57,10 +57,19 @@ export interface IProposalModuleBase<
   prePropose: PreProposeModule | null
 
   /**
+   * Check whether or not the proposal module supports a given feature.
+   */
+  supports(feature: Feature): boolean
+
+  /**
    * Make a proposal.
    */
   propose(options: {
     data: Proposal
+    /**
+     * Cast a vote with the proposal.
+     */
+    vote?: Vote
     getSigningClient: () => Promise<SigningCosmWasmClient>
     sender: string
     funds?: Coin[]

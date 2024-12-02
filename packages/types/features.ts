@@ -31,6 +31,8 @@ export enum ContractVersion {
   V230 = '2.3.0',
   // https://github.com/DA0-DA0/dao-contracts/releases/tag/v2.4.0
   V240 = '2.4.0',
+  // https://github.com/DA0-DA0/dao-contracts/releases/tag/v2.4.1
+  V241 = '2.4.1',
   // https://github.com/DA0-DA0/dao-contracts/releases/tag/v2.4.2
   V242 = '2.4.2',
   // https://github.com/DA0-DA0/dao-contracts/releases/tag/v2.5.0
@@ -97,6 +99,10 @@ export enum Feature {
    */
   Veto,
   /**
+   * Cast vote on proposal creation was added.
+   */
+  CastVoteOnProposalCreation,
+  /**
    * The ability to specify a more granular pre-propose submission policy.
    */
   GranularSubmissionPolicy,
@@ -106,8 +112,3 @@ export enum Feature {
    */
   UnlimitedNftClaims,
 }
-
-/**
- * Map each feature to whether or not it is supported.
- */
-export type SupportedFeatureMap = Record<Feature, boolean>

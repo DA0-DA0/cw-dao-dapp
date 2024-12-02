@@ -21,7 +21,6 @@ import {
   getDaoInfoForChainId,
   getFallbackImage,
   getSupportedChainConfig,
-  getSupportedFeatures,
   isConfiguredChainName,
   isFeatureSupportedByVersion,
   parseContractVersion,
@@ -107,7 +106,6 @@ export const fetchDaoInfo = async (
   ])
 
   const coreVersion = parseContractVersion(state.version.version)
-  const supportedFeatures = getSupportedFeatures(coreVersion)
 
   const [
     parentDao,
@@ -208,7 +206,6 @@ export const fetchDaoInfo = async (
     chainId,
     coreAddress,
     coreVersion,
-    supportedFeatures,
     votingModuleAddress: state.voting_module,
     votingModuleInfo,
     proposalModules: proposalModules.sort((a, b) =>

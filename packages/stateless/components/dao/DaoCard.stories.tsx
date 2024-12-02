@@ -38,7 +38,6 @@ export const makeDaoInfo = (id = 1): DaoInfo => ({
     parentDao: null,
     polytoneProxy: null,
   },
-  supportedFeatures: {} as any,
   votingModuleAddress: '',
   votingModuleInfo: {
     contract: '',

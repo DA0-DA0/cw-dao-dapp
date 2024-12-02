@@ -240,6 +240,7 @@ export const NewProposal = ({
     description,
     actionData,
     metadata,
+    vote,
   }) => ({
     title,
     description: descriptionWithPotentialProposalMetadata(
@@ -251,6 +252,7 @@ export const NewProposal = ({
       encodeContext,
       data: actionData,
     }),
+    vote,
   })
 
   return (

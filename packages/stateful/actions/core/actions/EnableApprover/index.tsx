@@ -60,7 +60,7 @@ export class EnableApproverAction extends ActionBase<EnableApproverData> {
     // - approver is already enabled
     if (
       options.context.type !== ActionContextType.Dao ||
-      !options.context.dao.info.supportedFeatures[Feature.Approval]
+      !options.context.dao.supports(Feature.Approval)
     ) {
       throw new Error('Invalid context for enabling approver')
     }

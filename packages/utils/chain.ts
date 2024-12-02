@@ -15,11 +15,9 @@ import {
   ConfiguredChain,
   ContractVersion,
   DaoInfo,
-  Feature,
   GenericToken,
   SupportedChain,
   SupportedChainConfig,
-  SupportedFeatureMap,
   TokenType,
   Validator,
 } from '@dao-dao/types'
@@ -703,13 +701,6 @@ export const getDaoInfoForChainId = (
   chainId,
   coreAddress: mustGetConfiguredChainConfig(chainId).name,
   coreVersion: ContractVersion.Gov,
-  supportedFeatures: Object.values(Feature).reduce(
-    (acc, feature) => ({
-      ...acc,
-      [feature]: false,
-    }),
-    {} as SupportedFeatureMap
-  ),
   votingModuleAddress: '',
   votingModuleInfo: {
     contract: '',

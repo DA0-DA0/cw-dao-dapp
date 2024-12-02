@@ -176,12 +176,14 @@ export class SingleChoiceProposalModule extends ProposalModuleBase<
   }
 
   async propose({
-    data,
+    data: _data,
+    vote,
     getSigningClient,
     sender,
     funds,
   }: {
     data: NewProposalData
+    vote?: Vote
     getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
     sender: string
     funds?: Coin[]
@@ -189,6 +191,21 @@ export class SingleChoiceProposalModule extends ProposalModuleBase<
     proposalNumber: number
     proposalId: string
   }> {
+    if (vote && !this.supports(Feature.CastVoteOnProposalCreation)) {
+      throw new Error(
+        `Casting vote on proposal creation is not supported by version ${this.version}`
+      )
+    }
+
+    const data = {
+      ..._data,
+      ...(vote && {
+        vote: {
+          vote,
+        },
+      }),
+    }
+
     const client = await getSigningClient()
 
     let proposalNumber: number

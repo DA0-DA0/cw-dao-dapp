@@ -48,7 +48,7 @@ import { Config as NeutronCwdSubdaoTimelockSingleConfig } from './contracts/Neut
 import { VotingVault } from './contracts/NeutronVotingRegistry'
 import { InstantiateMsg as SecretDaoDaoCoreInstantiateMsg } from './contracts/SecretDaoDaoCore'
 import { DaoCreator } from './creators'
-import { ContractVersion, SupportedFeatureMap } from './features'
+import { ContractVersion } from './features'
 import { LoadingDataWithError } from './misc'
 import { ProposalVetoConfig } from './proposal'
 import {
@@ -71,7 +71,6 @@ export type DaoInfo = {
   chainId: string
   coreAddress: string
   coreVersion: ContractVersion
-  supportedFeatures: SupportedFeatureMap
   votingModuleAddress: string
   votingModuleInfo: ContractVersionInfo
   proposalModules: ProposalModuleInfo[]

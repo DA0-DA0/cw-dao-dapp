@@ -8,7 +8,7 @@ import {
 } from '@dao-dao/types'
 import { Vote } from '@dao-dao/types/contracts/DaoProposalSingle.common'
 
-import { useProposalModuleAdapterOptions } from '../../../react'
+import { useProposalModuleAdapterCommonOptions } from '../../../react/context'
 
 export const useLoadingVoteOptions = (): LoadingData<
   ProposalVoteOption<Vote>[]
@@ -19,7 +19,7 @@ export const useLoadingVoteOptions = (): LoadingData<
   // approving another proposal, to make it more clear what the actions do.
   const {
     proposalModule: { prePropose },
-  } = useProposalModuleAdapterOptions()
+  } = useProposalModuleAdapterCommonOptions()
   const isPreProposeApproverProposal =
     prePropose?.type === PreProposeModuleType.Approver
 

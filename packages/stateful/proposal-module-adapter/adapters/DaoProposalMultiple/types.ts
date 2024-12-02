@@ -28,12 +28,14 @@ export type NewProposalForm = {
   title: string
   description: string
   choices: MultipleChoiceOptionFormData[]
+  vote?: MultipleChoiceVote
 }
 
 export type NewProposalData = {
   title: string
   description: string
   choices: MultipleChoiceOptions
+  vote?: MultipleChoiceVote
 }
 
 export interface PercentOrMajorityValue {

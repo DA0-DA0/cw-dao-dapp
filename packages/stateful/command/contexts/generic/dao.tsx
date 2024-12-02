@@ -48,9 +48,7 @@ export const makeGenericDaoContext: CommandModalContextMaker<{
   const useSections = () => {
     const { t } = useTranslation()
     const { getDaoPath, getDaoProposalPath, router } = useDaoNavHelpers()
-    const {
-      info: { accounts, supportedFeatures },
-    } = useDao()
+    const dao = useDao()
     const loadingTabs = useLoadingTabs()
 
     const { isFollowing, setFollowing, setUnfollowing, updatingFollowing } =
@@ -83,7 +81,7 @@ export const makeGenericDaoContext: CommandModalContextMaker<{
               chainId,
               coreAddress,
             }),
-            enabled: !!supportedFeatures[Feature.SubDaos],
+            enabled: dao.supports(Feature.SubDaos),
           },
       []
     )
@@ -152,7 +150,7 @@ export const makeGenericDaoContext: CommandModalContextMaker<{
             }),
           loading: updatingFollowing,
         },
-        ...accounts.map(({ chainId, address, type }, accountIndex) => ({
+        ...dao.accounts.map(({ chainId, address, type }, accountIndex) => ({
           name:
             copied === accountIndex
               ? t('info.copiedChainAddress', {

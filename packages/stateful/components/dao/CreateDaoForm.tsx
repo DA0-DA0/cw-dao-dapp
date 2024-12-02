@@ -900,8 +900,6 @@ export const InnerCreateDaoForm = ({
               description,
               imageUrl: imageUrl || getFallbackImage(coreAddress),
               parentDao: parentDao || null,
-              // Unused.
-              supportedFeatures: {} as any,
               created: Date.now(),
               votingModuleAddress: '',
               votingModuleInfo: {

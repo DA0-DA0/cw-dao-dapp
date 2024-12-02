@@ -431,7 +431,14 @@ const InnerCreateDaoProposal = ({
                     className="my-2"
                     matchAdapter={matchProposalModuleAdapter}
                     selected={selectedProposalModule.address}
-                    setSelected={setSelectedProposalModule}
+                    setSelected={(m) => {
+                      // Clear instant vote if switching proposal modules.
+                      if (m.address !== selectedProposalModule.address) {
+                        formMethods.setValue('vote', undefined)
+                      }
+
+                      setSelectedProposalModule(m)
+                    }}
                   />
                 }
                 saveDraft={saveDraft}

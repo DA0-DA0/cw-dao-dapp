@@ -56,9 +56,7 @@ export class EnableMultipleChoiceAction extends ActionBase<{}> {
     //   support approval flow right now and that would be confusing.
     if (
       options.context.type !== ActionContextType.Dao ||
-      !options.context.dao.info.supportedFeatures[
-        Feature.MultipleChoiceProposals
-      ] ||
+      !options.context.dao.supports(Feature.MultipleChoiceProposals) ||
       // Neutron fork SubDAOs don't support multiple choice proposals due to the
       // timelock/overrule system only being designed for single choice
       // proposals.

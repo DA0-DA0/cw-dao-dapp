@@ -280,7 +280,7 @@ export const ActionLibrary = ({
 
   return (
     <Collapsible
-      containerClassName="mt-2 flex flex-col gap-4 rounded-md border border-dashed border-border-primary p-4 relative"
+      containerClassName="flex flex-col gap-4 rounded-md border border-dashed border-border-primary p-4 relative"
       defaultCollapsed={!defaultOpen}
       dropdownContainerClassName="!ml-0"
       label={t('title.actionLibrary')}

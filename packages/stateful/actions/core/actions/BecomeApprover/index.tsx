@@ -106,7 +106,7 @@ export class BecomeApproverAction extends ActionBase<BecomeApproverData> {
   constructor(options: ActionOptions) {
     if (
       options.context.type !== ActionContextType.Dao ||
-      !options.context.dao.info.supportedFeatures[Feature.Approval]
+      !options.context.dao.supports(Feature.Approval)
     ) {
       throw new Error('Invalid context for becoming an approver')
     }

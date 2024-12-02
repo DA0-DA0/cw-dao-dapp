@@ -1,6 +1,6 @@
 import semverGte from 'semver/functions/gte'
 
-import { ContractVersion, Feature, SupportedFeatureMap } from '@dao-dao/types'
+import { ContractVersion, Feature } from '@dao-dao/types'
 
 /**
  * Checks if a specific feature is supported by a given contract version.
@@ -30,6 +30,8 @@ export const isFeatureSupportedByVersion = (
     case Feature.Approval:
     case Feature.Veto:
       return versionGte(version, ContractVersion.V240)
+    case Feature.CastVoteOnProposalCreation:
+      return versionGte(version, ContractVersion.V241)
     case Feature.GranularSubmissionPolicy:
       return versionGte(version, ContractVersion.V250)
     case Feature.UnlimitedNftClaims:
@@ -38,25 +40,6 @@ export const isFeatureSupportedByVersion = (
       return true
   }
 }
-
-/**
- * Pre-computes supported features based on the given contract version.
- *
- * @param {ContractVersion} version - The contract version to check.
- * @return {SupportedFeatureMap} - A map of supported features where the key is
- * the feature name and the value is a boolean indicating if the feature is
- * supported.
- */
-export const getSupportedFeatures = (
-  version: ContractVersion
-): SupportedFeatureMap =>
-  Object.values(Feature).reduce(
-    (acc, feature) => ({
-      ...acc,
-      [feature]: isFeatureSupportedByVersion(feature as Feature, version),
-    }),
-    {} as SupportedFeatureMap
-  )
 
 /**
  * Checks if a given version is greater than or equal to a specified version.

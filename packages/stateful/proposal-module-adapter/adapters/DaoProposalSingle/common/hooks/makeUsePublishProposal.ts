@@ -7,6 +7,7 @@ import { constSelector, useRecoilValueLoadable } from 'recoil'
 import { HugeDecimal } from '@dao-dao/math'
 import { Cw20BaseSelectors, nativeDenomBalanceSelector } from '@dao-dao/state'
 import { useCachedLoadable } from '@dao-dao/stateless'
+import { Feature } from '@dao-dao/types'
 import {
   checkProposalSubmissionPolicy,
   expirationExpired,
@@ -183,10 +184,7 @@ export const makeUsePublishProposal =
     })
 
     const publishProposal: PublishProposal = useCallback(
-      async (
-        { title, description, msgs },
-        { failedSimulationBypassSeconds = 0 } = {}
-      ) => {
+      async (data, { failedSimulationBypassSeconds = 0 } = {}) => {
         if (!isWalletConnected || !walletAddress) {
           throw new Error(t('error.logInToContinue'))
         }
@@ -200,13 +198,13 @@ export const makeUsePublishProposal =
         // Only simulate messages if any exist. Allow proposals without
         // messages. Also allow bypassing simulation check for a period of time.
         if (
-          msgs.length > 0 &&
+          data.msgs.length > 0 &&
           (!simulationBypassExpiration ||
             simulationBypassExpiration < new Date())
         ) {
           try {
             // Throws error if simulation fails, indicating invalid message.
-            await simulateMsgs(msgs)
+            await simulateMsgs(data.msgs)
           } catch (err) {
             // If failed simulation bypass duration is set, allow bypassing
             // simulation check for a period of time.
@@ -281,13 +279,18 @@ export const makeUsePublishProposal =
         // Recreate form data with just the expected fields to remove any fields
         // added by other proposal module forms.
         const proposalData: NewProposalData = {
-          title,
-          description,
-          msgs,
+          title: data.title,
+          description: data.description,
+          msgs: data.msgs,
         }
 
         const response = await proposalModule.propose({
           data: proposalData,
+          vote:
+            isMember &&
+            proposalModule.supports(Feature.CastVoteOnProposalCreation)
+              ? data.vote
+              : undefined,
           getSigningClient,
           sender: walletAddress,
           funds: proposeFunds,
@@ -311,6 +314,7 @@ export const makeUsePublishProposal =
         requiredProposalDeposit,
         depositInfoCw20TokenAddress,
         depositInfoNativeTokenDenom,
+        isMember,
         getSigningClient,
         t,
         simulateMsgs,

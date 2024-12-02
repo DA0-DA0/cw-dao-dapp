@@ -241,6 +241,7 @@ export const NewProposal = ({
     title,
     description,
     choices,
+    vote,
   }) => ({
     title,
     description,
@@ -264,6 +265,7 @@ export const NewProposal = ({
         }))
       ),
     },
+    vote,
   })
 
   return (

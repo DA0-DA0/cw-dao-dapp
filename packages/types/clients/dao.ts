@@ -8,7 +8,7 @@ import {
   VotingPowerAtHeightResponse,
 } from '../contracts/DaoDaoCore'
 import { DaoInfo, DaoSource } from '../dao'
-import { ContractVersion } from '../features'
+import { ContractVersion, Feature } from '../features'
 import { AmountWithTimestamp } from '../token'
 import { IProposalModuleBase } from './proposal-module'
 import { IVotingModuleBase } from './voting-module'
@@ -95,6 +95,11 @@ export interface IDaoBase {
    * the implementation.
    */
   init(): Promise<void>
+
+  /**
+   * Check whether or not the DAO supports a given feature.
+   */
+  supports(feature: Feature): boolean
 
   /**
    * Get the proposal module with the given address.

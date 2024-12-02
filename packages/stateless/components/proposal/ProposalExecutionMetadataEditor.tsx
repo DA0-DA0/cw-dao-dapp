@@ -65,14 +65,20 @@ export const ProposalExecutionMetadataEditor = ({
 
   return (
     <div className={clsx('flex flex-col gap-4', className)}>
-      <div className="flex flex-row gap-4 items-center">
-        <InputLabel name={t('title.executionMetadata')} optional title />
-
+      <div className="flex flex-row gap-3 items-center">
         <FormSwitch
           fieldName={`${metadataFieldName}.enabled`}
           setValue={setValue}
           sizing="md"
           value={metadataEnabled}
+        />
+
+        <InputLabel
+          name={t('title.executionMetadata')}
+          onClick={() =>
+            setValue(`${metadataFieldName}.enabled`, !metadataEnabled)
+          }
+          title
         />
       </div>
 

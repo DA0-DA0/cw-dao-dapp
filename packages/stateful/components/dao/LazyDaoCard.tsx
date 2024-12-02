@@ -24,8 +24,6 @@ export const LazyDaoCard = (props: LazyDaoCardProps) => {
       className={clsx('animate-pulse', props.className)}
       info={{
         ...props.info,
-        // Unused.
-        supportedFeatures: {} as any,
         votingModuleAddress: '',
         votingModuleInfo: {
           contract: '',
@@ -54,8 +52,6 @@ export const LazyDaoCard = (props: LazyDaoCardProps) => {
           processError(daoInfoQuery.error, {
             forceCapture: false,
           }),
-        // Unused.
-        supportedFeatures: {} as any,
         votingModuleAddress: '',
         votingModuleInfo: {
           contract: '',

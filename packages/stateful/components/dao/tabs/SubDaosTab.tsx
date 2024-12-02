@@ -15,11 +15,8 @@ import { ButtonLink } from '../../ButtonLink'
 import { DaoCard } from '../DaoCard'
 
 export const SubDaosTab = () => {
-  const {
-    chainId,
-    coreAddress,
-    info: { supportedFeatures },
-  } = useDao()
+  const dao = useDao()
+  const { chainId, coreAddress } = dao
   const { getDaoPath, getDaoProposalPath } = useDaoNavHelpers()
 
   const { isMember = false } = useMembership()
@@ -30,7 +27,7 @@ export const SubDaosTab = () => {
       chainId,
       coreAddress,
     }),
-    enabled: !!supportedFeatures[Feature.SubDaos],
+    enabled: dao.supports(Feature.SubDaos),
   })
 
   const upgradeToV2Action = useInitializedActionForKey(ActionKey.UpgradeV1ToV2)

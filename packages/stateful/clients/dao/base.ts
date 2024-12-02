@@ -9,6 +9,7 @@ import {
   DaoCardLazyData,
   DaoInfo,
   DaoSource,
+  Feature,
   IDaoBase,
   IProposalModuleBase,
   IVotingModuleBase,
@@ -17,6 +18,7 @@ import {
   TotalPowerAtHeightResponse,
   VotingPowerAtHeightResponse,
 } from '@dao-dao/types/contracts/DaoDaoCore'
+import { isFeatureSupportedByVersion } from '@dao-dao/utils'
 
 export abstract class DaoBase implements IDaoBase {
   constructor(protected readonly queryClient: QueryClient) {}
@@ -128,6 +130,13 @@ export abstract class DaoBase implements IDaoBase {
    */
   get bannerImageUrl(): string | undefined {
     return this.info.items['banner']
+  }
+
+  /**
+   * Check whether or not the DAO supports a given feature.
+   */
+  supports(feature: Feature): boolean {
+    return isFeatureSupportedByVersion(feature, this.coreVersion)
   }
 
   /**
