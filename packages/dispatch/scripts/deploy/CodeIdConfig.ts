@@ -23,7 +23,13 @@ type CodeIds = Record<string, Record<string, Record<string, number>>>
 export class CodeIdConfig {
   private _codeIds: CodeIds = {}
 
-  constructor(private indexerAnsibleGroupVarsPath: string) {
+  constructor(
+    private indexerAnsibleGroupVarsPath: string,
+    /**
+     * Whether to set the code ID in the indexer config.
+     */
+    private setIndexer = true
+  ) {
     if (!fs.existsSync(codeIdsPath)) {
       console.log(chalk.red(`Code IDs file not found at ${codeIdsPath}`))
       process.exit(1)
@@ -65,7 +71,7 @@ export class CodeIdConfig {
   }) {
     await Promise.all([
       this.setCodeIdUiConfig(options),
-      this.setCodeIdIndexerConfig(options),
+      this.setIndexer && this.setCodeIdIndexerConfig(options),
     ])
   }
 
@@ -268,9 +274,9 @@ export class CodeIdConfig {
     try {
       this.load()
 
-      const versionsDescending = Object.keys(this._codeIds[chainId])
-        .sort(semverCompare)
-        .reverse()
+      const versionsDescending = this._codeIds[chainId]
+        ? Object.keys(this._codeIds[chainId]).sort(semverCompare).reverse()
+        : []
 
       const name = contractNameToJsonConfigName(_name)
       for (const version of versionsDescending) {

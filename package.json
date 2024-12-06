@@ -28,6 +28,8 @@
     "email": "yarn workspace @dao-dao/email",
     "dispatch": "yarn workspace @dao-dao/dispatch",
     "math": "yarn workspace @dao-dao/math",
+    "tests": "yarn workspace @dao-dao/tests",
+    "starship": "yarn tests starship",
     "publish-all": "find . -name '*.log' -delete && lerna publish --no-private from-package"
   },
   "devDependencies": {

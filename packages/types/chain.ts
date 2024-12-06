@@ -157,7 +157,7 @@ export type SupportedChainConfig = Omit<BaseChainConfig, 'chainId'> & {
   /**
    * Chain ID.
    */
-  chainId: ChainId
+  chainId: string
   /**
    * The `cw-admin-factory` contract address that instantiates contracts with
    * themselves set as their admin.

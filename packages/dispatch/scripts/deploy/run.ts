@@ -13,6 +13,7 @@ import {
   makeGetSignerOptions,
   makeReactQueryClient,
 } from '@dao-dao/state'
+import { StarshipSuite } from '@dao-dao/tests'
 import { ContractVersion, SupportedChainConfig } from '@dao-dao/types'
 import { MsgExec } from '@dao-dao/types/protobuf/codegen/cosmos/authz/v1beta1/tx'
 import { MsgStoreCode } from '@dao-dao/types/protobuf/codegen/cosmwasm/wasm/v1/tx'
@@ -97,6 +98,11 @@ program.option(
   'default'
 )
 program.option(
+  '-s, --starship',
+  'load chains from starship config in @dao-dao/tests (and the chain ID option should be the chain name instead)'
+)
+program.option('--no-indexer', 'do not set the code ID in the indexer config')
+program.option(
   '--no-instantiate-admin-factory',
   'do not instantiate the admin factory'
 )
@@ -110,6 +116,8 @@ let {
   restrictInstantiation,
   mnemonic: mnemonicName,
   instantiateAdminFactory,
+  indexer,
+  starship,
 } = program.opts()
 
 // Add deployment arguments if they exist.
@@ -130,13 +138,12 @@ if (deploymentArgs) {
   if (deploymentArgs.instantiateAdminFactory !== undefined) {
     instantiateAdminFactory = deploymentArgs.instantiateAdminFactory
   }
+  if (deploymentArgs.indexer !== undefined) {
+    indexer = deploymentArgs.indexer
+  }
 }
 
-const mnemonic = mnemonics[mnemonicName]
-if (!mnemonic) {
-  log(chalk.red(`Mnemonic with name "${mnemonicName}" not found in config.`))
-  process.exit(1)
-}
+let mnemonic = mnemonics[mnemonicName]
 
 if (!Object.values(Mode).includes(mode)) {
   log(
@@ -148,13 +155,27 @@ if (!Object.values(Mode).includes(mode)) {
 const main = async () => {
   const queryClient = await makeReactQueryClient()
 
+  // Set up Starship stuff and load chain info.
+  if (starship) {
+    const suite = await StarshipSuite.init(chainId)
+    const signer = await suite.makeSigner()
+    mnemonic = signer.mnemonic
+    indexer = false
+    chainId = suite.chainId
+  }
+
+  if (!mnemonic) {
+    log(chalk.red(`Mnemonic with name "${mnemonicName}" not found in config.`))
+    process.exit(1)
+  }
+
   const {
     chainName,
     bech32Prefix,
     chainRegistry: { network_type: networkType, slip44 } = {},
   } = getChainForChainId(chainId)
 
-  const codeIds = new CodeIdConfig(indexerAnsibleGroupVarsPath)
+  const codeIds = new CodeIdConfig(indexerAnsibleGroupVarsPath, !!indexer)
 
   await queryClient.prefetchQuery(chainQueries.dynamicGasPrice({ chainId }))
 

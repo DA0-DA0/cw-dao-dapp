@@ -581,32 +581,38 @@ const BASE_SUPPORTED_CHAINS: Omit<
   },
 ]
 
+const convertConfiguredChainToSupportedChain = (
+  chain: typeof BASE_SUPPORTED_CHAINS[number]
+): SupportedChainConfig => {
+  // Type-check to ensure chain code IDs are present in JSON.
+  const allCodeIds = ALL_CODE_IDS[chain.chainId as ChainId]
+  if (!allCodeIds) {
+    throw new Error(`No code IDs found for chain ${chain.chainId}`)
+  }
+
+  // Type-check to ensure correct version of code IDs are present in JSON.
+  const codeIds = allCodeIds[chain.latestVersion]
+  if (!codeIds) {
+    throw new Error(
+      `Version ${chain.latestVersion} code IDs not found for chain ${chain.chainId}`
+    )
+  }
+
+  return {
+    ...chain,
+    codeIds,
+    allCodeIds,
+    codeHashes:
+      ALL_CODE_HASHES[chain.chainId as ChainId]?.[chain.latestVersion],
+    allCodeHashes: ALL_CODE_HASHES[chain.chainId as ChainId],
+    polytone: ALL_POLYTONE[chain.chainId as ChainId],
+  }
+}
+
 // Extract info from JSON config.
-export const SUPPORTED_CHAINS: SupportedChainConfig[] =
-  BASE_SUPPORTED_CHAINS.map((chain): SupportedChainConfig => {
-    // Type-check to ensure chain code IDs are present in JSON.
-    const allCodeIds = ALL_CODE_IDS[chain.chainId]
-    if (!allCodeIds) {
-      throw new Error(`No code IDs found for chain ${chain.chainId}`)
-    }
-
-    // Type-check to ensure correct version of code IDs are present in JSON.
-    const codeIds = allCodeIds[chain.latestVersion]
-    if (!codeIds) {
-      throw new Error(
-        `Version ${chain.latestVersion} code IDs not found for chain ${chain.chainId}`
-      )
-    }
-
-    return {
-      ...chain,
-      codeIds,
-      allCodeIds,
-      codeHashes: ALL_CODE_HASHES[chain.chainId]?.[chain.latestVersion],
-      allCodeHashes: ALL_CODE_HASHES[chain.chainId],
-      polytone: ALL_POLYTONE[chain.chainId],
-    }
-  })
+export let SUPPORTED_CHAINS: SupportedChainConfig[] = BASE_SUPPORTED_CHAINS.map(
+  convertConfiguredChainToSupportedChain
+)
 
 export const POLYTONE_CONFIG_PER_CHAIN: [ChainId, PolytoneConfig][] =
   SUPPORTED_CHAINS.map(({ chainId, polytone: polytone = {} }) => [
@@ -743,137 +749,220 @@ export const GAS_OVERRIDES: Partial<
 // The chains not to show in the governance UI.
 const NO_GOV_CHAIN_IDS = ['noble-1']
 
+const convertChainToBaseChainConfig = (
+  chain: AnyChain
+): BaseChainConfig | undefined => {
+  // Skip if chain already exists in configured chains.
+  if (SUPPORTED_CHAINS.some((c) => c.chainId === chain.chainId)) {
+    return
+  }
+
+  // Skip if no RPC exists for chain. Can't use `getRpcForChainId` helper
+  // because that file depends on this one. Yay circular dependencies.
+  if (
+    !(chain.chainId in CHAIN_ENDPOINTS) &&
+    !chain.chainRegistry?.apis?.rpc?.length
+  ) {
+    return
+  }
+
+  let explorerUrlTemplates: BaseChainConfig['explorerUrlTemplates'] = undefined
+  const explorers = chain.chainRegistry?.explorers
+  if (explorers) {
+    const mintscanExplorer = explorers.find(
+      (explorer) =>
+        explorer.kind?.toLowerCase() === 'mintscan' &&
+        explorer.url?.includes('mintscan.io')
+    )
+    if (mintscanExplorer) {
+      explorerUrlTemplates = {
+        tx: mintscanExplorer.url + '/txs/REPLACE',
+        gov: mintscanExplorer.url + '/proposals',
+        govProp: mintscanExplorer.url + '/proposals/REPLACE',
+        wallet: mintscanExplorer.url + '/account/REPLACE',
+      }
+    }
+
+    if (!explorerUrlTemplates) {
+      const pingPubExplorer = explorers.find(
+        (explorer) =>
+          explorer.kind?.toLowerCase() === 'ping.pub' &&
+          // Some explorers have kind = 'ping.pub' but the wrong URL.
+          explorer.url?.includes('ping.pub')
+      )
+      if (pingPubExplorer) {
+        explorerUrlTemplates = {
+          tx: pingPubExplorer.url + '/tx/REPLACE',
+          gov: pingPubExplorer.url + '/gov',
+          govProp: pingPubExplorer.url + '/gov/REPLACE',
+          wallet: pingPubExplorer.url + '/account/REPLACE',
+        }
+      }
+    }
+
+    if (!explorerUrlTemplates) {
+      const atomScanExplorer = explorers.find(
+        (explorer) =>
+          explorer.kind?.toLowerCase() === 'atomscan' &&
+          explorer.url?.includes('atomscan.com')
+      )
+      if (atomScanExplorer) {
+        explorerUrlTemplates = {
+          tx: atomScanExplorer.url + '/transactions/REPLACE',
+          gov: atomScanExplorer.url + '/votes',
+          govProp: atomScanExplorer.url + '/votes/REPLACE',
+          wallet: atomScanExplorer.url + '/accounts/REPLACE',
+        }
+      }
+    }
+
+    if (!explorerUrlTemplates) {
+      const bigDipperExplorer = explorers.find(
+        (explorer) =>
+          explorer.kind?.toLowerCase() === 'bigdipper' &&
+          explorer.url?.includes('bigdipper.live')
+      )
+      if (bigDipperExplorer) {
+        explorerUrlTemplates = {
+          tx: bigDipperExplorer.url + '/transactions/REPLACE',
+          gov: bigDipperExplorer.url + '/proposals',
+          govProp: bigDipperExplorer.url + '/proposals/REPLACE',
+          wallet: bigDipperExplorer.url + '/accounts/REPLACE',
+        }
+      }
+    }
+
+    if (!explorerUrlTemplates) {
+      const explorersGuruExplorer = explorers.find(
+        (explorer) =>
+          explorer.kind?.toLowerCase() === 'explorers.guru' &&
+          explorer.url?.includes('explorers.guru')
+      )
+      if (explorersGuruExplorer) {
+        explorerUrlTemplates = {
+          tx: explorersGuruExplorer.url + '/transaction/REPLACE',
+          gov: explorersGuruExplorer.url + '/proposals',
+          govProp: explorersGuruExplorer.url + '/proposals/REPLACE',
+          wallet: explorersGuruExplorer.url + '/account/REPLACE',
+        }
+      }
+    }
+
+    if (!explorerUrlTemplates) {
+      const stakeflowExplorer = explorers.find(
+        (explorer) =>
+          explorer.kind?.toLowerCase() === 'stakeflow' &&
+          explorer.url?.includes('stakeflow.io')
+      )
+      if (stakeflowExplorer) {
+        explorerUrlTemplates = {
+          tx: stakeflowExplorer.url + '/transactions/REPLACE',
+          gov: stakeflowExplorer.url + '/proposals',
+          govProp: stakeflowExplorer.url + '/proposals/REPLACE',
+          wallet: stakeflowExplorer.url + '/accounts/REPLACE',
+        }
+      }
+    }
+  }
+
+  return {
+    chainId: chain.chainId,
+    name: chain.chainName,
+    mainnet: chain.chainRegistry?.network_type === 'mainnet',
+    accentColor: '',
+    noGov: NO_GOV_CHAIN_IDS.includes(chain.chainId),
+    explorerUrlTemplates,
+  }
+}
 /**
  * All configured chains. Configured chains are either supported chains, which
  * DAO DAO is deployed on, or other chains that show up in the governance UI.
  */
-export const CONFIGURED_CHAINS: BaseChainConfig[] = [
+export let CONFIGURED_CHAINS: BaseChainConfig[] = [
   ...SUPPORTED_CHAINS,
   // Add other chains from chain registry.
   ...chains
-    .flatMap((chain): BaseChainConfig | [] => {
-      // Skip if chain already exists in configured chains.
-      if (SUPPORTED_CHAINS.some((c) => c.chainId === chain.chainId)) {
-        return []
-      }
-
-      // Skip if no RPC exists for chain. Can't use `getRpcForChainId` helper
-      // because that file depends on this one. Yay circular dependencies.
-      if (
-        !(chain.chainId in CHAIN_ENDPOINTS) &&
-        !chain.chainRegistry?.apis?.rpc?.length
-      ) {
-        return []
-      }
-
-      let explorerUrlTemplates: BaseChainConfig['explorerUrlTemplates'] =
-        undefined
-      const explorers = chain.chainRegistry?.explorers
-      if (explorers) {
-        const mintscanExplorer = explorers.find(
-          (explorer) =>
-            explorer.kind?.toLowerCase() === 'mintscan' &&
-            explorer.url?.includes('mintscan.io')
-        )
-        if (mintscanExplorer) {
-          explorerUrlTemplates = {
-            tx: mintscanExplorer.url + '/txs/REPLACE',
-            gov: mintscanExplorer.url + '/proposals',
-            govProp: mintscanExplorer.url + '/proposals/REPLACE',
-            wallet: mintscanExplorer.url + '/account/REPLACE',
-          }
-        }
-
-        if (!explorerUrlTemplates) {
-          const pingPubExplorer = explorers.find(
-            (explorer) =>
-              explorer.kind?.toLowerCase() === 'ping.pub' &&
-              // Some explorers have kind = 'ping.pub' but the wrong URL.
-              explorer.url?.includes('ping.pub')
-          )
-          if (pingPubExplorer) {
-            explorerUrlTemplates = {
-              tx: pingPubExplorer.url + '/tx/REPLACE',
-              gov: pingPubExplorer.url + '/gov',
-              govProp: pingPubExplorer.url + '/gov/REPLACE',
-              wallet: pingPubExplorer.url + '/account/REPLACE',
-            }
-          }
-        }
-
-        if (!explorerUrlTemplates) {
-          const atomScanExplorer = explorers.find(
-            (explorer) =>
-              explorer.kind?.toLowerCase() === 'atomscan' &&
-              explorer.url?.includes('atomscan.com')
-          )
-          if (atomScanExplorer) {
-            explorerUrlTemplates = {
-              tx: atomScanExplorer.url + '/transactions/REPLACE',
-              gov: atomScanExplorer.url + '/votes',
-              govProp: atomScanExplorer.url + '/votes/REPLACE',
-              wallet: atomScanExplorer.url + '/accounts/REPLACE',
-            }
-          }
-        }
-
-        if (!explorerUrlTemplates) {
-          const bigDipperExplorer = explorers.find(
-            (explorer) =>
-              explorer.kind?.toLowerCase() === 'bigdipper' &&
-              explorer.url?.includes('bigdipper.live')
-          )
-          if (bigDipperExplorer) {
-            explorerUrlTemplates = {
-              tx: bigDipperExplorer.url + '/transactions/REPLACE',
-              gov: bigDipperExplorer.url + '/proposals',
-              govProp: bigDipperExplorer.url + '/proposals/REPLACE',
-              wallet: bigDipperExplorer.url + '/accounts/REPLACE',
-            }
-          }
-        }
-
-        if (!explorerUrlTemplates) {
-          const explorersGuruExplorer = explorers.find(
-            (explorer) =>
-              explorer.kind?.toLowerCase() === 'explorers.guru' &&
-              explorer.url?.includes('explorers.guru')
-          )
-          if (explorersGuruExplorer) {
-            explorerUrlTemplates = {
-              tx: explorersGuruExplorer.url + '/transaction/REPLACE',
-              gov: explorersGuruExplorer.url + '/proposals',
-              govProp: explorersGuruExplorer.url + '/proposals/REPLACE',
-              wallet: explorersGuruExplorer.url + '/account/REPLACE',
-            }
-          }
-        }
-
-        if (!explorerUrlTemplates) {
-          const stakeflowExplorer = explorers.find(
-            (explorer) =>
-              explorer.kind?.toLowerCase() === 'stakeflow' &&
-              explorer.url?.includes('stakeflow.io')
-          )
-          if (stakeflowExplorer) {
-            explorerUrlTemplates = {
-              tx: stakeflowExplorer.url + '/transactions/REPLACE',
-              gov: stakeflowExplorer.url + '/proposals',
-              govProp: stakeflowExplorer.url + '/proposals/REPLACE',
-              wallet: stakeflowExplorer.url + '/accounts/REPLACE',
-            }
-          }
-        }
-      }
-
-      return {
-        chainId: chain.chainId,
-        name: chain.chainName,
-        mainnet: chain.chainRegistry?.network_type === 'mainnet',
-        accentColor: '',
-        noGov: NO_GOV_CHAIN_IDS.includes(chain.chainId),
-        explorerUrlTemplates,
-      }
-    })
+    .flatMap((chain) => convertChainToBaseChainConfig(chain) || [])
     .sort((a, b) => a.name.localeCompare(b.name)),
 ]
+
+/**
+ * Add a chain to the chains list and configured chains.
+ *
+ * For use in testing.
+ */
+export const _addChain = ({
+  chain,
+  rpcEndpoint,
+  restEndpoint,
+}: {
+  chain: Chain | AnyChain
+  rpcEndpoint: string
+  restEndpoint: string
+}) => {
+  const anyChain =
+    'chain_id' in chain ? convertChainRegistryChainToAnyChain(chain) : chain
+
+  // Remove any existing chain with the same chain ID.
+  chains = chains.filter((c) => c.chainId !== anyChain.chainId)
+  CONFIGURED_CHAINS = CONFIGURED_CHAINS.filter(
+    (c) => c.chainId !== anyChain.chainId
+  )
+  SUPPORTED_CHAINS = SUPPORTED_CHAINS.filter(
+    (c) => c.chainId !== anyChain.chainId
+  )
+
+  // Add the new chain.
+  chains.push(anyChain)
+  const baseChainConfig = convertChainToBaseChainConfig(anyChain)
+  if (baseChainConfig) {
+    CONFIGURED_CHAINS.push(baseChainConfig)
+  }
+
+  // Set preferred RPC and REST endpoints.
+  CHAIN_ENDPOINTS[anyChain.chainId as keyof typeof CHAIN_ENDPOINTS] = {
+    rpc: rpcEndpoint,
+    rest: restEndpoint,
+  }
+}
+
+/**
+ * Add a supported chain.
+ *
+ * For use in testing.
+ */
+export const _addSupportedChain = ({
+  chain,
+  version,
+  factoryContractAddress,
+  explorerUrl,
+}: {
+  chain: Chain | AnyChain
+  version: ContractVersion
+  factoryContractAddress: string
+  explorerUrl: string
+}) => {
+  const anyChain =
+    'chain_id' in chain ? convertChainRegistryChainToAnyChain(chain) : chain
+
+  const baseExplorerUrl = `${explorerUrl}/${anyChain.chainId}`
+
+  // Add to supported chains.
+  SUPPORTED_CHAINS.push(
+    convertConfiguredChainToSupportedChain({
+      chainId: anyChain.chainId,
+      name: anyChain.chainName,
+      mainnet: false,
+      accentColor: '',
+      factoryContractAddress,
+      noIndexer: true,
+      explorerUrlTemplates: {
+        tx: `${baseExplorerUrl}/tx/REPLACE`,
+        gov: `${baseExplorerUrl}/gov`,
+        govProp: `${baseExplorerUrl}/gov/REPLACE`,
+        wallet: `${baseExplorerUrl}/account/REPLACE`,
+      },
+      latestVersion: version,
+    })
+  )
+}

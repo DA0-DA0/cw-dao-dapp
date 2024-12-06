@@ -1,0 +1,42 @@
+{
+  "name": "@dao-dao/tests",
+  "version": "2.6.0-rc.1",
+  "license": "BSD-3-Clause-Clear",
+  "private": true,
+  "scripts": {
+    "format": "eslint . --fix",
+    "lint": "eslint .",
+    "test:starship": "jest --testPathPattern=starship",
+    "starship": "starship --config starship.config.yml",
+    "starship:setup": "./scripts/starship_setup.sh",
+    "starship:start": "./scripts/starship_start.sh",
+    "starship:start-ports": "npm run starship -- start-ports",
+    "starship:stop": "npm run starship -- stop"
+  },
+  "devDependencies": {
+    "@chain-registry/types": "0.45.86",
+    "@dao-dao/config": "2.6.0-rc.1",
+    "@dao-dao/types": "2.6.0-rc.1",
+    "@starship-ci/cli": "^2.13.0",
+    "@tanstack/react-query": "^5.40.0",
+    "chalk": "^4",
+    "commander": "^11.0.0",
+    "eslint": "^8.23.1",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.1.1",
+    "jest-environment-jsdom": "^29.7.0",
+    "starshipjs": "^2.4.1",
+    "typescript": "5.3.3"
+  },
+  "prettier": "@dao-dao/config/prettier",
+  "dependencies": {
+    "@cosmjs/cosmwasm-stargate": "^0.32.3",
+    "@cosmjs/crypto": "^0.32.3",
+    "@cosmjs/proto-signing": "^0.32.3",
+    "@cosmjs/stargate": "^0.32.3",
+    "@cosmjs/tendermint-rpc": "^0.32.3",
+    "@dao-dao/state": "2.6.0-rc.1",
+    "@dao-dao/stateful": "2.6.0-rc.1",
+    "@dao-dao/utils": "2.6.0-rc.1"
+  }
+}
