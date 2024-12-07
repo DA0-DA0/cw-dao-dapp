@@ -1,10 +1,9 @@
 import {
-  ActionKeyAndData,
   ContractVersion,
   DepositInfoSelector,
   IProposalModuleBase,
+  MultipleChoiceNewProposalData,
   ProcessedTQ,
-  ProposalExecutionMetadata,
   ProposalTimestampInfo,
   ProposalVoteOption,
   UnifiedCosmosMsg,
@@ -12,31 +11,9 @@ import {
 import {
   CheckedMultipleChoiceOption,
   MultipleChoiceOptionType,
-  MultipleChoiceOptions,
   MultipleChoiceProposal,
   MultipleChoiceVote,
 } from '@dao-dao/types/contracts/DaoProposalMultiple'
-
-export type MultipleChoiceOptionFormData = {
-  title: string
-  description: string
-  actionData: ActionKeyAndData[]
-  metadata?: ProposalExecutionMetadata
-}
-
-export type NewProposalForm = {
-  title: string
-  description: string
-  choices: MultipleChoiceOptionFormData[]
-  vote?: MultipleChoiceVote
-}
-
-export type NewProposalData = {
-  title: string
-  description: string
-  choices: MultipleChoiceOptions
-  vote?: MultipleChoiceVote
-}
 
 export interface PercentOrMajorityValue {
   majority: boolean
@@ -77,11 +54,11 @@ export interface PublishProposalOptions {
 }
 
 export type SimulateProposal = (
-  newProposalData: NewProposalData
+  newProposalData: MultipleChoiceNewProposalData
 ) => Promise<void>
 
 export type PublishProposal = (
-  newProposalData: NewProposalData,
+  newProposalData: MultipleChoiceNewProposalData,
   options?: PublishProposalOptions
 ) => Promise<{
   proposalNumber: number

@@ -35,6 +35,7 @@ import {
   ActionKeyAndData,
   BaseNewProposalProps,
   ProposalDraft,
+  SingleChoiceNewProposalForm,
   UnifiedCosmosMsg,
   decodedStargateMsgToCw,
   getAminoTypes,
@@ -57,7 +58,6 @@ import {
   ProposalModuleAdapterCommonProvider,
   matchAdapter as matchProposalModuleAdapter,
 } from '../../../proposal-module-adapter'
-import { NewProposalForm as NewSingleChoiceProposalForm } from '../../../proposal-module-adapter/adapters/DaoProposalSingle/types'
 import { useProposalModuleAdapterCommonContext } from '../../../proposal-module-adapter/react/context'
 import { ConnectWallet } from '../../ConnectWallet'
 import { SuspenseLoader } from '../../SuspenseLoader'
@@ -407,7 +407,7 @@ const InnerActionMatcherAndProposer = ({
     },
   } = useProposalModuleAdapterCommonContext()
 
-  const formMethods = useForm<NewSingleChoiceProposalForm>({
+  const formMethods = useForm<SingleChoiceNewProposalForm>({
     mode: 'onChange',
     defaultValues: {
       title: '',

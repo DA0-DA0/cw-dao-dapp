@@ -1,3 +1,4 @@
+import { Cw4VotingModule } from '@dao-dao/state/clients'
 import { daoVotingCw4Queries } from '@dao-dao/state/query'
 import { ActionBase, PeopleEmoji } from '@dao-dao/stateless'
 import { UnifiedCosmosMsg } from '@dao-dao/types'
@@ -14,7 +15,6 @@ import {
   objectMatchesStructure,
 } from '@dao-dao/utils'
 
-import { Cw4VotingModule } from '../../../../../clients'
 import { AddressInput, EntityDisplay } from '../../../../../components'
 import { useLoadingVotingModuleInfo } from '../../hooks/useLoadingVotingModuleInfo'
 import {

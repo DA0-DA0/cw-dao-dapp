@@ -12,8 +12,8 @@ import {
 import {
   Action,
   ActionComponent,
+  IProposalModuleBase,
   LoadingDataWithError,
-  ProposalModuleInfo,
   SuspenseLoaderProps,
   TransProps,
 } from '@dao-dao/types'
@@ -24,7 +24,7 @@ export type UpdatePreProposeConfigData = {
 }
 
 export type ProposalModuleWithAction = {
-  proposalModule: ProposalModuleInfo
+  proposalModule: IProposalModuleBase
   action: Action
 }
 

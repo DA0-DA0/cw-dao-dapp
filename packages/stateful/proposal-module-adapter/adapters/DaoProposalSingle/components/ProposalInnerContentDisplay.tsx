@@ -15,6 +15,7 @@ import {
   ActionKeyAndData,
   BaseProposalInnerContentDisplayProps,
   ChainId,
+  SingleChoiceNewProposalForm,
 } from '@dao-dao/types'
 import { Proposal } from '@dao-dao/types/contracts/CwProposalSingle.v1'
 import { SingleChoiceProposal } from '@dao-dao/types/contracts/DaoProposalSingle.v2'
@@ -26,10 +27,9 @@ import {
 
 import { SuspenseLoader } from '../../../../components'
 import { useLoadingProposal } from '../hooks'
-import { NewProposalForm } from '../types'
 
 export const ProposalInnerContentDisplay = (
-  props: BaseProposalInnerContentDisplayProps<NewProposalForm>
+  props: BaseProposalInnerContentDisplayProps<SingleChoiceNewProposalForm>
 ) => {
   const loadingProposal = useLoadingProposal()
 
@@ -51,7 +51,7 @@ export const ProposalInnerContentDisplay = (
 const InnerProposalInnerContentDisplay = ({
   setDuplicateFormData,
   proposal,
-}: BaseProposalInnerContentDisplayProps<NewProposalForm> & {
+}: BaseProposalInnerContentDisplayProps<SingleChoiceNewProposalForm> & {
   proposal: Proposal | SingleChoiceProposal
 }) => {
   const { t } = useTranslation()

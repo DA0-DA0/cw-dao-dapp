@@ -2,14 +2,7 @@ import { DecoratorFn } from '@storybook/react'
 import { useMemo } from 'react'
 
 import { DaoPageWrapper } from '@dao-dao/stateful'
-import {
-  AccountType,
-  ChainId,
-  ContractVersion,
-  DaoInfo,
-  PreProposeModuleType,
-  ProposalModuleType,
-} from '@dao-dao/types'
+import { AccountType, ChainId, ContractVersion, DaoInfo } from '@dao-dao/types'
 
 export const makeDaoInfo = (): DaoInfo => ({
   chainId: ChainId.JunoMainnet,
@@ -22,26 +15,12 @@ export const makeDaoInfo = (): DaoInfo => ({
   },
   proposalModules: [
     {
-      type: ProposalModuleType.Single,
-      contractName: 'crates.io:dao-proposal-single',
-      version: ContractVersion.V2Alpha,
       address: 'proposalModuleAddress',
       prefix: 'A',
-      prePropose: {
-        contractName: 'crates.io:dao-pre-propose-single',
+      status: 'enabled',
+      info: {
+        contract: 'crates.io:dao-proposal-single',
         version: ContractVersion.V2Alpha,
-        address: 'preProposeModuleAddress',
-        type: PreProposeModuleType.Other,
-        submissionPolicy: {
-          specific: {
-            dao_members: true,
-            allowlist: [],
-            denylist: [],
-          },
-        },
-      },
-      config: {
-        veto: null,
       },
     },
   ],

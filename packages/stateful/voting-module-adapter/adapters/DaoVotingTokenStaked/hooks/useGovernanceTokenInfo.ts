@@ -9,10 +9,10 @@ import {
   nativeSupplySelector,
   usdPriceSelector,
 } from '@dao-dao/state'
+import { TokenStakedVotingModule } from '@dao-dao/state/clients'
 import { useCachedLoading, useVotingModule } from '@dao-dao/stateless'
 import { TokenType } from '@dao-dao/types'
 
-import { TokenStakedVotingModule } from '../../../../clients'
 import { useWallet } from '../../../../hooks/useWallet'
 import {
   UseGovernanceTokenInfoOptions,

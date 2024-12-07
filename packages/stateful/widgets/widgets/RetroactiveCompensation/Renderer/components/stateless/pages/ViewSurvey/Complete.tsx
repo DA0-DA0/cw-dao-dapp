@@ -30,18 +30,18 @@ import {
   GenericTokenWithUsdPrice,
   LoadingData,
   LoadingDataWithError,
+  SingleChoiceNewProposalData,
   StatefulEntityDisplayProps,
   StatefulProposalListProps,
 } from '@dao-dao/types'
 import { Boolean } from '@dao-dao/types/contracts/DaoVotingCw721Staked'
 import { decodedMessagesString, validateRequired } from '@dao-dao/utils'
 
-import { NewProposalData } from '../../../../../../../../proposal-module-adapter/adapters/DaoProposalSingle/types'
 import { CompleteRatings, SurveyWithMetadata } from '../../../../types'
 
 export type ProposalCreationFormData = {
   type: 'new' | 'existing' | 'none'
-  newProposal: Omit<NewProposalData, 'msgs'>
+  newProposal: Omit<SingleChoiceNewProposalData, 'msgs'>
   existing: string
 }
 

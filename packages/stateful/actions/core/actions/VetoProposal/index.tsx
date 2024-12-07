@@ -2,7 +2,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import { contractQueries } from '@dao-dao/state/query'
+import { getProposalModule } from '@dao-dao/state/clients'
+import { contractQueries, daoQueries } from '@dao-dao/state/query'
 import {
   ActionBase,
   ThumbDownEmoji,
@@ -25,14 +26,12 @@ import {
   objectMatchesStructure,
 } from '@dao-dao/utils'
 
-import { getProposalModule } from '../../../../clients'
 import {
   AddressInput,
   EntityDisplay,
   ProposalLine,
 } from '../../../../components'
 import { useQueryLoadingDataWithError } from '../../../../hooks'
-import { daoQueries } from '../../../../queries/dao'
 import { daosWithVetoableProposalsSelector } from '../../../../recoil'
 import {
   VetoProposalComponent as StatelessVetoProposalComponent,

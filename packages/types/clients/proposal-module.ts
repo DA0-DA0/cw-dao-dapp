@@ -3,7 +3,8 @@ import { EncodeObject } from '@cosmjs/proto-signing'
 import { FetchQueryOptions } from '@tanstack/react-query'
 
 import { CheckedDepositInfo, Coin, Duration } from '../contracts/common'
-import { PreProposeModule, ProposalModuleInfo } from '../dao'
+import { VetoConfig } from '../contracts/DaoProposalSingle.v2'
+import { PreProposeModule } from '../dao'
 import { ContractVersion, Feature } from '../features'
 import { IDaoBase } from './dao'
 
@@ -20,11 +21,6 @@ export interface IProposalModuleBase<
    * DAO this module belongs to.
    */
   dao: Dao
-
-  /**
-   * Proposal module info.
-   */
-  info: ProposalModuleInfo
 
   /**
    * Chain ID of the proposal module.
@@ -55,6 +51,23 @@ export interface IProposalModuleBase<
    * Pre-propose module, or null if none.
    */
   prePropose: PreProposeModule | null
+
+  /**
+   * Veto config, or null if disabled.
+   */
+  veto: VetoConfig | null
+
+  /**
+   * Whether or not the client has been initialized. This only matters for some
+   * functions, depending on the implementation.
+   */
+  initialized: boolean
+
+  /**
+   * Initialize the client. This only matters for some functions, depending on
+   * the implementation.
+   */
+  init(): void | Promise<void>
 
   /**
    * Check whether or not the proposal module supports a given feature.

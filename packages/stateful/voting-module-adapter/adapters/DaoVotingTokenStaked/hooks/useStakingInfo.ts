@@ -11,6 +11,7 @@ import {
   refreshClaimsIdAtom,
   refreshWalletBalancesIdAtom,
 } from '@dao-dao/state'
+import { TokenStakedVotingModule } from '@dao-dao/state/clients'
 import {
   useCachedLoadable,
   useCachedLoading,
@@ -18,7 +19,6 @@ import {
 } from '@dao-dao/stateless'
 import { claimAvailable } from '@dao-dao/utils'
 
-import { TokenStakedVotingModule } from '../../../../clients'
 import { useWallet } from '../../../../hooks/useWallet'
 import { UseStakingInfoOptions, UseStakingInfoResponse } from '../types'
 

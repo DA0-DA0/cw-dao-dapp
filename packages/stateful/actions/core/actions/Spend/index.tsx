@@ -5,6 +5,7 @@ import { constSelector, useRecoilValue } from 'recoil'
 
 import { HugeDecimal } from '@dao-dao/math'
 import {
+  entityQueries,
   neutronQueries,
   nobleQueries,
   skipQueries,
@@ -75,7 +76,6 @@ import {
 import { AddressInput } from '../../../../components'
 import { useQueryLoadingDataWithError } from '../../../../hooks'
 import { useProposalModuleAdapterCommonContextIfAvailable } from '../../../../proposal-module-adapter/react/context'
-import { entityQueries } from '../../../../queries/entity'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import {
   SpendData,

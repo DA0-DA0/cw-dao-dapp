@@ -2,10 +2,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 
+import { daoQueries } from '@dao-dao/state/query'
 import { LazyDaoCardProps } from '@dao-dao/types'
 import { processError } from '@dao-dao/utils'
 
-import { daoQueries } from '../../queries/dao'
 import { DaoCard } from './DaoCard'
 
 export const LazyDaoCard = (props: LazyDaoCardProps) => {

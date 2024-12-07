@@ -1,3 +1,9 @@
+import {
+  MultipleChoiceProposalModule,
+  SecretMultipleChoiceProposalModule,
+  SecretSingleChoiceProposalModule,
+  SingleChoiceProposalModule,
+} from '@dao-dao/state/clients'
 import { contractQueries } from '@dao-dao/state/query'
 import { ActionBase, PersonRaisingHandEmoji } from '@dao-dao/stateless'
 import {
@@ -28,12 +34,6 @@ import {
   objectMatchesStructure,
 } from '@dao-dao/utils'
 
-import {
-  MultipleChoiceProposalModule,
-  SecretMultipleChoiceProposalModule,
-  SecretSingleChoiceProposalModule,
-  SingleChoiceProposalModule,
-} from '../../../../clients'
 import { AddressInput } from '../../../../components'
 import { EnableApproverComponent, EnableApproverData } from './Component'
 

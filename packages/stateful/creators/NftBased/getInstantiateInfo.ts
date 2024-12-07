@@ -1,11 +1,14 @@
+import {
+  Cw721StakedVotingModule,
+  OnftStakedVotingModule,
+} from '@dao-dao/state/clients'
+import { SecretSnip721StakedVotingModule } from '@dao-dao/state/clients/voting-module/Snip721StakedVotingModule.secret'
 import { ChainId, DaoCreatorGetInstantiateInfo } from '@dao-dao/types'
 import {
   convertDurationWithUnitsToDuration,
   isSecretNetwork,
 } from '@dao-dao/utils'
 
-import { Cw721StakedVotingModule, OnftStakedVotingModule } from '../../clients'
-import { SecretSnip721StakedVotingModule } from '../../clients/voting-module/Snip721StakedVotingModule.secret'
 import { CreatorData } from './types'
 
 export const getInstantiateInfo: DaoCreatorGetInstantiateInfo<CreatorData> = ({

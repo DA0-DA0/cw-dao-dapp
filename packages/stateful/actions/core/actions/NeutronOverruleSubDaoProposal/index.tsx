@@ -2,6 +2,7 @@ import {
   contractQueries,
   neutronCwdSubdaoTimelockSingleQueries,
 } from '@dao-dao/state'
+import { getDao } from '@dao-dao/state/clients'
 import { ActionBase, ThumbDownEmoji } from '@dao-dao/stateless'
 import { ChainId, PreProposeModuleType } from '@dao-dao/types'
 import {
@@ -19,7 +20,6 @@ import {
 } from '@dao-dao/utils'
 
 import { EntityDisplay, ProposalLine } from '../../../../components'
-import { daoQueries } from '../../../../queries'
 import {
   NeutronOverruleSubDaoProposalData,
   NeutronOverruleSubDaoProposalComponent as StatelessNeutronOverruleSubDaoProposalComponent,
@@ -115,16 +115,15 @@ export class NeutronOverruleSubDaoProposalAction extends ActionBase<NeutronOverr
       })
     )
 
-    // Get SubDAO proposal modules.
-    const proposalModules = await this.options.queryClient.fetchQuery(
-      daoQueries.proposalModules(this.options.queryClient, {
-        chainId,
-        coreAddress: subdao,
-      })
-    )
+    const subDao = getDao({
+      queryClient: this.options.queryClient,
+      chainId,
+      coreAddress: subdao,
+    })
+    await subDao.init()
 
     // Get proposal module that uses the specified timelock module.
-    const proposalModule = proposalModules.find(
+    const proposalModule = subDao.proposalModules.find(
       ({ prePropose }) =>
         prePropose?.type === PreProposeModuleType.NeutronSubdaoSingle &&
         prePropose.config.timelockAddress ===
@@ -148,16 +147,15 @@ export class NeutronOverruleSubDaoProposalAction extends ActionBase<NeutronOverr
       })
     )
 
-    // Get SubDAO proposal modules.
-    const proposalModules = await this.options.queryClient.fetchQuery(
-      daoQueries.proposalModules(this.options.queryClient, {
-        chainId,
-        coreAddress: subdao,
-      })
-    )
+    const subDao = getDao({
+      queryClient: this.options.queryClient,
+      chainId,
+      coreAddress: subdao,
+    })
+    await subDao.init()
 
     // Get proposal module that uses the specified timelock module.
-    const proposalModule = proposalModules.find(
+    const proposalModule = subDao.proposalModules.find(
       ({ prePropose }) =>
         prePropose?.type === PreProposeModuleType.NeutronSubdaoSingle &&
         prePropose.config.timelockAddress ===

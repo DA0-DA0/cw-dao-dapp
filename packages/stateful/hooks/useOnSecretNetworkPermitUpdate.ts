@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react'
 
-import { useDaoIfAvailable, useUpdatingRef } from '@dao-dao/stateless'
-import { DaoSource, PermitForPermitData } from '@dao-dao/types'
-import { serializeDaoSource } from '@dao-dao/utils'
-
 import {
   SECRET_PERMIT_UPDATE_EVENT_PREFIX,
   SecretPermitUpdateEvent,
-} from '../clients/dao/SecretCwDao'
+} from '@dao-dao/state/clients/dao/CwDao.secret'
+import { useDaoIfAvailable, useUpdatingRef } from '@dao-dao/stateless'
+import { DaoSource, PermitForPermitData } from '@dao-dao/types'
+import { serializeDaoSource } from '@dao-dao/utils'
 
 export type OnSecretNetworkPermitUpdateOptions = {
   /**

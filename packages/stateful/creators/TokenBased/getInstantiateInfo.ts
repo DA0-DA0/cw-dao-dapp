@@ -1,4 +1,8 @@
 import { HugeDecimal } from '@dao-dao/math'
+import { Cw20StakedVotingModule } from '@dao-dao/state/clients/voting-module/Cw20StakedVotingModule'
+import { SecretSnip20StakedVotingModule } from '@dao-dao/state/clients/voting-module/Snip20StakedVotingModule.secret'
+import { TokenStakedVotingModule } from '@dao-dao/state/clients/voting-module/TokenStakedVotingModule'
+import { SecretTokenStakedVotingModule } from '@dao-dao/state/clients/voting-module/TokenStakedVotingModule.secret'
 import {
   ChainId,
   DaoCreatorGetInstantiateInfo,
@@ -12,10 +16,6 @@ import {
   isSecretNetwork,
 } from '@dao-dao/utils'
 
-import { Cw20StakedVotingModule } from '../../clients/voting-module/Cw20StakedVotingModule'
-import { SecretSnip20StakedVotingModule } from '../../clients/voting-module/Snip20StakedVotingModule.secret'
-import { TokenStakedVotingModule } from '../../clients/voting-module/TokenStakedVotingModule'
-import { SecretTokenStakedVotingModule } from '../../clients/voting-module/TokenStakedVotingModule.secret'
 import { CreatorData, GovernanceTokenType } from './types'
 
 export const getInstantiateInfo: DaoCreatorGetInstantiateInfo<CreatorData> = ({

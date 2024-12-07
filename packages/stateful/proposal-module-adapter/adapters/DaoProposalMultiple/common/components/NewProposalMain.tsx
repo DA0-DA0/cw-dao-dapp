@@ -3,7 +3,7 @@ import { useFieldArray, useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
 import { ProposalInstantVoter } from '@dao-dao/stateless'
-import { Feature } from '@dao-dao/types'
+import { Feature, MultipleChoiceNewProposalForm } from '@dao-dao/types'
 
 import { SuspenseLoader } from '../../../../../components'
 import { useMembership } from '../../../../../hooks'
@@ -12,11 +12,11 @@ import {
   MULTIPLE_CHOICE_OPTION_COLORS,
   MultipleChoiceOptionEditor,
 } from '../../components/MultipleChoiceOptionEditor'
-import { NewProposalForm } from '../../types'
 
 export const NewProposalMain = () => {
   const { t } = useTranslation()
-  const { control, watch, setValue } = useFormContext<NewProposalForm>()
+  const { control, watch, setValue } =
+    useFormContext<MultipleChoiceNewProposalForm>()
   const { proposalModule } = useProposalModuleAdapterCommonOptions()
   const { isMember = false } = useMembership()
 

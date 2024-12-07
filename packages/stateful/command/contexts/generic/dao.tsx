@@ -12,6 +12,7 @@ import { useRecoilState } from 'recoil'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 
 import { navigatingToHrefAtom } from '@dao-dao/state'
+import { daoQueries } from '@dao-dao/state/query'
 import { useDao, useDaoNavHelpers } from '@dao-dao/stateless'
 import { AccountType, ContractVersion, Feature } from '@dao-dao/types'
 import {
@@ -29,7 +30,6 @@ import {
   useGovDaoTabs,
   useQueryLoadingData,
 } from '../../../hooks'
-import { daoQueries } from '../../../queries'
 
 export const makeGenericDaoContext: CommandModalContextMaker<{
   dao: CommandModalDaoInfo

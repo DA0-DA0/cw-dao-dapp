@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 
+import { daoQueries } from '@dao-dao/state/query'
 import { ActionBase, DaoEmoji, useChain } from '@dao-dao/stateless'
 import {
   ActionComponent,
@@ -12,7 +13,6 @@ import { decodeJsonFromBase64, objectMatchesStructure } from '@dao-dao/utils'
 
 import { LinkWrapper } from '../../../../components'
 import { useQueryLoadingDataWithError } from '../../../../hooks'
-import { daoQueries } from '../../../../queries'
 import { CreateDaoComponent, CreateDaoData } from './Component'
 
 const Component: ActionComponent<undefined, CreateDaoData> = (props) => {

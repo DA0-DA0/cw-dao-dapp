@@ -4,7 +4,11 @@ import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
 import { HugeDecimal } from '@dao-dao/math'
-import { daoVoteDelegationQueries, indexerQueries } from '@dao-dao/state/query'
+import {
+  daoVoteDelegationQueries,
+  delegationsQueries,
+  indexerQueries,
+} from '@dao-dao/state/query'
 import {
   DaoVoteDelegationCard as StatelessDaoVoteDelegationCard,
   useDao,
@@ -26,7 +30,6 @@ import {
   useQueryLoadingDataWithError,
   useWallet,
 } from '../../hooks'
-import { delegationsQueries } from '../../queries'
 import { useWidget } from '../../widgets'
 import { Trans } from '../Trans'
 

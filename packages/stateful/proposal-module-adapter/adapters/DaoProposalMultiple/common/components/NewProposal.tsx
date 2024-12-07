@@ -21,6 +21,8 @@ import {
 import {
   BaseNewProposalProps,
   IProposalModuleBase,
+  MultipleChoiceNewProposalData,
+  MultipleChoiceNewProposalForm,
   PlausibleEvents,
 } from '@dao-dao/types'
 import {
@@ -35,19 +37,16 @@ import {
 import { useActionEncodeContext } from '../../../../../actions'
 import { useMembership, useWallet } from '../../../../../hooks'
 import { makeGetProposalInfo } from '../../functions'
-import {
-  NewProposalData,
-  NewProposalForm,
-  UsePublishProposal,
-} from '../../types'
+import { UsePublishProposal } from '../../types'
 import { useProcessQ } from '../hooks'
 import { NewProposalMain } from './NewProposalMain'
 import { NewProposalPreview } from './NewProposalPreview'
 
-export type NewProposalProps = BaseNewProposalProps<NewProposalForm> & {
-  proposalModule: IProposalModuleBase
-  usePublishProposal: UsePublishProposal
-}
+export type NewProposalProps =
+  BaseNewProposalProps<MultipleChoiceNewProposalForm> & {
+    proposalModule: IProposalModuleBase
+    usePublishProposal: UsePublishProposal
+  }
 
 export const NewProposal = ({
   onCreateSuccess,
@@ -65,7 +64,7 @@ export const NewProposal = ({
   const { address, isWalletConnecting, isWalletConnected, getStargateClient } =
     useWallet()
 
-  const { watch } = useFormContext<NewProposalForm>()
+  const { watch } = useFormContext<MultipleChoiceNewProposalForm>()
   const proposalTitle = watch('title')
   const choices = watch('choices') ?? []
 
@@ -104,7 +103,7 @@ export const NewProposal = ({
   const plausible = usePlausible<PlausibleEvents>()
   const createProposal = useRecoilCallback(
     ({ snapshot }) =>
-      async (newProposalData: NewProposalData) => {
+      async (newProposalData: MultipleChoiceNewProposalData) => {
         if (!isWalletConnected || !address) {
           toast.error(t('error.logInToContinue'))
           return
@@ -142,7 +141,7 @@ export const NewProposal = ({
           const proposalInfo = await makeGetProposalInfo({
             chain: proposalModule.dao.chain,
             coreAddress: proposalModule.dao.coreAddress,
-            proposalModule: proposalModule.info,
+            proposalModule,
             proposalNumber,
             proposalId,
             isPreProposeApprovalProposal: false,
@@ -235,8 +234,8 @@ export const NewProposal = ({
   const encodeContext = useActionEncodeContext()
 
   const getProposalDataFromFormData: StatelessNewProposalProps<
-    NewProposalForm,
-    NewProposalData
+    MultipleChoiceNewProposalForm,
+    MultipleChoiceNewProposalData
   >['getProposalDataFromFormData'] = async ({
     title,
     description,
@@ -269,7 +268,10 @@ export const NewProposal = ({
   })
 
   return (
-    <StatelessNewProposal<NewProposalForm, NewProposalData>
+    <StatelessNewProposal<
+      MultipleChoiceNewProposalForm,
+      MultipleChoiceNewProposalData
+    >
       activeThreshold={activeThreshold}
       additionalSubmitError={
         choices.length < 2

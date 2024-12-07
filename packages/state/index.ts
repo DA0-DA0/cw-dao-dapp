@@ -1,3 +1,4 @@
+export * from './clients'
 export * from './contracts'
 export * from './graphql'
 export * from './indexer'

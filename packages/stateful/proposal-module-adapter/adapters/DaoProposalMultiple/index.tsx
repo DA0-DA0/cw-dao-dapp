@@ -1,4 +1,7 @@
-import { ProposalModuleAdapter } from '@dao-dao/types'
+import {
+  MultipleChoiceNewProposalForm,
+  ProposalModuleAdapter,
+} from '@dao-dao/types'
 import { MultipleChoiceVote } from '@dao-dao/types/contracts/DaoProposalMultiple'
 import {
   DAO_PROPOSAL_MULTIPLE_CONTRACT_NAMES,
@@ -25,11 +28,7 @@ import {
   ProposalWalletVote,
 } from './components'
 import { getInstantiateInfo } from './daoCreation'
-import {
-  fetchPrePropose,
-  fetchVetoConfig,
-  makeGetProposalInfo,
-} from './functions'
+import { makeGetProposalInfo } from './functions'
 import {
   useCastVote,
   useLoadingProposalExecutionTxHash,
@@ -39,12 +38,12 @@ import {
   useProposalDaoInfoCards,
   useProposalRefreshers,
 } from './hooks'
-import { DaoCreationExtraVotingConfig, NewProposalForm } from './types'
+import { DaoCreationExtraVotingConfig } from './types'
 
 export const DaoProposalMultipleAdapter: ProposalModuleAdapter<
   DaoCreationExtraVotingConfig,
   MultipleChoiceVote,
-  NewProposalForm
+  MultipleChoiceNewProposalForm
 > = {
   id: DaoProposalMultipleAdapterId,
   contractNames: DAO_PROPOSAL_MULTIPLE_CONTRACT_NAMES,
@@ -160,11 +159,6 @@ export const DaoProposalMultipleAdapter: ProposalModuleAdapter<
         proposal_count: {},
       },
     },
-  },
-
-  functions: {
-    fetchPrePropose,
-    fetchVetoConfig,
   },
 
   daoCreation: {

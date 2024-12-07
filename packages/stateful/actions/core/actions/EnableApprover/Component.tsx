@@ -3,6 +3,10 @@ import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
 import {
+  MultipleChoiceProposalModule,
+  SecretMultipleChoiceProposalModule,
+} from '@dao-dao/state/clients'
+import {
   InputErrorMessage,
   InputLabel,
   useActionOptions,
@@ -10,11 +14,6 @@ import {
 import { AddressInputProps } from '@dao-dao/types'
 import { ActionComponent, ActionContextType } from '@dao-dao/types/actions'
 import { makeValidateAddress, validateRequired } from '@dao-dao/utils'
-
-import {
-  MultipleChoiceProposalModule,
-  SecretMultipleChoiceProposalModule,
-} from '../../../../clients'
 
 export type EnableApproverData = {
   approver: string

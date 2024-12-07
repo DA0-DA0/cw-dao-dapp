@@ -15,10 +15,12 @@ import {
   TextAreaInput,
   TextInput,
 } from '@dao-dao/stateless'
-import { SuspenseLoaderProps } from '@dao-dao/types'
+import {
+  MultipleChoiceNewProposalForm,
+  MultipleChoiceOptionFormData,
+  SuspenseLoaderProps,
+} from '@dao-dao/types'
 import { validateRequired } from '@dao-dao/utils'
-
-import { MultipleChoiceOptionFormData, NewProposalForm } from '../types'
 
 export type MultipleChoiceOptionEditorProps = {
   optionIndex: number
@@ -40,7 +42,7 @@ export const MultipleChoiceOptionEditor = ({
     watch,
     getValues,
     formState: { errors },
-  } = useFormContext<NewProposalForm>()
+  } = useFormContext<MultipleChoiceNewProposalForm>()
 
   const errorsOption = errors?.choices?.[optionIndex]
 

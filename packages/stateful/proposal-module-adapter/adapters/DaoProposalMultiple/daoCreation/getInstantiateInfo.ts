@@ -1,4 +1,6 @@
 import { HugeDecimal } from '@dao-dao/math'
+import { MultipleChoiceProposalModule } from '@dao-dao/state/clients/proposal-module/MultipleChoiceProposalModule'
+import { SecretMultipleChoiceProposalModule } from '@dao-dao/state/clients/proposal-module/MultipleChoiceProposalModule.secret'
 import { DaoCreationGetInstantiateInfo, TokenType } from '@dao-dao/types'
 import {
   TokenBasedCreatorId,
@@ -7,8 +9,6 @@ import {
   isSecretNetwork,
 } from '@dao-dao/utils'
 
-import { MultipleChoiceProposalModule } from '../../../../clients/proposal-module/MultipleChoiceProposalModule'
-import { SecretMultipleChoiceProposalModule } from '../../../../clients/proposal-module/MultipleChoiceProposalModule.secret'
 import { CreatorData as TokenBasedCreatorData } from '../../../../creators/TokenBased/types'
 import { DaoCreationExtraVotingConfig } from '../types'
 import { convertPercentOrMajorityValueToPercentageThreshold } from '../utils'

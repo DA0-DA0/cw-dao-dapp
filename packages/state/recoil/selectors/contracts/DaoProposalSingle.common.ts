@@ -1,11 +1,5 @@
 import { RecoilValueReadOnly, selectorFamily } from 'recoil'
 
-import {
-  contractVersionSelector,
-  queryContractIndexerSelector,
-  refreshProposalIdAtom,
-  refreshProposalsIdAtom,
-} from '@dao-dao/state'
 import { ContractVersion, WithChainId } from '@dao-dao/types'
 import {
   ConfigResponse as ConfigV1Response,
@@ -23,6 +17,9 @@ import {
   ProposalListResponse as ReverseProposalsV2Response,
 } from '@dao-dao/types/contracts/DaoProposalSingle.v2'
 
+import { refreshProposalIdAtom, refreshProposalsIdAtom } from '../../atoms'
+import { contractVersionSelector } from '../contract'
+import { queryContractIndexerSelector } from '../indexer'
 import {
   configSelector as configV1Selector,
   getVoteSelector as getVoteV1Selector,

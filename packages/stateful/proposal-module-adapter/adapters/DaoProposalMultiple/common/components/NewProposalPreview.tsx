@@ -3,6 +3,7 @@ import { useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
 import { ProposalContentDisplay } from '@dao-dao/stateless'
+import { MultipleChoiceNewProposalForm } from '@dao-dao/types'
 import { descriptionWithPotentialProposalMetadata } from '@dao-dao/utils'
 
 import { useActionEncodeContext } from '../../../../../actions'
@@ -10,11 +11,10 @@ import { EntityDisplay, SuspenseLoader } from '../../../../../components'
 import { useEntity, useWallet } from '../../../../../hooks'
 import { MULTIPLE_CHOICE_OPTION_COLORS } from '../../components/MultipleChoiceOptionEditor'
 import { MultipleChoiceOptionViewer } from '../../components/MultipleChoiceOptionViewer'
-import { NewProposalForm } from '../../types'
 
 export const NewProposalPreview = () => {
   const { t } = useTranslation()
-  const { watch } = useFormContext<NewProposalForm>()
+  const { watch } = useFormContext<MultipleChoiceNewProposalForm>()
   const encodeContext = useActionEncodeContext()
 
   const { address: walletAddress = '' } = useWallet()

@@ -1,5 +1,9 @@
 import { HugeDecimal } from '@dao-dao/math'
 import {
+  SecretSingleChoiceProposalModule,
+  SingleChoiceProposalModule,
+} from '@dao-dao/state/clients'
+import {
   DaoCreationGetInstantiateInfo,
   PercentOrMajorityValue,
   TokenType,
@@ -12,8 +16,6 @@ import {
   isSecretNetwork,
 } from '@dao-dao/utils'
 
-import { SingleChoiceProposalModule } from '../../../../clients/proposal-module/SingleChoiceProposalModule'
-import { SecretSingleChoiceProposalModule } from '../../../../clients/proposal-module/SingleChoiceProposalModule.secret'
 import { CreatorData as TokenBasedCreatorData } from '../../../../creators/TokenBased/types'
 import { DaoCreationExtraVotingConfig } from '../types'
 

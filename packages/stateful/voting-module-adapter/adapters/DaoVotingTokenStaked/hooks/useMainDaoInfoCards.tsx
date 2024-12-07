@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import { indexerQueries } from '@dao-dao/state'
+import { TokenStakedVotingModule } from '@dao-dao/state/clients'
 import { TokenAmountDisplay, useVotingModule } from '@dao-dao/stateless'
 import { DaoInfoCard } from '@dao-dao/types'
 import {
@@ -10,7 +11,6 @@ import {
   isSecretNetwork,
 } from '@dao-dao/utils'
 
-import { TokenStakedVotingModule } from '../../../../clients'
 import { useQueryLoadingDataWithError } from '../../../../hooks'
 import { useGovernanceTokenInfo } from './useGovernanceTokenInfo'
 import { useStakingInfo } from './useStakingInfo'

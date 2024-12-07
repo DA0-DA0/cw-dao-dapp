@@ -23,6 +23,8 @@ import {
   contractQueries,
   walletChainIdAtom,
 } from '@dao-dao/state'
+import { CwDao } from '@dao-dao/state/clients/dao/CwDao'
+import { SecretCwDao } from '@dao-dao/state/clients/dao/CwDao.secret'
 import {
   Button,
   ChainProvider,
@@ -87,8 +89,6 @@ import {
 } from '@dao-dao/utils'
 
 import { CustomData } from '../../actions/core/actions/Custom/Component'
-import { CwDao } from '../../clients/dao/CwDao'
-import { SecretCwDao } from '../../clients/dao/SecretCwDao'
 import { getCreatorById, getCreators } from '../../creators'
 import {
   GovernanceTokenType,

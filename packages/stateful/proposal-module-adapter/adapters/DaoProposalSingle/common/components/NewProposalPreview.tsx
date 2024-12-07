@@ -6,16 +6,16 @@ import {
   ProposalExecutionMetadataRenderer,
   RawActionsRenderer,
 } from '@dao-dao/stateless'
+import { SingleChoiceNewProposalForm } from '@dao-dao/types'
 import { descriptionWithPotentialProposalMetadata } from '@dao-dao/utils'
 
 import { useActionEncodeContext } from '../../../../../actions'
 import { EntityDisplay } from '../../../../../components'
 import { useEntity, useWallet } from '../../../../../hooks'
-import { NewProposalForm } from '../../types'
 
 export const NewProposalPreview = () => {
   const { t } = useTranslation()
-  const { watch } = useFormContext<NewProposalForm>()
+  const { watch } = useFormContext<SingleChoiceNewProposalForm>()
 
   const { address: walletAddress = '' } = useWallet()
   const { entity } = useEntity(walletAddress)

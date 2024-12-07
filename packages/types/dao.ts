@@ -36,10 +36,7 @@ import {
 } from './contracts/DaoDaoCore'
 import { PreProposeSubmissionPolicy } from './contracts/DaoPreProposeSingle'
 import { ProposalResponse as MultipleChoiceProposalResponse } from './contracts/DaoProposalMultiple'
-import {
-  ProposalResponse as SingleChoiceProposalResponse,
-  VetoConfig,
-} from './contracts/DaoProposalSingle.v2'
+import { ProposalResponse as SingleChoiceProposalResponse } from './contracts/DaoProposalSingle.v2'
 import {
   DistributionState,
   EmissionRate,
@@ -73,7 +70,7 @@ export type DaoInfo = {
   coreVersion: ContractVersion
   votingModuleAddress: string
   votingModuleInfo: ContractVersionInfo
-  proposalModules: ProposalModuleInfo[]
+  proposalModules: ProposalModuleWithInfo[]
   /**
    * Wasm contract-level admin that can migrate.
    */
@@ -205,40 +202,6 @@ export type PreProposeModule = {
   address: string
   submissionPolicy: PreProposeSubmissionPolicy
 } & PreProposeModuleTypedConfig
-
-export enum ProposalModuleType {
-  Single = 'single',
-  Multiple = 'multiple',
-  Other = 'other',
-}
-
-export type ProposalModuleSingleConfig = {
-  veto: VetoConfig | null
-}
-export type ProposalModuleMultipleConfig = ProposalModuleSingleConfig
-
-export type ProposalModuleTypedConfig =
-  | {
-      type: ProposalModuleType.Single
-      config: ProposalModuleSingleConfig
-    }
-  | {
-      type: ProposalModuleType.Multiple
-      config: ProposalModuleMultipleConfig
-    }
-  | {
-      type: ProposalModuleType.Other
-      config?: undefined
-    }
-
-export type ProposalModuleInfo = {
-  contractName: string
-  version: ContractVersion
-  address: string
-  prefix: string
-  // If set, this uses a pre-propose module.
-  prePropose: PreProposeModule | null
-} & ProposalModuleTypedConfig
 
 export type ProposalPrefill<FormData> = {
   // Proposal module adapter ID

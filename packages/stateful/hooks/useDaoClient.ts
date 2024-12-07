@@ -1,10 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
-import { useDaoIfAvailable } from '@dao-dao/stateless'
+import { SecretCwDao, getDao } from '@dao-dao/state/clients/dao'
+import { useDaoIfAvailable, useUpdatingRef } from '@dao-dao/stateless'
 import { DaoSource, IDaoBase } from '@dao-dao/types'
 
-import { getDao } from '../clients/dao'
+import { useWallet } from './useWallet'
 
 export type UseDaoClientOptions = {
   /**
@@ -12,6 +13,12 @@ export type UseDaoClientOptions = {
    * Otherwise, throws an error.
    */
   dao?: DaoSource
+  /**
+   * Whether or not to initialize the DAO client.
+   *
+   * Defaults to false.
+   */
+  initialize?: boolean
 }
 
 export type UseDaoClientReturn = {
@@ -19,6 +26,18 @@ export type UseDaoClientReturn = {
    * DAO client.
    */
   dao: IDaoBase
+  /**
+   * Whether or not the DAO client initialization is loading.
+   */
+  initializing: boolean
+  /**
+   * Whether or not the DAO client was initialized.
+   */
+  initialized: boolean
+  /**
+   * Error that occurred during DAO client initialization.
+   */
+  error: Error | undefined
 }
 
 /**
@@ -26,26 +45,32 @@ export type UseDaoClientReturn = {
  */
 export const useDaoClient = ({
   dao: daoSource,
+  initialize = false,
 }: UseDaoClientOptions): UseDaoClientReturn => {
   const queryClient = useQueryClient()
   const currentDao = useDaoIfAvailable()
+
+  // Extract chainId and coreAddress from DAO source so it memoizes properly.
+  const sourceChainId = daoSource?.chainId
+  const sourceCoreAddress = daoSource?.coreAddress
+  const hasDaoSource = !!sourceChainId && !!sourceCoreAddress
 
   // Get DAO client. If matches current DAO context, use that one instead.
   const dao = useMemo(
     () =>
       currentDao &&
-      (!daoSource ||
-        (currentDao.chainId === daoSource.chainId &&
-          currentDao.coreAddress === daoSource.coreAddress))
+      (!hasDaoSource ||
+        (currentDao.chainId === sourceChainId &&
+          currentDao.coreAddress === sourceCoreAddress))
         ? currentDao
-        : daoSource
+        : hasDaoSource
         ? getDao({
             queryClient,
-            chainId: daoSource.chainId,
-            coreAddress: daoSource.coreAddress,
+            chainId: sourceChainId,
+            coreAddress: sourceCoreAddress,
           })
         : undefined,
-    [currentDao, daoSource, queryClient]
+    [currentDao, hasDaoSource, queryClient, sourceChainId, sourceCoreAddress]
   )
 
   if (!dao) {
@@ -54,7 +79,43 @@ export const useDaoClient = ({
     )
   }
 
+  // Register wallet offline signer if Secret DAO so it can request permits.
+  const { isWalletConnected, signAmino } = useWallet()
+  // Stabilize reference so callback doesn't change. This only needs to update
+  // on wallet connection state change anyway.
+  const signAminoRef = useUpdatingRef(signAmino)
+
+  useEffect(() => {
+    if (dao instanceof SecretCwDao && isWalletConnected) {
+      dao.registerSignAmino(signAminoRef.current)
+    }
+  }, [dao, isWalletConnected, signAminoRef])
+
+  // Start in loading state if client not initialized and we are initializing.
+  const shouldInitialize = initialize && !dao.initialized
+  const [_initializing, setInitializing] = useState(false)
+  const initializing = _initializing || shouldInitialize
+
+  const [error, setError] = useState<Error>()
+
+  // Initialize client if not already initialized.
+  useEffect(() => {
+    if (shouldInitialize) {
+      setInitializing(true)
+      setError(undefined)
+      dao
+        .init()
+        .catch((err) =>
+          setError(err || new Error('Failed to initialize DAO client.'))
+        )
+        .finally(() => setInitializing(false))
+    }
+  }, [dao, shouldInitialize])
+
   return {
     dao,
+    initializing,
+    initialized: dao.initialized,
+    error,
   }
 }

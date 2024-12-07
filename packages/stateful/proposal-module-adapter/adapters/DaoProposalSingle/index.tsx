@@ -2,6 +2,7 @@ import {
   ContractVersion,
   PreProposeModuleType,
   ProposalModuleAdapter,
+  SingleChoiceNewProposalForm,
 } from '@dao-dao/types'
 import { Vote } from '@dao-dao/types/contracts/DaoProposalSingle.common'
 import {
@@ -35,11 +36,7 @@ import {
   ProposalWalletVote,
 } from './components'
 import { ThresholdVotingConfigItem, getInstantiateInfo } from './daoCreation'
-import {
-  fetchPrePropose,
-  fetchVetoConfig,
-  makeGetProposalInfo,
-} from './functions'
+import { makeGetProposalInfo } from './functions'
 import {
   useCastVote,
   useLoadingPreProposeApprovalProposal,
@@ -50,12 +47,12 @@ import {
   useProposalDaoInfoCards,
   useProposalRefreshers,
 } from './hooks'
-import { DaoCreationExtraVotingConfig, NewProposalForm } from './types'
+import { DaoCreationExtraVotingConfig } from './types'
 
 export const DaoProposalSingleAdapter: ProposalModuleAdapter<
   DaoCreationExtraVotingConfig,
   Vote,
-  NewProposalForm
+  SingleChoiceNewProposalForm
 > = {
   id: DaoProposalSingleAdapterId,
   contractNames: DAO_PROPOSAL_SINGLE_CONTRACT_NAMES,
@@ -191,11 +188,6 @@ export const DaoProposalSingleAdapter: ProposalModuleAdapter<
         proposal_count: {},
       },
     },
-  },
-
-  functions: {
-    fetchPrePropose,
-    fetchVetoConfig,
   },
 
   daoCreation: {

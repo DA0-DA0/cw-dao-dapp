@@ -2,6 +2,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
+import {
+  SecretSingleChoiceProposalModule,
+  SingleChoiceProposalModule,
+} from '@dao-dao/state/clients'
 import { daoQueries } from '@dao-dao/state/query'
 import { DaoPreProposeApprovalSingleSelectors } from '@dao-dao/state/recoil'
 import {
@@ -38,10 +42,6 @@ import {
   objectMatchesStructure,
 } from '@dao-dao/utils'
 
-import {
-  SecretSingleChoiceProposalModule,
-  SingleChoiceProposalModule,
-} from '../../../../clients'
 import { EntityDisplay } from '../../../../components/EntityDisplay'
 import { useQueryLoadingDataWithError } from '../../../../hooks'
 import {

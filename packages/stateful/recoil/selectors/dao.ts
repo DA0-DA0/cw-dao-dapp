@@ -11,7 +11,6 @@ import {
   DaoVotingCw20StakedSelectors,
   accountsSelector,
   contractInfoSelector,
-  contractVersionSelector,
   daoDropdownInfoSelector,
   daoVetoableDaosSelector,
   followingDaosSelector,
@@ -20,13 +19,15 @@ import {
   queryClientAtom,
   refreshProposalsIdAtom,
 } from '@dao-dao/state'
+import { getDao } from '@dao-dao/state/clients'
 import {
   DaoPageMode,
   DaoSource,
   DaoWithDropdownVetoableProposalList,
   DaoWithVetoableProposals,
+  IDaoBase,
+  IProposalModuleBase,
   IndexerDaoWithVetoableProposals,
-  ProposalModuleInfo,
   StatefulProposalLineProps,
   WithChainId,
 } from '@dao-dao/types'
@@ -36,12 +37,11 @@ import {
   isConfiguredChainName,
 } from '@dao-dao/utils'
 
-import { fetchProposalModules } from '../../utils/fetchProposalModules'
 import { matchAdapter as matchVotingModuleAdapter } from '../../voting-module-adapter'
 
 export const followingDaosWithProposalModulesSelector = selectorFamily<
   (DaoSource & {
-    proposalModules: ProposalModuleInfo[]
+    proposalModules: IProposalModuleBase[]
   })[],
   {
     walletPublicKey: string
@@ -73,29 +73,34 @@ export const followingDaosWithProposalModulesSelector = selectorFamily<
     },
 })
 
+export const daoClientSelector = selectorFamily<
+  IDaoBase,
+  WithChainId<{ coreAddress: string }>
+>({
+  key: 'daoClient',
+  get:
+    ({ chainId, coreAddress }) =>
+    async ({ get }) => {
+      const queryClient = get(queryClientAtom)
+      const dao = getDao({
+        queryClient,
+        chainId,
+        coreAddress,
+      })
+      await dao.init()
+      return dao
+    },
+})
+
 export const daoCoreProposalModulesSelector = selectorFamily<
-  ProposalModuleInfo[],
+  IProposalModuleBase[],
   WithChainId<{ coreAddress: string }>
 >({
   key: 'daoCoreProposalModules',
   get:
-    ({ coreAddress, chainId }) =>
-    async ({ get }) => {
-      const queryClient = get(queryClientAtom)
-      const coreVersion = get(
-        contractVersionSelector({
-          contractAddress: coreAddress,
-          chainId,
-        })
-      )
-
-      return await fetchProposalModules(
-        queryClient,
-        chainId,
-        coreAddress,
-        coreVersion
-      )
-    },
+    (params) =>
+    ({ get }) =>
+      [...get(daoClientSelector(params)).proposalModules],
 })
 
 // Gets CW20 governance token address if this DAO uses the cw20-staked voting

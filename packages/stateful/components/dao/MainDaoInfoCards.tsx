@@ -40,7 +40,7 @@ const InnerMainDaoInfoCards = () => {
   const tokenInfo = useDaoGovernanceToken()
 
   const dao = useDao()
-  const { activeThreshold, created, proposalModules } = dao.info
+  const { activeThreshold, created } = dao.info
 
   const tvlLoading = useQueryLoadingData(dao.tvlQuery, {
     amount: -1,
@@ -49,7 +49,7 @@ const InnerMainDaoInfoCards = () => {
 
   // Get unique approvers from all proposal modules.
   const allApprovers = uniq(
-    proposalModules.flatMap(({ prePropose }) =>
+    dao.proposalModules.flatMap(({ prePropose }) =>
       prePropose?.type === PreProposeModuleType.Approval
         ? prePropose.config.approver
         : []
@@ -58,9 +58,7 @@ const InnerMainDaoInfoCards = () => {
 
   // Get unique vetoers from all proposal modules.
   const allVetoers = uniq(
-    proposalModules.flatMap(({ config }) =>
-      config?.veto ? [config.veto.vetoer] : []
-    )
+    dao.proposalModules.flatMap(({ veto }) => (veto ? [veto.vetoer] : []))
   )
 
   // Attempt to load cw1-whitelist admins if the vetoer is set. Will only

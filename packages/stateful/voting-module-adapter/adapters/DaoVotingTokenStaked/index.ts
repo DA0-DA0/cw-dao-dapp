@@ -1,5 +1,6 @@
 import { PeopleAltOutlined, PeopleAltRounded } from '@mui/icons-material'
 
+import { TokenStakedVotingModule } from '@dao-dao/state/clients'
 import { MainDaoInfoCardsTokenLoader } from '@dao-dao/stateless'
 import {
   ActionCategoryKey,
@@ -15,7 +16,6 @@ import {
   isSecretNetwork,
 } from '@dao-dao/utils'
 
-import { TokenStakedVotingModule } from '../../../clients'
 import {
   BitSongFantokenMintAction,
   DaoVotingNativeStakedMintAction,

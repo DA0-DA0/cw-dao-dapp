@@ -7,7 +7,7 @@ import { constSelector, useRecoilValueLoadable } from 'recoil'
 import { HugeDecimal } from '@dao-dao/math'
 import { Cw20BaseSelectors, nativeDenomBalanceSelector } from '@dao-dao/state'
 import { useCachedLoadable } from '@dao-dao/stateless'
-import { Feature } from '@dao-dao/types'
+import { Feature, MultipleChoiceNewProposalData } from '@dao-dao/types'
 import {
   MAX_NUM_PROPOSAL_CHOICES,
   checkProposalSubmissionPolicy,
@@ -24,7 +24,6 @@ import {
 } from '../../../../../hooks'
 import {
   MakeUsePublishProposalOptions,
-  NewProposalData,
   PublishProposal,
   SimulateProposal,
   UsePublishProposal,
@@ -187,7 +186,7 @@ export const makeUsePublishProposal =
     )
 
     const cannotProposeReason = checkProposalSubmissionPolicy({
-      proposalModule: proposalModule.info,
+      proposalModule,
       address: walletAddress,
       isMember,
       t,
@@ -307,7 +306,7 @@ export const makeUsePublishProposal =
 
         // Recreate form data with just the expected fields to remove any fields
         // added by other proposal module forms.
-        const proposalData: NewProposalData = {
+        const proposalData: MultipleChoiceNewProposalData = {
           title: data.title,
           description: data.description,
           choices: data.choices,

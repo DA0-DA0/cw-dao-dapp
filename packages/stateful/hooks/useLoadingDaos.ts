@@ -11,7 +11,6 @@ import {
 } from '@dao-dao/types'
 import { makeCombineQueryResultsIntoLoadingData } from '@dao-dao/utils'
 
-import { daoQueries as statefulDaoQueries } from '../queries/dao'
 import { useQueryLoadingData } from './query/useQueryLoadingData'
 import { useProfile } from './useProfile'
 
@@ -24,7 +23,7 @@ export const useLoadingDaos = (
     queries: daos.loading
       ? []
       : daos.data.map(({ chainId, coreAddress }) =>
-          statefulDaoQueries.info(queryClient, {
+          daoQueries.info(queryClient, {
             chainId,
             coreAddress,
           })

@@ -5,6 +5,7 @@ import { Loader } from '@dao-dao/stateless'
 import {
   ActionKeyAndData,
   BaseProposalInnerContentDisplayProps,
+  MultipleChoiceNewProposalForm,
   ProposalStatusEnum,
   ProposalVoteOption,
 } from '@dao-dao/types'
@@ -23,11 +24,11 @@ import {
   useLoadingVoteOptions,
   useLoadingVotesInfo,
 } from '../hooks'
-import { MultipleChoiceOptionData, NewProposalForm, VotesInfo } from '../types'
+import { MultipleChoiceOptionData, VotesInfo } from '../types'
 import { MultipleChoiceOptionViewer } from './MultipleChoiceOptionViewer'
 
 export const ProposalInnerContentDisplay = (
-  props: BaseProposalInnerContentDisplayProps<NewProposalForm>
+  props: BaseProposalInnerContentDisplayProps<MultipleChoiceNewProposalForm>
 ) => {
   const { t } = useTranslation()
   const loadingProposal = useLoadingProposal()
@@ -67,7 +68,7 @@ export const InnerProposalInnerContentDisplay = ({
   proposal,
   voteOptions,
   votesInfo: { winningChoice },
-}: BaseProposalInnerContentDisplayProps<NewProposalForm> & {
+}: BaseProposalInnerContentDisplayProps<MultipleChoiceNewProposalForm> & {
   proposal: MultipleChoiceProposal
   voteOptions: ProposalVoteOption<MultipleChoiceVote>[]
   votesInfo: VotesInfo

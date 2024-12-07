@@ -10,11 +10,7 @@ import {
   makeReactQueryClient,
   miscQueries,
 } from '@dao-dao/state'
-import {
-  Home,
-  StatefulHomeProps,
-  daoQueries as statefulDaoQueries,
-} from '@dao-dao/stateful'
+import { Home, StatefulHomeProps } from '@dao-dao/stateful'
 import { AccountTabId } from '@dao-dao/types'
 import {
   MAINNET,
@@ -81,7 +77,7 @@ export const getStaticProps: GetStaticProps<StatefulHomeProps> = async ({
         Promise.all(
           featured?.map((dao) =>
             retry(5, () =>
-              queryClient.fetchQuery(statefulDaoQueries.info(queryClient, dao))
+              queryClient.fetchQuery(daoQueries.info(queryClient, dao))
             )
           ) || []
         )

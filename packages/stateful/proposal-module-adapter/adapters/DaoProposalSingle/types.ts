@@ -1,35 +1,14 @@
 import {
-  ActionKeyAndData,
   DepositInfoSelector,
   IProposalModuleBase,
   NeutronTimelockOverrule,
   PercentOrMajorityValue,
   ProcessedTQ,
-  ProposalExecutionMetadata,
   ProposalTimestampInfo,
-  UnifiedCosmosMsg,
+  SingleChoiceNewProposalData,
 } from '@dao-dao/types'
 import { Proposal } from '@dao-dao/types/contracts/CwProposalSingle.v1'
-import {
-  SingleChoiceProposal,
-  Vote,
-} from '@dao-dao/types/contracts/DaoProposalSingle.v2'
-
-export type NewProposalForm = {
-  title: string
-  description: string
-  actionData: ActionKeyAndData[]
-  metadata?: ProposalExecutionMetadata
-  vote?: Vote
-}
-
-// Converted data from actions into Cosmos messages.
-export type NewProposalData = {
-  title: string
-  description: string
-  msgs: UnifiedCosmosMsg[]
-  vote?: Vote
-}
+import { SingleChoiceProposal } from '@dao-dao/types/contracts/DaoProposalSingle.v2'
 
 export type DaoCreationExtraVotingConfig = {
   /**
@@ -77,11 +56,11 @@ export interface PublishProposalOptions {
 }
 
 export type SimulateProposal = (
-  newProposalData: NewProposalData
+  newProposalData: SingleChoiceNewProposalData
 ) => Promise<void>
 
 export type PublishProposal = (
-  newProposalData: NewProposalData,
+  newProposalData: SingleChoiceNewProposalData,
   options?: PublishProposalOptions
 ) => Promise<{
   proposalNumber: number

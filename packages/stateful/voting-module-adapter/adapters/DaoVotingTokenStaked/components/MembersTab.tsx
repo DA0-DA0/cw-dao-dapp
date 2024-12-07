@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import { HugeDecimal } from '@dao-dao/math'
+import { TokenStakedVotingModule } from '@dao-dao/state/clients'
 import { indexerQueries } from '@dao-dao/state/query'
 import {
   MembersTab as StatelessMembersTab,
@@ -9,7 +10,6 @@ import {
 } from '@dao-dao/stateless'
 import { StatefulDaoMemberCardProps } from '@dao-dao/types'
 
-import { TokenStakedVotingModule } from '../../../../clients'
 import {
   ButtonLink,
   DaoMemberCard,

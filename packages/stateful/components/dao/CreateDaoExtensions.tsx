@@ -5,6 +5,7 @@ import { useMemo } from 'react'
 import { FieldErrors } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
+import { CreatingDaoPlaceholder } from '@dao-dao/state/clients/dao/CreatingDaoPlaceholder'
 import {
   DaoContext,
   IconButton,
@@ -13,8 +14,6 @@ import {
 } from '@dao-dao/stateless'
 import { CreateDaoContext } from '@dao-dao/types'
 import { getFallbackImage } from '@dao-dao/utils'
-
-import { CreatingDaoPlaceholder } from '../../clients/dao/CreatingDaoPlaceholder'
 
 export const CreateDaoExtensions = (context: CreateDaoContext) => {
   const { t } = useTranslation()

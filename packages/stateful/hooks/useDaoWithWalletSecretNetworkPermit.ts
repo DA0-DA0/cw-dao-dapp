@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { SecretCwDao } from '@dao-dao/state/clients/dao'
 import { useUpdatingRef } from '@dao-dao/stateless'
 import { DaoSource, IDaoBase, PermitForPermitData } from '@dao-dao/types'
 import { isSecretNetwork } from '@dao-dao/utils'
 
-import { SecretCwDao } from '../clients/dao'
 import { useDaoClient } from './useDaoClient'
 import { useOnSecretNetworkPermitUpdate } from './useOnSecretNetworkPermitUpdate'
 import { UseWalletOptions, UseWalletReturn, useWallet } from './useWallet'

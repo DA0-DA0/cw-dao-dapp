@@ -1,4 +1,8 @@
 import { HugeDecimal } from '@dao-dao/math'
+import {
+  SecretSingleChoiceProposalModule,
+  SingleChoiceProposalModule,
+} from '@dao-dao/state/clients'
 import { tokenQueries } from '@dao-dao/state/query'
 import { ActionBase, NumbersEmoji } from '@dao-dao/stateless'
 import {
@@ -29,10 +33,6 @@ import {
   objectMatchesStructure,
 } from '@dao-dao/utils'
 
-import {
-  SecretSingleChoiceProposalModule,
-  SingleChoiceProposalModule,
-} from '../../../../clients'
 import { DaoProposalMultipleAdapter } from '../../../../proposal-module-adapter'
 import { makeDefaultNewDao } from '../../../../recoil'
 import { EnableMultipleChoiceComponent } from './Component'

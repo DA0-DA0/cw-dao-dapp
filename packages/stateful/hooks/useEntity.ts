@@ -2,6 +2,7 @@ import { fromBech32 } from '@cosmjs/encoding'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
+import { entityQueries } from '@dao-dao/state/query'
 import { useChain } from '@dao-dao/stateless'
 import { Entity, EntityType, LoadingData } from '@dao-dao/types'
 import {
@@ -10,7 +11,6 @@ import {
   makeEmptyUnifiedProfile,
 } from '@dao-dao/utils'
 
-import { entityQueries } from '../queries/entity'
 import { useQueryLoadingData } from './query/useQueryLoadingData'
 
 export type UseEntityReturn = {

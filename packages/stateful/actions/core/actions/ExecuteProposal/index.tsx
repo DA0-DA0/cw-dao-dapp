@@ -1,6 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useFormContext } from 'react-hook-form'
 
+import { getProposalModule } from '@dao-dao/state/clients'
+import { daoQueries } from '@dao-dao/state/query'
 import { ActionBase, KeyEmoji } from '@dao-dao/stateless'
 import { UnifiedCosmosMsg } from '@dao-dao/types'
 import {
@@ -18,7 +20,6 @@ import {
   objectMatchesStructure,
 } from '@dao-dao/utils'
 
-import { getProposalModule } from '../../../../clients'
 import {
   AddressInput,
   DaoProviders,
@@ -26,7 +27,6 @@ import {
   ProposalList,
 } from '../../../../components'
 import { useQueryLoadingDataWithError } from '../../../../hooks'
-import { daoQueries } from '../../../../queries/dao'
 import {
   ExecuteProposalData,
   ExecuteProposalComponent as StatelessExecuteProposalComponent,

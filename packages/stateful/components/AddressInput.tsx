@@ -5,7 +5,11 @@ import { FieldValues, Path, useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useDeepCompareMemoize } from 'use-deep-compare-effect'
 
-import { indexerQueries, profileQueries } from '@dao-dao/state/query'
+import {
+  entityQueries,
+  indexerQueries,
+  profileQueries,
+} from '@dao-dao/state/query'
 import {
   AddressInput as StatelessAddressInput,
   useChain,
@@ -19,7 +23,6 @@ import {
 } from '@dao-dao/utils'
 
 import { useQueryLoadingDataWithError } from '../hooks'
-import { entityQueries } from '../queries/entity'
 import { EntityDisplay } from './EntityDisplay'
 
 export const AddressInput = <

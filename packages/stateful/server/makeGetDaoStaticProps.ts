@@ -6,8 +6,10 @@ import removeMarkdown from 'remove-markdown'
 
 import { serverSideTranslationsWithServerT } from '@dao-dao/i18n/serverSideTranslations'
 import {
+  ChainXGovDao,
   contractQueries,
   dehydrateSerializable,
+  getDao,
   makeReactQueryClient,
   polytoneQueries,
   queryIndexer,
@@ -38,7 +40,6 @@ import {
   processError,
 } from '@dao-dao/utils'
 
-import { ChainXGovDao, getDao } from '../clients'
 import { DaoPageWrapperProps } from '../components'
 import {
   ProposalModuleAdapterError,

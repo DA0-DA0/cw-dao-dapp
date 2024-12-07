@@ -9,14 +9,13 @@ import {
   ProposalInstantVoter,
   useActionsContext,
 } from '@dao-dao/stateless'
-import { Feature } from '@dao-dao/types'
+import { Feature, SingleChoiceNewProposalForm } from '@dao-dao/types'
 import { convertActionKeysAndDataToActions } from '@dao-dao/utils'
 
 import { SuspenseLoader } from '../../../../../components'
 import { useMembership } from '../../../../../hooks'
 import { useProposalModuleAdapterCommonOptions } from '../../../../react/context'
 import { useLoadingVoteOptions } from '../../hooks'
-import { NewProposalForm } from '../../types'
 
 export type NewProposalMainProps = {
   actionsReadOnlyMode?: boolean
@@ -34,7 +33,7 @@ export const NewProposalMain = ({
   const {
     watch,
     formState: { errors },
-  } = useFormContext<NewProposalForm>()
+  } = useFormContext<SingleChoiceNewProposalForm>()
 
   const actionKeysAndData = watch('actionData') || []
   const metadata = watch('metadata')

@@ -1,9 +1,8 @@
-import { QueryClient } from '@tanstack/react-query'
 import { CSSProperties, ComponentType, ReactNode } from 'react'
 import { FieldPath, FieldValues } from 'react-hook-form'
 import { RecoilValueReadOnly } from 'recoil'
 
-import { ActionMaker } from './actions'
+import { ActionKeyAndData, ActionMaker } from './actions'
 import { AnyChain } from './chain'
 import { IProposalModuleBase } from './clients'
 import {
@@ -16,19 +15,25 @@ import {
   CheckedDepositInfo,
   Duration,
   ProposalStatus,
+  UnifiedCosmosMsg,
 } from './contracts/common'
 import { Proposal as DaoPreProposeApprovalProposal } from './contracts/DaoPreProposeApprovalSingle'
-import { VetoConfig } from './contracts/DaoProposalSingle.v2'
+import {
+  MultipleChoiceOptions,
+  MultipleChoiceVote,
+} from './contracts/DaoProposalMultiple'
+import { Vote as SingleChoiceVote } from './contracts/DaoProposalSingle.v2'
 import {
   DaoCreationGetInstantiateInfo,
   DaoCreationVotingConfigItem,
-  PreProposeModule,
   ProposalDraft,
-  ProposalModuleInfo,
 } from './dao'
-import { ContractVersion } from './features'
 import { LoadingData } from './misc'
-import { ProposalCreatedCardProps, ProposalTimestampInfo } from './proposal'
+import {
+  ProposalCreatedCardProps,
+  ProposalExecutionMetadata,
+  ProposalTimestampInfo,
+} from './proposal'
 
 export type IProposalModuleAdapterCommon<FormData extends FieldValues = any> = {
   // Fields
@@ -126,11 +131,6 @@ export type ProposalModuleAdapter<
     }
   }
 
-  functions: {
-    fetchPrePropose?: FetchPreProposeFunction
-    fetchVetoConfig?: FetchVetoConfig
-  }
-
   daoCreation: {
     // Voting config added to the common voting config.
     extraVotingConfig?: {
@@ -160,7 +160,7 @@ export type IProposalModuleAdapterOptions = {
   /**
    * The proposal module.
    */
-  proposalModule: ProposalModuleInfo
+  proposalModule: IProposalModuleBase
   /**
    * The proposal ID unique across all proposal modules. They include the
    * proposal module's prefix, the proposal number within the proposal module,
@@ -212,19 +212,6 @@ export type IProposalModuleCommonContext = {
 }
 
 // Internal Adapter Types
-
-export type FetchPreProposeFunction = (
-  queryClient: QueryClient,
-  chainId: string,
-  proposalModuleAddress: string,
-  version: ContractVersion | null
-) => Promise<PreProposeModule | null>
-
-export type FetchVetoConfig = (
-  chainId: string,
-  proposalModuleAddress: string,
-  version: ContractVersion | null
-) => Promise<VetoConfig | null>
 
 export type ReverseProposalInfosSelector = (data: {
   startBefore: number | undefined
@@ -385,3 +372,39 @@ export type PreProposeApprovalProposalWithMeteadata =
     // proposal ID.
     approverProposalId?: string
   }
+
+export type SingleChoiceNewProposalForm = {
+  title: string
+  description: string
+  actionData: ActionKeyAndData[]
+  metadata?: ProposalExecutionMetadata
+  vote?: SingleChoiceVote
+}
+
+export type SingleChoiceNewProposalData = {
+  title: string
+  description: string
+  msgs: UnifiedCosmosMsg[]
+  vote?: SingleChoiceVote
+}
+
+export type MultipleChoiceOptionFormData = {
+  title: string
+  description: string
+  actionData: ActionKeyAndData[]
+  metadata?: ProposalExecutionMetadata
+}
+
+export type MultipleChoiceNewProposalForm = {
+  title: string
+  description: string
+  choices: MultipleChoiceOptionFormData[]
+  vote?: MultipleChoiceVote
+}
+
+export type MultipleChoiceNewProposalData = {
+  title: string
+  description: string
+  choices: MultipleChoiceOptions
+  vote?: MultipleChoiceVote
+}

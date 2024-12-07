@@ -4,8 +4,8 @@ import { TFunction } from 'react-i18next'
 import {
   DurationUnits,
   GaiaMetaprotocolsExtensionData,
+  IProposalModuleBase,
   ProposalExecutionMetadata,
-  ProposalModuleInfo,
   ProposalVetoConfig,
 } from '@dao-dao/types'
 import {
@@ -165,7 +165,7 @@ export const checkProposalSubmissionPolicy = ({
   /**
    * The proposal module.
    */
-  proposalModule: ProposalModuleInfo
+  proposalModule: IProposalModuleBase
   /**
    * Current wallet address. Undefined if not connected.
    */

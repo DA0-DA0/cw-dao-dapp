@@ -2,7 +2,8 @@ import { DecoratorFn } from '@storybook/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
-import { DaoProviders, daoQueries } from '@dao-dao/stateful'
+import { daoQueries } from '@dao-dao/state'
+import { DaoProviders } from '@dao-dao/stateful'
 import { DaoInfo } from '@dao-dao/types'
 
 export const makeDaoProvidersDecorator = (info: DaoInfo): DecoratorFn =>

@@ -12,7 +12,11 @@ import {
   useDao,
   useDaoNavHelpers,
 } from '@dao-dao/stateless'
-import { TokenType, UnifiedCosmosMsg } from '@dao-dao/types'
+import {
+  SingleChoiceNewProposalData,
+  TokenType,
+  UnifiedCosmosMsg,
+} from '@dao-dao/types'
 import {
   makeBankMessage,
   makeWasmMessage,
@@ -29,7 +33,6 @@ import {
   useEntity,
   useWallet,
 } from '../../../../../../../../hooks'
-import { NewProposalData } from '../../../../../../../../proposal-module-adapter/adapters/DaoProposalSingle/types'
 import { usePostRequest } from '../../../../hooks/usePostRequest'
 import { retroactiveCompensationQueries } from '../../../../queries'
 import {
@@ -280,7 +283,7 @@ export const Complete = ({
       let proposalId = ''
       if (formData.type === 'new') {
         // Propose.
-        const proposalData: NewProposalData = {
+        const proposalData: SingleChoiceNewProposalData = {
           ...formData.newProposal,
           msgs: completeRatings.cosmosMsgs,
         }

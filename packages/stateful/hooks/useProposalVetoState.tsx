@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
+import { getDao } from '@dao-dao/state/clients'
 import {
   ProposalStatusAndInfoProps,
   Tooltip,
@@ -31,7 +32,6 @@ import {
   processError,
 } from '@dao-dao/utils'
 
-import { getDao } from '../clients'
 import { ButtonLink, EntityDisplay } from '../components'
 import { useProposalModuleAdapterOptions } from '../proposal-module-adapter'
 import { useEntity } from './useEntity'

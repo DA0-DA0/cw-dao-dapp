@@ -34,7 +34,7 @@ const getUpdateProposalConfigActions = async (
   return (
     (
       await Promise.all(
-        dao.info.proposalModules.flatMap(
+        dao.proposalModules.flatMap(
           (proposalModule): Promise<ProposalModuleWithAction> | [] => {
             const action = matchAndLoadCommon(
               dao,

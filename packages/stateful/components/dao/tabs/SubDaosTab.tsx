@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 
+import { daoQueries } from '@dao-dao/state/query'
 import {
   SubDaosTab as StatelessSubDaosTab,
   useDao,
@@ -8,7 +9,6 @@ import {
 import { Feature } from '@dao-dao/types'
 
 import { useMembership, useQueryLoadingDataWithError } from '../../../hooks'
-import { daoQueries } from '../../../queries'
 import { ButtonLink } from '../../ButtonLink'
 import { DaoCard } from '../DaoCard'
 

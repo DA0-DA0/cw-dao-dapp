@@ -1,4 +1,3 @@
-import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useRecoilValue } from 'recoil'
 
@@ -17,13 +16,12 @@ import {
   PreProposeModuleType,
 } from '@dao-dao/types'
 
-import { useEntity } from '../../hooks'
+import { useDaoClient, useEntity } from '../../hooks'
 import {
   ProposalModuleAdapterProvider,
   useProposalModuleAdapter,
   useProposalModuleAdapterContext,
 } from '../../proposal-module-adapter'
-import { daoQueries } from '../../queries/dao'
 import { EntityDisplay } from '../EntityDisplay'
 import { IconButtonLink } from '../IconButtonLink'
 import { SuspenseLoader } from '../SuspenseLoader'
@@ -48,6 +46,7 @@ export const DaoApproverProposalContentDisplay = ({
   proposalInfo,
   ...props
 }: DaoApproverProposalContentDisplayProps) => {
+  const { chainId } = useChain()
   const {
     options: {
       proposalModule: { prePropose },
@@ -65,15 +64,24 @@ export const DaoApproverProposalContentDisplay = ({
     throw new Error('Invalid pre-propose module type. Expected an approver.')
   }
 
-  const { approvalDao, preProposeApprovalContract } = prePropose.config
+  const { approvalDao: approvalDaoAddress, preProposeApprovalContract } =
+    prePropose.config
 
-  const { chainId } = useChain()
-  const { data: daoInfo } = useSuspenseQuery(
-    daoQueries.info(useQueryClient(), {
+  const { entity } = useEntity(proposalInfo.createdByAddress)
+
+  const {
+    dao: approvalDao,
+    initializing: approvalDaoInitializing,
+    initialized: approvalDaoInitialized,
+    error: approvalDaoError,
+  } = useDaoClient({
+    dao: {
       chainId,
-      coreAddress: approvalDao,
-    })
-  )
+      coreAddress: approvalDaoAddress,
+    },
+    initialize: true,
+  })
+
   const preProposeApprovalProposalId = useRecoilValue(
     DaoPreProposeApproverSelectors.queryExtensionSelector({
       chainId,
@@ -90,19 +98,24 @@ export const DaoApproverProposalContentDisplay = ({
     })
   ) as number
 
-  const proposalModuleWithPreProposeApproval = daoInfo.proposalModules.find(
+  if (approvalDaoError) {
+    throw approvalDaoError
+  } else if (approvalDaoInitializing) {
+    return <Loader />
+  } else if (!approvalDaoInitialized) {
+    throw new Error('Approval DAO client not initialized.')
+  }
+
+  const proposalModuleWithPreProposeApproval = approvalDao.proposalModules.find(
     ({ prePropose }) => prePropose?.address === preProposeApprovalContract
   )
   if (!proposalModuleWithPreProposeApproval?.prePropose) {
     throw new Error('Pre-propose approval contract not found.')
   }
 
-  const creatorAddress = proposalInfo.createdByAddress
-  const { entity } = useEntity(creatorAddress)
-
   const innerProps: InnerDaoApproverProposalContentDisplayProps = {
     creator: {
-      address: creatorAddress,
+      address: proposalInfo.createdByAddress,
       entity,
     },
     createdAt:
@@ -124,7 +137,7 @@ export const DaoApproverProposalContentDisplay = ({
   }
 
   return (
-    <DaoProviders chainId={chainId} coreAddress={approvalDao}>
+    <DaoProviders chainId={chainId} coreAddress={approvalDaoAddress}>
       <ProposalModuleAdapterProvider
         proposalId={
           // Add prefix of target proposal module so it matches.

@@ -90,7 +90,7 @@ export const matchAndLoadAdapter = (
   }
 
   const proposalModule = proposalPrefix
-    ? dao.proposalModules.find((p) => p.info.prefix === proposalPrefix)
+    ? dao.proposalModules.find((p) => p.prefix === proposalPrefix)
     : // If no proposalPrefix (i.e. proposalId is just a number), and there is
     // only one proposal module, return it. This should handle backwards
     // compatibility when there were no prefixes and every DAO used a single
@@ -119,7 +119,7 @@ export const matchAndLoadAdapter = (
   const adapterOptions: IProposalModuleAdapterOptions = {
     chain: dao.chain,
     coreAddress: dao.coreAddress,
-    proposalModule: proposalModule.info,
+    proposalModule,
     proposalId,
     proposalNumber,
     isPreProposeApprovalProposal,

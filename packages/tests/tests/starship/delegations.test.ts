@@ -1,9 +1,9 @@
-import { CwAdminFactoryClient } from '@dao-dao/state/contracts/CwAdminFactory'
 import {
   Cw4VotingModule,
   CwDao,
   SingleChoiceProposalModule,
-} from '@dao-dao/stateful/clients'
+} from '@dao-dao/state/clients'
+import { CwAdminFactoryClient } from '@dao-dao/state/contracts/CwAdminFactory'
 import {
   CHAIN_GAS_MULTIPLIER,
   encodeJsonToBase64,
