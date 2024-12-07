@@ -26,7 +26,7 @@ const ignore = [
   'ValenceAccount',
 ]
 
-const ignoreChainIds = [
+const ignoreChainIds: string[] = [
   // Secret Network does not let you query contracts by code ID.
   ChainId.SecretMainnet,
   ChainId.SecretTestnet,
