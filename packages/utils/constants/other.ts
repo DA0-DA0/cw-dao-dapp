@@ -230,3 +230,8 @@ export const DAOS_HIDDEN_FROM_SEARCH = [
  * stored at the end of the description field.
  */
 export const PROPOSAL_DESCRIPTION_METADATA_SEPARATOR = '\n~@~@~@~\n'
+
+/**
+ * Whether or not the current environment is testing.
+ */
+export const TEST_ENV = process.env.NODE_ENV === 'test'

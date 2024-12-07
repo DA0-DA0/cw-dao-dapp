@@ -14,7 +14,12 @@ import { ConfigContext, generateMnemonic, useChain } from 'starshipjs'
 
 import { makeGetSignerOptions, makeReactQueryClient } from '@dao-dao/state'
 import { ContractVersion } from '@dao-dao/types'
-import { _addChain, _addSupportedChain } from '@dao-dao/utils'
+import {
+  _addChain,
+  _addSupportedChain,
+  instantiateSmartContract,
+  mustGetSupportedChainConfig,
+} from '@dao-dao/utils'
 
 export class StarshipSuite {
   public readonly queryClient: QueryClient
@@ -30,12 +35,16 @@ export class StarshipSuite {
       address: string,
       denom?: string
     ) => Promise<void>,
-    public readonly client: CosmWasmClient
+    public readonly client: CosmWasmClient,
+    /**
+     * The version of the contracts deployed to the chain.
+     */
+    public readonly contractVersion: ContractVersion
   ) {
     this.queryClient = makeReactQueryClient()
   }
 
-  static async init(chainName: string) {
+  static async init(chainName: string, contractVersion: ContractVersion) {
     // Initialize the starshipjs config.
     await ConfigContext.init(path.join(__dirname, '../../starship.config.yml'))
 
@@ -76,7 +85,8 @@ export class StarshipSuite {
       restEndpoint,
       genesisMnemonic,
       creditFromFaucet,
-      client
+      client,
+      contractVersion
     )
 
     return suite
@@ -137,21 +147,42 @@ export class StarshipSuite {
   }
 
   /**
-   * Register the chain as a supported chain. This can only be done once the
-   * contracts are deployed.
+   * Ensure this chain is set up, and register the chain as a supported chain.
+   * This can only be done once the contracts are deployed.
+   *
+   * Once this is complete:
+   * - the factory contract will be deployed and saved to the supported chain
+   *   config.
    */
-  registerSupportedChain({
-    version,
-    factoryContractAddress,
-  }: {
-    version: ContractVersion
-    factoryContractAddress: string
-  }) {
+  async ensureChainSetUp() {
     _addSupportedChain({
       chain: this.chain,
-      version,
-      factoryContractAddress,
+      version: this.contractVersion,
+      factoryContractAddress: '',
       explorerUrl: this.chain.explorers?.[0]?.url!,
     })
+
+    const config = mustGetSupportedChainConfig(this.chainId)
+    if (!config.codeIds.CwAdminFactory) {
+      throw new Error('CwAdminFactory code ID not found')
+    }
+
+    // Find or deploy the CwAdminFactory contract.
+    const contracts = await this.client.getContracts(
+      config.codeIds.CwAdminFactory
+    )
+    if (contracts.length > 0) {
+      config.factoryContractAddress = contracts[0]
+    } else {
+      console.log('Deploying new factory contract...')
+      const { address, signingClient } = await this.makeSigner()
+      config.factoryContractAddress = await instantiateSmartContract(
+        signingClient,
+        address,
+        config.codeIds.CwAdminFactory,
+        'CwAdminFactory',
+        {}
+      )
+    }
   }
 }

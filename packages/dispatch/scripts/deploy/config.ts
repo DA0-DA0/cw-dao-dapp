@@ -96,7 +96,11 @@ export const deploySets: DeploySet[] = [
     name: 'migrator',
     type: 'always',
     contracts: ['dao_migrator'],
-    chainIds: [ChainId.JunoMainnet, ChainId.JunoTestnet],
+    chainIds: [
+      ChainId.JunoMainnet,
+      ChainId.JunoTestnet,
+      ChainId.StarshipJunoTesting,
+    ],
   },
 
   // cw-vesting with staking, which all chains but Neutron support
@@ -133,6 +137,7 @@ export const deploySets: DeploySet[] = [
     chainIds: [
       ChainId.JunoMainnet,
       ChainId.JunoTestnet,
+      ChainId.StarshipJunoTesting,
 
       'layer',
 
@@ -151,6 +156,7 @@ export const deploySets: DeploySet[] = [
     chainIds: [
       ChainId.JunoMainnet,
       ChainId.JunoTestnet,
+      ChainId.StarshipJunoTesting,
 
       'layer',
 
@@ -169,6 +175,7 @@ export const deploySets: DeploySet[] = [
     chainIds: [
       ChainId.JunoMainnet,
       ChainId.JunoTestnet,
+      ChainId.StarshipJunoTesting,
 
       ChainId.KujiraMainnet,
       ChainId.KujiraTestnet,
@@ -202,6 +209,7 @@ export const deploySets: DeploySet[] = [
 
       ChainId.JunoMainnet,
       ChainId.JunoTestnet,
+      ChainId.StarshipJunoTesting,
 
       ChainId.KujiraMainnet,
       ChainId.KujiraTestnet,
@@ -240,6 +248,7 @@ export const deploySets: DeploySet[] = [
     chainIds: [
       ChainId.JunoMainnet,
       ChainId.JunoTestnet,
+      ChainId.StarshipJunoTesting,
 
       'layer',
 
@@ -291,6 +300,7 @@ export const deploySets: DeploySet[] = [
 
       ChainId.JunoMainnet,
       ChainId.JunoTestnet,
+      ChainId.StarshipJunoTesting,
 
       ChainId.KujiraMainnet,
       ChainId.KujiraTestnet,

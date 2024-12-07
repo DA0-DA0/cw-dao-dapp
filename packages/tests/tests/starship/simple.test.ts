@@ -6,16 +6,16 @@ import {
 import { CwAdminFactoryClient } from '@dao-dao/state/contracts/CwAdminFactory'
 import {
   CHAIN_GAS_MULTIPLIER,
-  encodeJsonToBase64,
+  ContractName,
   findWasmAttributeValue,
   mustGetSupportedChainConfig,
 } from '@dao-dao/utils'
 
 import { suite } from './setup.test'
 
-describe('delegations', () => {
-  it('should work', async () => {
-    const { factoryContractAddress, codeIds } = mustGetSupportedChainConfig(
+describe('simple', () => {
+  it('should create a DAO', async () => {
+    const { factoryContractAddress } = mustGetSupportedChainConfig(
       suite.chainId
     )
 
@@ -46,11 +46,11 @@ describe('delegations', () => {
         submissionPolicy: 'members',
       })
 
-    const instantiateMsg = CwDao.generateInstantiateInfo(
+    const instantiateInfo = CwDao.generateInstantiateInfo(
       suite.chainId,
       {
-        name: 'test',
-        description: 'test',
+        name: 'test name',
+        description: 'test description',
       },
       votingModule,
       [proposalModuleSingle]
@@ -64,11 +64,13 @@ describe('delegations', () => {
 
     const { events } = await adminFactory.instantiateContractWithSelfAdmin(
       {
-        codeId: codeIds.DaoDaoCore,
-        instantiateMsg: encodeJsonToBase64(instantiateMsg),
-        label: 'test',
+        codeId: instantiateInfo.codeId,
+        instantiateMsg: instantiateInfo.msg,
+        label: instantiateInfo.label,
       },
-      CHAIN_GAS_MULTIPLIER
+      CHAIN_GAS_MULTIPLIER,
+      undefined,
+      instantiateInfo.funds
     )
 
     const coreAddress = findWasmAttributeValue(
@@ -84,8 +86,20 @@ describe('delegations', () => {
       chainId: suite.chainId,
       coreAddress,
     })
+    await dao.init()
 
-    console.log(dao)
-    console.log(JSON.stringify(dao, null, 2))
+    expect(dao.coreAddress).toBe(coreAddress)
+    expect(dao.name).toBe('test name')
+    expect(dao.description).toBe('test description')
+    expect(dao.info.coreVersion).toBe(suite.contractVersion)
+
+    expect(dao.votingModule.address).toBeDefined()
+    expect(dao.votingModule.contractName).toBe(ContractName.DaoVotingCw4)
+
+    expect(dao.proposalModules.length).toBe(1)
+    expect(dao.proposalModules[0].address).toBeDefined()
+    expect(dao.proposalModules[0].contractName).toBe(
+      ContractName.DaoProposalSingle
+    )
   })
 })

@@ -100,6 +100,9 @@ export enum ChainId {
   OmniflixHubTestnet = 'flixnet-4',
   SecretMainnet = 'secret-4',
   SecretTestnet = 'pulsar-3',
+
+  // Local testing chain powered by Starship.
+  StarshipJunoTesting = 'starship-juno',
 }
 
 export type BaseChainConfig = {
@@ -278,6 +281,7 @@ export type CodeIdConfig = {
   Cw721Base?: number
 
   // https://github.com/DA0-DA0/dao-contracts
+  CwAdminFactory?: number
   CwPayrollFactory: number
   CwTokenSwap: number
   CwTokenfactoryIssuer: number

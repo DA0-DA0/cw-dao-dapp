@@ -157,7 +157,7 @@ const main = async () => {
 
   // Set up Starship stuff and load chain info.
   if (starship) {
-    const suite = await StarshipSuite.init(chainId)
+    const suite = await StarshipSuite.init(chainId, version)
     const signer = await suite.makeSigner()
     mnemonic = signer.mnemonic
     indexer = false
@@ -175,7 +175,11 @@ const main = async () => {
     chainRegistry: { network_type: networkType, slip44 } = {},
   } = getChainForChainId(chainId)
 
-  const codeIds = new CodeIdConfig(indexerAnsibleGroupVarsPath, !!indexer)
+  const codeIds = new CodeIdConfig(
+    indexerAnsibleGroupVarsPath,
+    !!indexer,
+    starship
+  )
 
   await queryClient.prefetchQuery(chainQueries.dynamicGasPrice({ chainId }))
 

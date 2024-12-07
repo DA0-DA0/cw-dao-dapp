@@ -1,19 +1,10 @@
 import fs from 'fs'
 import path from 'path'
 
-import chalk from 'chalk'
 import lockfile from 'proper-lockfile'
 import semverCompare from 'semver/functions/compare'
 
 import { chainIdToIndexerGroupVarsName } from './config'
-
-/**
- * Path to all uploaded code IDs.
- */
-const codeIdsPath = path.join(
-  __dirname,
-  '../../../utils/constants/codeIds.json'
-)
 
 type CodeIds = Record<string, Record<string, Record<string, number>>>
 
@@ -23,16 +14,31 @@ type CodeIds = Record<string, Record<string, Record<string, number>>>
 export class CodeIdConfig {
   private _codeIds: CodeIds = {}
 
+  /**
+   * Path to all uploaded code IDs.
+   */
+  public readonly codeIdsPath: string
+
   constructor(
     private indexerAnsibleGroupVarsPath: string,
     /**
      * Whether to set the code ID in the indexer config.
      */
-    private setIndexer = true
+    private setIndexer = true,
+    /**
+     * Whether or not to use the test codeIds.
+     */
+    useTestCodeIds = false
   ) {
-    if (!fs.existsSync(codeIdsPath)) {
-      console.log(chalk.red(`Code IDs file not found at ${codeIdsPath}`))
-      process.exit(1)
+    this.codeIdsPath = path.join(
+      __dirname,
+      `../../../utils/constants/codeIds.${
+        useTestCodeIds ? 'test.json' : 'json'
+      }`
+    )
+
+    if (!fs.existsSync(this.codeIdsPath)) {
+      fs.writeFileSync(this.codeIdsPath, '{}')
     }
   }
 
@@ -41,11 +47,14 @@ export class CodeIdConfig {
   }
 
   private load() {
-    this._codeIds = JSON.parse(fs.readFileSync(codeIdsPath, 'utf8'))
+    this._codeIds = JSON.parse(fs.readFileSync(this.codeIdsPath, 'utf8'))
   }
 
   private save() {
-    fs.writeFileSync(codeIdsPath, JSON.stringify(this._codeIds, null, 2) + '\n')
+    fs.writeFileSync(
+      this.codeIdsPath,
+      JSON.stringify(this._codeIds, null, 2) + '\n'
+    )
   }
 
   /**
@@ -102,7 +111,7 @@ export class CodeIdConfig {
     codeId: number
   }) {
     // Establish lock.
-    const releaseLock = await lockfile.lock(codeIdsPath, {
+    const releaseLock = await lockfile.lock(this.codeIdsPath, {
       retries: {
         forever: true,
         minTimeout: 100,
@@ -262,7 +271,7 @@ export class CodeIdConfig {
     codeId: number
   } | null> {
     // Establish lock.
-    const releaseLock = await lockfile.lock(codeIdsPath, {
+    const releaseLock = await lockfile.lock(this.codeIdsPath, {
       retries: {
         forever: true,
         minTimeout: 100,
@@ -317,7 +326,7 @@ export class CodeIdConfig {
     version: string
   }): Promise<number | null> {
     // Establish lock.
-    const releaseLock = await lockfile.lock(codeIdsPath, {
+    const releaseLock = await lockfile.lock(this.codeIdsPath, {
       retries: {
         forever: true,
         minTimeout: 100,

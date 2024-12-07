@@ -173,9 +173,7 @@ export const fetchContractInstantiationTime = async (
         })
       )
     ).getTime()
-  } catch (error) {
-    console.error(error)
-  }
+  } catch {}
 
   // If indexer fails, fallback to querying chain.
   const client = await getCosmWasmClientForChainId(chainId)
