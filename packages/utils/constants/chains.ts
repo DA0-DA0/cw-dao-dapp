@@ -31,19 +31,16 @@ const ALL_CODE_HASHES = _ALL_CODE_HASHES as unknown as Partial<
 const ALL_CODE_IDS = TEST_ENV
   ? // If testing, use the test codeIds. It's safe to require fs and path here since this will only run in a node environment.
     JSON.parse(
-      // Use `eval?.('require')` instead of `require` so webpack doesn't attempt
+      // eslint-disable-next-line regex/invalid
+      // Use `eval('require')` instead of `require` so webpack doesn't attempt
       // to bundle these node packages in the browser. The test environment is
       // only used in tests run by node, so these will never be used in the
       // browser.
       //
-      // Also, use indirect eval (?.) instead of direct eval since it's better.
-      // Read more here:
-      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#never_use_direct_eval!
-      //
       // eslint-disable-next-line regex/invalid
-      eval?.('require')('fs').readFileSync(
+      eval('require')('fs').readFileSync(
         // eslint-disable-next-line regex/invalid
-        eval?.('require')('path').join(
+        eval('require')('path').join(
           __dirname,
           `./codeIds.${process.env.NODE_ENV === 'test' ? 'test.json' : 'json'}`
         ),

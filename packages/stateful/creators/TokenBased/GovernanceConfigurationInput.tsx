@@ -10,9 +10,9 @@ import { constSelector, useRecoilValueLoadable } from 'recoil'
 import { HugeDecimal } from '@dao-dao/math'
 import {
   Cw20BaseSelectors,
+  chainQueries,
   genericTokenSelector,
   nativeSupplySelector,
-  tokenFactoryDenomCreationFeeSelector,
 } from '@dao-dao/state'
 import {
   Button,
@@ -25,7 +25,6 @@ import {
   TextInput,
   VotingPowerDistribution,
   VotingPowerDistributionEntry,
-  useCachedLoading,
   useSupportedChainContext,
 } from '@dao-dao/stateless'
 import {
@@ -55,6 +54,7 @@ import {
 import { TokenBasedCreator } from '.'
 import { EntityDisplay } from '../../components/EntityDisplay'
 import { Trans } from '../../components/Trans'
+import { useQueryLoadingDataWithError } from '../../hooks'
 import { useWallet } from '../../hooks/useWallet'
 import { TierCard } from './TierCard'
 import { CreatorData, GovernanceTokenType } from './types'
@@ -106,24 +106,24 @@ export const GovernanceConfigurationInput = ({
   }, [appendTier, config])
 
   // Load token factory denom creation fee.
-  const tokenFactoryDenomCreationFeeLoading = useCachedLoading(
-    tokenFactoryDenomCreationFeeSelector(chainId),
-    undefined
+  const tokenFactoryDenomCreationFee = useQueryLoadingDataWithError(
+    chainQueries.tokenFactoryDenomCreationFee({ chainId })
   )
   useEffect(() => {
     if (
       data.govTokenType === GovernanceTokenType.New &&
-      !tokenFactoryDenomCreationFeeLoading.loading
+      !tokenFactoryDenomCreationFee.loading &&
+      !tokenFactoryDenomCreationFee.errored
     ) {
       setValue(
         'creator.data.tokenFactoryDenomCreationFee',
-        tokenFactoryDenomCreationFeeLoading.data
+        tokenFactoryDenomCreationFee.data
       )
     } else {
       // No fee for using existing token.
       setValue('creator.data.tokenFactoryDenomCreationFee', undefined)
     }
-  }, [data.govTokenType, setValue, tokenFactoryDenomCreationFeeLoading])
+  }, [data.govTokenType, setValue, tokenFactoryDenomCreationFee])
 
   // Fill in default first tier info if tiers not yet edited.
   const [loadedPage, setLoadedPage] = useState(false)

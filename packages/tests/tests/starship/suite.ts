@@ -1,3 +1,4 @@
+import fs from 'fs'
 import path from 'path'
 
 import { ChainInfo } from '@chain-registry/client'
@@ -10,9 +11,19 @@ import { stringToPath as stringToHdPath } from '@cosmjs/crypto'
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing'
 import { GasPrice } from '@cosmjs/stargate'
 import { QueryClient } from '@tanstack/react-query'
-import { ConfigContext, generateMnemonic, useChain } from 'starshipjs'
+import jsYaml from 'js-yaml'
+import {
+  ChainConfig,
+  ConfigContext,
+  generateMnemonic,
+  useChain,
+} from 'starshipjs'
 
-import { makeGetSignerOptions, makeReactQueryClient } from '@dao-dao/state'
+import {
+  chainQueries,
+  makeGetSignerOptions,
+  makeReactQueryClient,
+} from '@dao-dao/state'
 import { ContractVersion } from '@dao-dao/types'
 import {
   _addChain,
@@ -25,13 +36,14 @@ export class StarshipSuite {
   public readonly queryClient: QueryClient
 
   constructor(
+    public readonly starshipConfig: ChainConfig,
     public readonly chain: Chain,
     public readonly chainInfo: ChainInfo,
     public readonly coin: Asset,
     public readonly rpcEndpoint: string,
     public readonly restEndpoint: string,
     public readonly genesisMnemonic: string,
-    public readonly creditFromFaucet: (
+    public readonly tapFaucet: (
       address: string,
       denom?: string
     ) => Promise<void>,
@@ -41,7 +53,12 @@ export class StarshipSuite {
      */
     public readonly contractVersion: ContractVersion
   ) {
-    this.queryClient = makeReactQueryClient()
+    this.queryClient = makeReactQueryClient(undefined, {
+      queries: {
+        // Disable caching so all queries are fresh.
+        gcTime: 0,
+      },
+    })
   }
 
   static async init(chainName: string, contractVersion: ContractVersion) {
@@ -55,7 +72,6 @@ export class StarshipSuite {
       getRpcEndpoint,
       getRestEndpoint,
       getGenesisMnemonic,
-      creditFromFaucet,
     } = useChain(chainName)
 
     // Parallelize all the async calls.
@@ -77,14 +93,54 @@ export class StarshipSuite {
       restEndpoint,
     })
 
+    const config = jsYaml.load(
+      fs.readFileSync(ConfigContext.configFile, 'utf8')
+    ) as ChainConfig
+
+    const tapFaucet = async (address: string, denom?: string) => {
+      const chainConfig = config.chains.find((c) => c.id === chain.chain_id)
+      if (!chainConfig) {
+        throw new Error(`Chain config not found for ${chain.chain_id}`)
+      }
+      const faucetEndpoint = `http://localhost:${chainConfig.ports.faucet}/credit`
+
+      if (!denom) {
+        denom = (await getCoin()).base
+      }
+
+      const res = await fetch(faucetEndpoint, {
+        method: 'POST',
+        body: JSON.stringify({
+          address,
+          denom,
+        }),
+        headers: {
+          'Content-type': 'application/json',
+        },
+      })
+
+      if (!res.ok) {
+        throw new Error(
+          `Failed to tap faucet for ${address}: ${res.status} ${res.statusText}`
+        )
+      }
+
+      const data = await res.text()
+
+      if (data !== 'ok') {
+        throw new Error(`Failed to tap faucet for ${address}: ${data}`)
+      }
+    }
+
     const suite = new StarshipSuite(
+      config,
       chain,
       chainInfo,
       coin,
       rpcEndpoint,
       restEndpoint,
       genesisMnemonic,
-      creditFromFaucet,
+      tapFaucet,
       client,
       contractVersion
     )
@@ -113,13 +169,21 @@ export class StarshipSuite {
     return GasPrice.fromString(`${price}${this.denom}`)
   }
 
+  /**
+   * Generate a signer and potentially provide it with tokens from the faucet.
+   */
   async makeSigner({
     mnemonic,
+    noFaucet = false,
   }: {
     /**
      * If undefined, will generate a random mnemonic.
      */
     mnemonic?: string
+    /**
+     * If true, will not tap the faucet. Defaults to false.
+     */
+    noFaucet?: boolean
   } = {}) {
     mnemonic ||= generateMnemonic()
 
@@ -136,7 +200,9 @@ export class StarshipSuite {
       makeGetSignerOptions(this.queryClient)(this.chain)
     )
 
-    await this.creditFromFaucet(address)
+    if (!noFaucet) {
+      await this.tapFaucet(address)
+    }
 
     return {
       mnemonic,
@@ -144,6 +210,41 @@ export class StarshipSuite {
       address,
       signingClient,
     }
+  }
+
+  /**
+   * Generate many signers and potentially provide them with tokens from the
+   * faucet.
+   *
+   * This is preferred when generating multiple signers and tapping the faucet,
+   * since the faucet endpoint should not be parallelized.
+   */
+  async makeSigners(
+    /**
+     * Number of signers to generate.
+     */
+    count: number,
+    {
+      noFaucet = false,
+    }: {
+      /**
+       * If true, will not tap the faucet. Defaults to false.
+       */
+      noFaucet?: boolean
+    } = {}
+  ) {
+    const signers = await Promise.all(
+      [...new Array(count)].map(() => this.makeSigner({ noFaucet: true }))
+    )
+
+    if (!noFaucet) {
+      // Tap faucet one at a time for each signer.
+      for (const signer of signers) {
+        await this.tapFaucet(signer.address)
+      }
+    }
+
+    return signers
   }
 
   /**
@@ -183,6 +284,35 @@ export class StarshipSuite {
         'CwAdminFactory',
         {}
       )
+    }
+  }
+
+  /**
+   * Wait for one block to pass.
+   *
+   * Times out after the given number of milliseconds.
+   */
+  async waitOneBlock(timeout = 10_000) {
+    const start = Date.now()
+
+    const currentBlock = await this.queryClient.fetchQuery(
+      chainQueries.block({ chainId: this.chainId })
+    )
+
+    while (true) {
+      const block = await this.queryClient.fetchQuery(
+        chainQueries.block({ chainId: this.chainId })
+      )
+
+      if (block.header.height > currentBlock.header.height) {
+        break
+      }
+
+      if (Date.now() - start > timeout) {
+        throw new Error(`Timed out after ${timeout}ms waiting for block`)
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000))
     }
   }
 }

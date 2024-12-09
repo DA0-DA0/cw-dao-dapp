@@ -8,6 +8,7 @@ export enum ContractName {
   CwTokenfactoryIssuer = 'cw-tokenfactory-issuer',
   DaoProposalSingle = 'crates.io:dao-proposal-single',
   DaoVotingCw4 = 'crates.io:dao-voting-cw4',
+  DaoVotingTokenStaked = 'crates.io:dao-voting-token-staked',
   PolytoneProxy = 'crates.io:polytone-proxy',
   PreProposeSingle = 'crates.io:dao-pre-propose-single',
   PreProposeMultiple = 'crates.io:dao-pre-propose-multiple',
@@ -79,8 +80,7 @@ export const DAO_VOTING_SG_COMMUNITY_NFT_CONTRACT_NAMES = [
 ]
 
 export const DAO_VOTING_TOKEN_STAKED_CONTRACT_NAMES = [
-  // V2.3.0+
-  'crates.io:dao-voting-token-staked',
+  ContractName.DaoVotingTokenStaked,
 ]
 
 export const NEUTRON_VOTING_REGISTRY_CONTRACT_NAMES = [

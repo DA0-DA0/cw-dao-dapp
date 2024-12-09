@@ -23,6 +23,7 @@
     "commander": "^11.0.0",
     "eslint": "^8.23.1",
     "jest": "^29.1.1",
+    "js-yaml": "^4.1.0",
     "starshipjs": "^2.4.1",
     "typescript": "5.3.3"
   },

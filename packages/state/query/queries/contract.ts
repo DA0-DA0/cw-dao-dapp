@@ -189,7 +189,7 @@ export const fetchContractInstantiationTime = async (
   }
 
   return await queryClient.fetchQuery(
-    chainQueries.blockTimestamp({
+    chainQueries.blockTimestamp(queryClient, {
       chainId,
       height: events[0].height,
     })

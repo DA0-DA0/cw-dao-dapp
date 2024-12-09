@@ -40,10 +40,18 @@
     },
     {
       "name": "Debug Unit Tests",
-      "type": "pwa-node",
+      "type": "node",
       "request": "launch",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/jest",
       "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug Starship Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/jest",
+      "cwd": "${workspaceFolder}/packages/tests",
+      "args": ["--testPathPattern=starship"]
     }
   ]
 }

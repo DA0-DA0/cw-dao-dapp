@@ -1,6 +1,6 @@
 import { Asset } from '@chain-registry/types'
 import { fromBase64 } from '@cosmjs/encoding'
-import { Coin } from '@cosmjs/stargate'
+import { Block, Coin } from '@cosmjs/stargate'
 import { QueryClient, queryOptions, skipToken } from '@tanstack/react-query'
 import uniq from 'lodash.uniq'
 
@@ -27,10 +27,12 @@ import {
   WeightedVoteOption,
 } from '@dao-dao/types/protobuf/codegen/cosmos/gov/v1beta1/gov'
 import {
+  bitsongProtoRpcClientRouter,
   cosmosProtoRpcClientRouter,
   cosmosSdkVersionIs46OrHigher,
   cosmosSdkVersionIs47OrHigher,
   cosmosValidatorToValidator,
+  cosmwasmProtoRpcClientRouter,
   decodeGovProposal,
   feemarketProtoRpcClientRouter,
   getAllRpcResponse,
@@ -40,6 +42,7 @@ import {
   ibcProtoRpcClientRouter,
   isNonexistentQueryError,
   isValidBech32Address,
+  kujiraProtoRpcClientRouter,
   osmosisProtoRpcClientRouter,
   stargateClientRouter,
 } from '@dao-dao/utils'
@@ -190,17 +193,36 @@ export const isAddressModule = async (
 }
 
 /**
+ * Fetch a block, optionally a specific height, or the latest block.
+ */
+export const fetchBlock = async ({
+  chainId,
+  height,
+}: {
+  chainId: string
+  height?: number
+}): Promise<Block> => {
+  const client = await getCosmWasmClientForChainId(chainId)
+  return await client.getBlock(height)
+}
+
+/**
  * Fetch the timestamp for a given block height.
  */
-export const fetchBlockTimestamp = async ({
+export const fetchBlockTimestamp = async (queryClient: QueryClient, {
   chainId,
   height,
 }: {
   chainId: string
   height: number
 }): Promise<number> => {
-  const client = await getCosmWasmClientForChainId(chainId)
-  return new Date((await client.getBlock(height)).header.time).getTime()
+  const block = await queryClient.fetchQuery(
+    chainQueries.block({
+      chainId,
+      height,
+    })
+  )
+  return new Date(block.header.time).getTime()
 }
 
 /**
@@ -275,6 +297,26 @@ export const fetchTotalNativeStakedBalance = async ({
   }
 
   return pool.bondedTokens
+}
+
+/**
+ * Fetch a native token's supply.
+ */
+export const fetchSupply = async ({
+  chainId,
+  denom,
+}: {
+  chainId: string
+  denom: string
+}): Promise<string> => {
+  const client = await cosmosProtoRpcClientRouter.connect(chainId)
+  return (
+    (
+      await client.bank.v1beta1.supplyOf({
+        denom,
+      })
+    ).amount?.amount ?? '0'
+  )
 }
 
 /**
@@ -1278,6 +1320,45 @@ export const fetchChainRegistryAssets = async ({
     ).json()
   ).assets
 
+/**
+ * Fetch token factory denom creation fee.
+ */
+export const fetchTokenFactoryDenomCreationFee = async ({
+  chainId,
+}: {
+  chainId: string
+}): Promise<Coin[] | undefined> => {
+  if (chainId === ChainId.KujiraTestnet || chainId === ChainId.KujiraMainnet) {
+    const kujiraClient = await kujiraProtoRpcClientRouter.connect(chainId)
+    const { params } = await kujiraClient.denom.params()
+    return params?.creationFee
+  }
+
+  if (
+    chainId === ChainId.BitsongMainnet ||
+    chainId === ChainId.BitsongTestnet
+  ) {
+    const bitsongClient = await bitsongProtoRpcClientRouter.connect(chainId)
+    const { params } = await bitsongClient.fantoken.v1beta1.params()
+    return params?.issueFee && [params.issueFee]
+  }
+
+  const osmosisClient = await osmosisProtoRpcClientRouter.connect(chainId)
+  try {
+    return (await osmosisClient.tokenfactory.v1beta1.params()).params
+      ?.denomCreationFee
+  } catch (err) {
+    // If Osmosis query failed, try CosmWasm tokenfactory.
+    if (isNonexistentQueryError(err)) {
+      const cosmwasmClient = await cosmwasmProtoRpcClientRouter.connect(chainId)
+      return (await cosmwasmClient.tokenfactory.v1beta1.params()).params
+        ?.denomCreationFee
+    }
+
+    throw err
+  }
+}
+
 export const chainQueries = {
   /**
    * Fetch the module address associated with the specified name.
@@ -1309,12 +1390,25 @@ export const chainQueries = {
       queryFn: () => isAddressModule(queryClient, options),
     }),
   /**
+   * Fetch a block, optionally a specific height, or the latest block.
+   */
+  block: (
+    options: Parameters<typeof fetchBlock>[0]
+  ) =>
+    queryOptions({
+      queryKey: ['chain', 'block', options],
+      queryFn: () => fetchBlock(options),
+    }),
+  /**
    * Fetch the timestamp for a given block height.
    */
-  blockTimestamp: (options: Parameters<typeof fetchBlockTimestamp>[0]) =>
+  blockTimestamp: (
+    queryClient: QueryClient,
+    options: Parameters<typeof fetchBlockTimestamp>[1]
+  ) =>
     queryOptions({
       queryKey: ['chain', 'blockTimestamp', options],
-      queryFn: () => fetchBlockTimestamp(options),
+      queryFn: () => fetchBlockTimestamp(queryClient, options),
     }),
   /**
    * Fetch the balance for a given address and denom.
@@ -1351,6 +1445,14 @@ export const chainQueries = {
     queryOptions({
       queryKey: ['chain', 'totalNativeStakedBalance', options],
       queryFn: () => fetchTotalNativeStakedBalance(options),
+    }),
+  /**
+   * Fetch a native token's supply.
+   */
+  supply: (options: Parameters<typeof fetchSupply>[0]) =>
+    queryOptions({
+      queryKey: ['chain', 'supply', options],
+      queryFn: () => fetchSupply(options),
     }),
   /**
    * Fetch native delegation info.
@@ -1523,5 +1625,15 @@ export const chainQueries = {
     queryOptions({
       queryKey: ['chain', 'chainRegistryAssets', options],
       queryFn: () => fetchChainRegistryAssets(options),
+    }),
+  /**
+   * Fetch token factory denom creation fee.
+   */
+  tokenFactoryDenomCreationFee: (
+    options: Parameters<typeof fetchTokenFactoryDenomCreationFee>[0]
+  ) =>
+    queryOptions({
+      queryKey: ['chain', 'tokenFactoryDenomCreationFee', options],
+      queryFn: () => fetchTokenFactoryDenomCreationFee(options),
     }),
 }

@@ -1,6 +1,7 @@
 import {
   DehydratedState,
   QueryClient,
+  QueryClientConfig,
   QueryKey,
   dehydrate,
   hydrate,
@@ -13,13 +14,19 @@ export const makeReactQueryClient = (
   /**
    * Optionally hydrate the query client with dehydrated state.
    */
-  dehydratedState?: DehydratedState
+  dehydratedState?: DehydratedState,
+  /**
+   * Optionally set default options.
+   */
+  defaultOptions?: QueryClientConfig['defaultOptions']
 ) => {
   const client = new QueryClient({
     defaultOptions: {
+      ...defaultOptions,
       queries: {
         // Global default to 60 seconds.
         staleTime: 60 * 1000,
+        ...defaultOptions?.queries,
       },
     },
   })

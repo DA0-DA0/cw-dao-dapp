@@ -2,7 +2,8 @@
 module.exports = {
   ...require('../../jest.config'),
 
-  testTimeout: 90_000,
+  // 1 hour
+  testTimeout: 3_600_000,
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
 
   transformIgnorePatterns: ['node_modules/(?!nanoid)/'],

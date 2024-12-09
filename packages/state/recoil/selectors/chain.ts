@@ -37,7 +37,6 @@ import { Packet } from '@dao-dao/types/protobuf/codegen/ibc/core/channel/v1/chan
 import {
   MAINNET,
   SecretCosmWasmClient,
-  bitsongProtoRpcClientRouter,
   cosmosProtoRpcClientRouter,
   cosmosSdkVersionIs46OrHigher,
   cosmosSdkVersionIs47OrHigher,
@@ -48,7 +47,6 @@ import {
   getNativeTokenForChainId,
   ibcProtoRpcClientRouter,
   junoProtoRpcClientRouter,
-  kujiraProtoRpcClientRouter,
   neutronProtoRpcClientRouter,
   nobleProtoRpcClientRouter,
   osmosisProtoRpcClientRouter,
@@ -330,52 +328,6 @@ export const nativeBalancesSelector = selectorFamily<
     },
 })
 
-export const tokenFactoryDenomCreationFeeSelector = selectorFamily<
-  Coin[] | undefined,
-  string
->({
-  key: 'tokenFactoryDenomCreationFee',
-  get:
-    (chainId) =>
-    async ({ get }) => {
-      if (
-        chainId === ChainId.KujiraTestnet ||
-        chainId === ChainId.KujiraMainnet
-      ) {
-        const kujiraClient = await kujiraProtoRpcClientRouter.connect(chainId)
-        const { params } = await kujiraClient.denom.params()
-        return params?.creationFee
-      }
-
-      if (
-        chainId === ChainId.BitsongMainnet ||
-        chainId === ChainId.BitsongTestnet
-      ) {
-        const bitsongClient = await bitsongProtoRpcClientRouter.connect(chainId)
-        const { params } = await bitsongClient.fantoken.v1beta1.params()
-        return params?.issueFee && [params.issueFee]
-      }
-
-      const osmosisClient = get(osmosisRpcClientForChainSelector(chainId))
-      try {
-        return (await osmosisClient.tokenfactory.v1beta1.params()).params
-          ?.denomCreationFee
-      } catch (err) {
-        // If Osmosis query failed, try CosmWasm tokenfactory.
-        if (
-          err instanceof Error &&
-          err.message.includes('unknown query path')
-        ) {
-          const cosmwasmClient = get(cosmwasmRpcClientForChainSelector(chainId))
-          return (await cosmwasmClient.tokenfactory.v1beta1.params()).params
-            ?.denomCreationFee
-        }
-
-        throw err
-      }
-    },
-})
-
 export const nativeDenomBalanceSelector = selectorFamily<
   Coin,
   WithChainId<{ walletAddress: string; denom: string }>
@@ -454,14 +406,14 @@ export const nativeSupplySelector = selectorFamily<
   get:
     ({ denom, chainId }) =>
     async ({ get }) => {
-      const client = get(cosmosRpcClientForChainSelector(chainId))
-
+      const client = get(queryClientAtom)
       return Number(
-        (
-          await client.bank.v1beta1.supplyOf({
+        await client.fetchQuery(
+          chainQueries.supply({
+            chainId,
             denom,
           })
-        ).amount?.amount ?? -1
+        )
       )
     },
 })
