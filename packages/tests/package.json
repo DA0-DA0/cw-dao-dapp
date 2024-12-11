@@ -6,7 +6,7 @@
   "scripts": {
     "format": "eslint . --fix",
     "lint": "eslint .",
-    "test": "jest",
+    "test": "jest --forceExit --detectOpenHandles --runInBand",
     "starship": "starship --config starship.config.yml",
     "starship:setup": "./scripts/starship_setup.sh",
     "starship:deploy": "./scripts/starship_deploy.sh",
