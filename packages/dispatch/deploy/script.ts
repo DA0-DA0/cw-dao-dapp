@@ -1,5 +1,3 @@
-import path from 'path'
-
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import { stringToPath as stringToHdPath } from '@cosmjs/crypto'
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing'
@@ -11,7 +9,6 @@ import {
   makeGetSignerOptions,
   makeReactQueryClient,
 } from '@dao-dao/state'
-import { StarshipSuite } from '@dao-dao/tests'
 import { ContractVersion, SupportedChainConfig } from '@dao-dao/types'
 import { getChainForChainId, getRpcForChainId } from '@dao-dao/utils'
 
@@ -83,10 +80,6 @@ program.option(
   'use this configured mnemonic name for signing transactions',
   'default'
 )
-program.option(
-  '-s, --starship',
-  'load chains from starship config in @dao-dao/tests (and the chain ID option should be the chain name instead)'
-)
 program.option('--no-indexer', 'do not set the code ID in the indexer config')
 program.option(
   '--no-instantiate-admin-factory',
@@ -103,7 +96,6 @@ let {
   mnemonic: mnemonicName,
   instantiateAdminFactory,
   indexer,
-  starship,
 } = program.opts()
 
 // Add deployment arguments if they exist.
@@ -141,15 +133,6 @@ if (!Object.values(Mode).includes(mode)) {
 const main = async () => {
   const queryClient = await makeReactQueryClient()
 
-  // Set up Starship stuff and load chain info.
-  if (starship) {
-    const suite = await StarshipSuite.init(chainId, version)
-    const signer = await suite.makeSigner()
-    mnemonic = signer.mnemonic
-    indexer = false
-    chainId = suite.chainId
-  }
-
   if (!mnemonic) {
     log(chalk.red(`Mnemonic with name "${mnemonicName}" not found in config.`))
     process.exit(1)
@@ -162,10 +145,7 @@ const main = async () => {
   } = getChainForChainId(chainId)
 
   const codeIds = new CodeIdConfig(
-    indexer ? indexerAnsibleGroupVarsPath : undefined,
-    starship
-      ? path.join(__dirname, '../../../utils/constants/codeIds.test.json')
-      : undefined
+    indexer ? indexerAnsibleGroupVarsPath : undefined
   )
 
   await queryClient.prefetchQuery(chainQueries.dynamicGasPrice({ chainId }))

@@ -33,7 +33,7 @@ export class CodeIdConfig {
   ) {
     this.codeIdsPath =
       overrideCodeIdsPath ||
-      path.join(__dirname, '../../../utils/constants/codeIds.json')
+      path.join(__dirname, '../../utils/constants/codeIds.json')
 
     if (!fs.existsSync(this.codeIdsPath)) {
       fs.writeFileSync(this.codeIdsPath, '{}')
