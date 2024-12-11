@@ -48,7 +48,7 @@ export const useCastVote = (onSuccess?: () => void | Promise<void>) => {
         await proposalModule.vote({
           proposalId: proposalNumber,
           vote,
-          getSigningClient,
+          signingClient: getSigningClient,
           sender: walletAddress,
         })
 

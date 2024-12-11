@@ -29,24 +29,8 @@ const ALL_CODE_HASHES = _ALL_CODE_HASHES as unknown as Partial<
   Record<ChainId, Partial<Record<ContractVersion, CodeHashConfig>>>
 >
 const ALL_CODE_IDS = TEST_ENV
-  ? // If testing, use the test codeIds. It's safe to require fs and path here since this will only run in a node environment.
-    JSON.parse(
-      // eslint-disable-next-line regex/invalid
-      // Use `eval('require')` instead of `require` so webpack doesn't attempt
-      // to bundle these node packages in the browser. The test environment is
-      // only used in tests run by node, so these will never be used in the
-      // browser.
-      //
-      // eslint-disable-next-line regex/invalid
-      eval('require')('fs').readFileSync(
-        // eslint-disable-next-line regex/invalid
-        eval('require')('path').join(
-          __dirname,
-          `./codeIds.${process.env.NODE_ENV === 'test' ? 'test.json' : 'json'}`
-        ),
-        'utf8'
-      )
-    )
+  ? // Fetched later in convertConfiguredChainToSupportedChain.
+    {}
   : (_ALL_CODE_IDS as unknown as Partial<
       Record<ChainId, Partial<Record<ContractVersion, CodeIdConfig>>>
     >)
@@ -606,8 +590,27 @@ const BASE_SUPPORTED_CHAINS: Omit<
 const convertConfiguredChainToSupportedChain = (
   chain: typeof BASE_SUPPORTED_CHAINS[number]
 ): SupportedChainConfig => {
+  // If testing, use the test codeIds. It's safe to require fs and path here
+  // since this will only run in a node environment.
+  const allCodeIdsToUse = TEST_ENV
+    ? JSON.parse(
+        // eslint-disable-next-line regex/invalid
+        // Use `eval('require')` instead of `require` so webpack doesn't attempt
+        // to bundle these node packages in the browser. The test environment is
+        // only used in tests run by node, so these will never be used in the
+        // browser.
+        //
+        // eslint-disable-next-line regex/invalid
+        eval('require')('fs').readFileSync(
+          // eslint-disable-next-line regex/invalid
+          eval('require')('path').join(__dirname, './codeIds.test.json'),
+          'utf8'
+        )
+      )
+    : ALL_CODE_IDS
+
   // Type-check to ensure chain code IDs are present in JSON.
-  const allCodeIds = ALL_CODE_IDS[chain.chainId as ChainId]
+  const allCodeIds = allCodeIdsToUse[chain.chainId as ChainId]
   if (!allCodeIds) {
     throw new Error(`No code IDs found for chain ${chain.chainId}`)
   }
@@ -927,13 +930,15 @@ export const _addChain = ({
   const anyChain =
     'chain_id' in chain ? convertChainRegistryChainToAnyChain(chain) : chain
 
-  // Remove any existing chain with the same chain ID.
-  chains = chains.filter((c) => c.chainId !== anyChain.chainId)
+  // Remove any existing chain with the same chain ID or name.
+  chains = chains.filter(
+    (c) => c.chainId !== anyChain.chainId && c.chainName !== anyChain.chainName
+  )
   CONFIGURED_CHAINS = CONFIGURED_CHAINS.filter(
-    (c) => c.chainId !== anyChain.chainId
+    (c) => c.chainId !== anyChain.chainId && c.name !== anyChain.chainName
   )
   SUPPORTED_CHAINS = SUPPORTED_CHAINS.filter(
-    (c) => c.chainId !== anyChain.chainId
+    (c) => c.chainId !== anyChain.chainId && c.name !== anyChain.chainName
   )
 
   // Add the new chain.
@@ -971,9 +976,9 @@ export const _addSupportedChain = ({
 
   const baseExplorerUrl = `${explorerUrl}/${anyChain.chainId}`
 
-  // Remove any existing chain with the same chain ID.
+  // Remove any existing chain with the same chain ID or name.
   SUPPORTED_CHAINS = SUPPORTED_CHAINS.filter(
-    (c) => c.chainId !== anyChain.chainId
+    (c) => c.chainId !== anyChain.chainId && c.name !== anyChain.chainName
   )
 
   // Add to supported chains.

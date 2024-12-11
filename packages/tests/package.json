@@ -6,16 +6,19 @@
   "scripts": {
     "format": "eslint . --fix",
     "lint": "eslint .",
-    "test:starship": "jest --testPathPattern=starship",
+    "test": "jest",
     "starship": "starship --config starship.config.yml",
     "starship:setup": "./scripts/starship_setup.sh",
-    "starship:start": "./scripts/starship_start.sh",
+    "starship:deploy": "./scripts/starship_deploy.sh",
     "starship:start-ports": "npm run starship -- start-ports",
-    "starship:stop": "npm run starship -- stop"
+    "starship:start": "npm run starship -- start",
+    "starship:stop": "npm run starship -- stop",
+    "starship:get-pods": "npm run starship -- get-pods"
   },
   "devDependencies": {
     "@chain-registry/types": "0.45.86",
     "@dao-dao/config": "2.6.0-rc.1",
+    "@dao-dao/dispatch": "2.6.0-rc.1",
     "@dao-dao/types": "2.6.0-rc.1",
     "@starship-ci/cli": "^2.13.0",
     "@tanstack/react-query": "^5.40.0",

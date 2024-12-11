@@ -233,13 +233,15 @@ export class SecretSingleChoiceProposalModule extends ProposalModuleBase<
   async propose({
     data: _data,
     vote,
-    getSigningClient,
+    signingClient,
     sender,
     funds,
   }: {
     data: SingleChoiceNewProposalData
     vote?: Vote
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
     funds?: Coin[]
   }): Promise<{
@@ -261,7 +263,10 @@ export class SecretSingleChoiceProposalModule extends ProposalModuleBase<
       }),
     }
 
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
     const permit = await this.dao.getPermit(sender)
 
     let proposalNumber: number
@@ -351,15 +356,20 @@ export class SecretSingleChoiceProposalModule extends ProposalModuleBase<
   async vote({
     proposalId,
     vote,
-    getSigningClient,
+    signingClient,
     sender,
   }: {
     proposalId: number
     vote: Vote
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
   }): Promise<void> {
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
     const permit = await this.dao.getPermit(sender)
 
     await new SecretDaoProposalSingleClient(client, sender, this.address).vote({
@@ -380,16 +390,21 @@ export class SecretSingleChoiceProposalModule extends ProposalModuleBase<
 
   async execute({
     proposalId,
-    getSigningClient,
+    signingClient,
     sender,
     memo,
   }: {
     proposalId: number
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
     memo?: string
   }): Promise<void> {
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
     const permit = await this.dao.getPermit(sender)
 
     await new SecretDaoProposalSingleClient(
@@ -410,14 +425,19 @@ export class SecretSingleChoiceProposalModule extends ProposalModuleBase<
 
   async close({
     proposalId,
-    getSigningClient,
+    signingClient,
     sender,
   }: {
     proposalId: number
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
   }): Promise<void> {
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
     await new SecretDaoProposalSingleClient(client, sender, this.address).close(
       {
         proposalId,

@@ -6,8 +6,8 @@
   "scripts": {
     "format": "eslint . --fix",
     "lint": "eslint .",
-    "deploy": "tsx ./scripts/deploy/run.ts",
-    "polytone": "tsx ./scripts/polytone/run.ts"
+    "deploy": "tsx ./deploy/script.ts",
+    "polytone": "tsx ./polytone/script.ts"
   },
   "devDependencies": {
     "@confio/relayer": "^0.12.0",

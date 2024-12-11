@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 
 import { ChainInfo } from '@chain-registry/client'
-import { Asset, Chain } from '@chain-registry/types'
+import { Asset } from '@chain-registry/types'
 import {
   CosmWasmClient,
   SigningCosmWasmClient,
@@ -19,25 +19,37 @@ import {
   useChain,
 } from 'starshipjs'
 
+import { CodeIdConfig, DeploySet, getDispatchConfig } from '@dao-dao/dispatch'
 import {
+  CwDao,
+  SingleChoiceProposalModule,
   chainQueries,
   makeGetSignerOptions,
   makeReactQueryClient,
 } from '@dao-dao/state'
-import { ContractVersion } from '@dao-dao/types'
+import { AnyChain, ContractVersion, UnifiedCosmosMsg } from '@dao-dao/types'
 import {
   _addChain,
   _addSupportedChain,
+  getChainForChainName,
   instantiateSmartContract,
+  isErrorWithSubstring,
   mustGetSupportedChainConfig,
 } from '@dao-dao/utils'
+
+export type StarshipSuiteSigner = {
+  mnemonic: string
+  signer: DirectSecp256k1HdWallet
+  address: string
+  signingClient: SigningCosmWasmClient
+}
 
 export class StarshipSuite {
   public readonly queryClient: QueryClient
 
   constructor(
     public readonly starshipConfig: ChainConfig,
-    public readonly chain: Chain,
+    public readonly chain: AnyChain,
     public readonly chainInfo: ChainInfo,
     public readonly coin: Asset,
     public readonly rpcEndpoint: string,
@@ -66,7 +78,7 @@ export class StarshipSuite {
     await ConfigContext.init(path.join(__dirname, '../../starship.config.yml'))
 
     const {
-      chain,
+      chain: _chain,
       chainInfo,
       getCoin,
       getRpcEndpoint,
@@ -88,19 +100,21 @@ export class StarshipSuite {
 
     // Add to main chain lists.
     _addChain({
-      chain,
+      chain: _chain,
       rpcEndpoint,
       restEndpoint,
     })
+
+    const chain = getChainForChainName(chainName)
 
     const config = jsYaml.load(
       fs.readFileSync(ConfigContext.configFile, 'utf8')
     ) as ChainConfig
 
     const tapFaucet = async (address: string, denom?: string) => {
-      const chainConfig = config.chains.find((c) => c.id === chain.chain_id)
+      const chainConfig = config.chains.find((c) => c.id === chain.chainId)
       if (!chainConfig) {
-        throw new Error(`Chain config not found for ${chain.chain_id}`)
+        throw new Error(`Chain config not found for ${chain.chainId}`)
       }
       const faucetEndpoint = `http://localhost:${chainConfig.ports.faucet}/credit`
 
@@ -153,19 +167,20 @@ export class StarshipSuite {
   }
 
   get bech32Prefix() {
-    return this.chain.bech32_prefix
+    return this.chain.bech32Prefix
   }
 
   get chainId() {
-    return this.chain.chain_id
+    return this.chain.chainId
   }
 
   get chainName() {
-    return this.chain.chain_name
+    return this.chain.chainName
   }
 
   get gasPrice() {
-    const price = this.chain.fees?.fee_tokens?.[0].fixed_min_gas_price || 0
+    const price =
+      this.chainInfo.chain.fees?.fee_tokens?.[0].fixed_min_gas_price || 0
     return GasPrice.fromString(`${price}${this.denom}`)
   }
 
@@ -184,12 +199,12 @@ export class StarshipSuite {
      * If true, will not tap the faucet. Defaults to false.
      */
     noFaucet?: boolean
-  } = {}) {
+  } = {}): Promise<StarshipSuiteSigner> {
     mnemonic ||= generateMnemonic()
 
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
       prefix: this.bech32Prefix,
-      hdPaths: [stringToHdPath(`m/44'/${this.chain.slip44}'/0'/0/0`)],
+      hdPaths: [stringToHdPath(`m/44'/${this.chainInfo.chain.slip44}'/0'/0/0`)],
     })
 
     const address = (await signer.getAccounts())[0].address
@@ -197,7 +212,7 @@ export class StarshipSuite {
     const signingClient = await SigningCosmWasmClient.connectWithSigner(
       this.rpcEndpoint,
       signer,
-      makeGetSignerOptions(this.queryClient)(this.chain)
+      makeGetSignerOptions(this.queryClient)(this.chainName)
     )
 
     if (!noFaucet) {
@@ -232,7 +247,7 @@ export class StarshipSuite {
        */
       noFaucet?: boolean
     } = {}
-  ) {
+  ): Promise<StarshipSuiteSigner[]> {
     const signers = await Promise.all(
       [...new Array(count)].map(() => this.makeSigner({ noFaucet: true }))
     )
@@ -256,16 +271,64 @@ export class StarshipSuite {
    *   config.
    */
   async ensureChainSetUp() {
+    // Ensure the contracts are deployed. Upload them if not.
+    try {
+      await this.client.getCodeDetails(1)
+    } catch (err) {
+      if (isErrorWithSubstring(err, 'no such code')) {
+        console.log(
+          'Contracts not uploaded. Uploading... (may take a few minutes)'
+        )
+        await this.uploadContracts()
+        console.log('Uploaded contracts.')
+      } else {
+        throw err
+      }
+    }
+
     _addSupportedChain({
       chain: this.chain,
       version: this.contractVersion,
       factoryContractAddress: '',
-      explorerUrl: this.chain.explorers?.[0]?.url!,
+      explorerUrl: this.chainInfo.chain.explorers?.[0]?.url!,
     })
 
-    const config = mustGetSupportedChainConfig(this.chainId)
+    let config = mustGetSupportedChainConfig(this.chainId)
     if (!config.codeIds.CwAdminFactory) {
-      throw new Error('CwAdminFactory code ID not found')
+      console.log(
+        'Contracts not configured. Uploading... (may take a few minutes)'
+      )
+      await this.uploadContracts()
+      console.log('Uploaded contracts.')
+
+      // Add again now that the contracts are uploaded.
+      _addSupportedChain({
+        chain: this.chain,
+        version: this.contractVersion,
+        factoryContractAddress: '',
+        explorerUrl: this.chainInfo.chain.explorers?.[0]?.url!,
+      })
+
+      config = mustGetSupportedChainConfig(this.chainId)
+    }
+
+    if (!config.codeIds.CwAdminFactory) {
+      throw new Error(
+        `CwAdminFactory code ID still not found for chain ${this.chainId}`
+      )
+    }
+
+    // Ensure the code is deployed. This will error if it is not.
+    try {
+      await this.client.getCodeDetails(config.codeIds.CwAdminFactory)
+    } catch (err) {
+      if (isErrorWithSubstring(err, 'no such code')) {
+        throw new Error(
+          `Configured CwAdminFactory code ID (${config.codeIds.CwAdminFactory}) not deployed. Are you sure you deployed the contracts?`
+        )
+      }
+
+      throw err
     }
 
     // Find or deploy the CwAdminFactory contract.
@@ -285,6 +348,42 @@ export class StarshipSuite {
         {}
       )
     }
+  }
+
+  private async uploadContracts() {
+    const contractDirs = getDispatchConfig().default.contract_dirs
+
+    const codeIds = new CodeIdConfig(
+      undefined,
+      path.join(__dirname, '../../../utils/constants/codeIds.test.json')
+    )
+
+    const deploySets = DeploySet.getAutoDeploySets(this.chainId)
+
+    const contracts = deploySets.flatMap((deploySet) => deploySet.contracts)
+    // Make a signer for each contract so we can parallelize the uploads.
+    const signers = await this.makeSigners(contracts.length)
+
+    await Promise.all(
+      contracts.map(async (contract, index) => {
+        const signer = signers[index]
+
+        // Upload the contract.
+        const codeId = await contract.upload({
+          client: signer.signingClient,
+          sender: signer.address,
+          contractDirs,
+        })
+
+        // Save the code ID.
+        await codeIds.setCodeId({
+          chainId: this.chainId,
+          version: this.contractVersion,
+          name: contract.name,
+          codeId,
+        })
+      })
+    )
   }
 
   /**
@@ -314,5 +413,54 @@ export class StarshipSuite {
 
       await new Promise((resolve) => setTimeout(resolve, 1000))
     }
+  }
+
+  /**
+   * Create, pass, and execute a single-choice proposal in a DAO.
+   */
+  async createAndExecuteSingleChoiceProposal(
+    dao: CwDao,
+    proposer: StarshipSuiteSigner,
+    voters: StarshipSuiteSigner[],
+    title: string,
+    msgs: UnifiedCosmosMsg[]
+  ) {
+    const proposalModule = dao.proposalModules.find(
+      (m) => m instanceof SingleChoiceProposalModule
+    ) as SingleChoiceProposalModule
+
+    if (!proposalModule) {
+      throw new Error('Single choice proposal module not found')
+    }
+
+    // Create the proposal.
+    const { proposalNumber } = await proposalModule.propose({
+      data: {
+        title,
+        description: title,
+        msgs,
+      },
+      signingClient: proposer.signingClient,
+      sender: proposer.address,
+    })
+
+    // Vote on the proposal.
+    await Promise.all(
+      voters.map((voter) =>
+        proposalModule.vote({
+          proposalId: proposalNumber,
+          signingClient: voter.signingClient,
+          sender: voter.address,
+          vote: 'yes',
+        })
+      )
+    )
+
+    // Execute the proposal.
+    await proposalModule.execute({
+      proposalId: proposalNumber,
+      signingClient: proposer.signingClient,
+      sender: proposer.address,
+    })
   }
 }

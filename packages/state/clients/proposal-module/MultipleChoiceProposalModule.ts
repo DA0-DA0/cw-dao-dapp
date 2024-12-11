@@ -272,13 +272,15 @@ export class MultipleChoiceProposalModule extends ProposalModuleBase<
   async propose({
     data: _data,
     vote,
-    getSigningClient,
+    signingClient,
     sender,
     funds,
   }: {
     data: MultipleChoiceNewProposalData
     vote?: MultipleChoiceVote
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
     funds?: Coin[]
   }): Promise<{
@@ -300,7 +302,10 @@ export class MultipleChoiceProposalModule extends ProposalModuleBase<
       }),
     }
 
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
 
     let proposalNumber: number
 
@@ -372,15 +377,20 @@ export class MultipleChoiceProposalModule extends ProposalModuleBase<
   async vote({
     proposalId,
     vote,
-    getSigningClient,
+    signingClient,
     sender,
   }: {
     proposalId: number
     vote: MultipleChoiceVote
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
   }): Promise<void> {
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
 
     await new DaoProposalMultipleClient(client, sender, this.address).vote({
       proposalId,
@@ -397,18 +407,23 @@ export class MultipleChoiceProposalModule extends ProposalModuleBase<
 
   async execute({
     proposalId,
-    getSigningClient,
+    signingClient,
     sender,
     memo,
     nonCriticalExtensionOptions,
   }: {
     proposalId: number
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
     memo?: string
     nonCriticalExtensionOptions?: EncodeObject[]
   }): Promise<void> {
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
     await new DaoProposalMultipleClient(client, sender, this.address).execute(
       {
         proposalId,
@@ -422,14 +437,19 @@ export class MultipleChoiceProposalModule extends ProposalModuleBase<
 
   async close({
     proposalId,
-    getSigningClient,
+    signingClient,
     sender,
   }: {
     proposalId: number
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
   }): Promise<void> {
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
     await new DaoProposalMultipleClient(client, sender, this.address).close({
       proposalId,
     })

@@ -348,7 +348,7 @@ const main = async () => {
       block_max_gas: srcBlockMaxGas,
     },
     label: `polytone_note_to_${destChainId}`,
-    prefixLength: consolePrefixLength,
+    logPrefixLength: consolePrefixLength,
     override: _note,
   })
 
@@ -362,7 +362,7 @@ const main = async () => {
       note,
     },
     label: `polytone_listener_from_${destChainId}`,
-    prefixLength: consolePrefixLength,
+    logPrefixLength: consolePrefixLength,
     override: _listener,
   })
 
@@ -382,7 +382,7 @@ const main = async () => {
       }),
     },
     label: `polytone_voice_from_${srcChainId}`,
-    prefixLength: consolePrefixLength,
+    logPrefixLength: consolePrefixLength,
     override: _voice,
   })
 

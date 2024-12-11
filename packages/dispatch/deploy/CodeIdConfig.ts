@@ -20,22 +20,20 @@ export class CodeIdConfig {
   public readonly codeIdsPath: string
 
   constructor(
-    private indexerAnsibleGroupVarsPath: string,
     /**
-     * Whether to set the code ID in the indexer config.
+     * The path to the indexer's Ansible group vars file. If undefined, will not
+     * set the code ID in the indexer config.
      */
-    private setIndexer = true,
+    private indexerAnsibleGroupVarsPath?: string,
     /**
-     * Whether or not to use the test codeIds.
+     * Override the path to the code IDs file. Defaults to the production code
+     * IDs file.
      */
-    useTestCodeIds = false
+    overrideCodeIdsPath?: string
   ) {
-    this.codeIdsPath = path.join(
-      __dirname,
-      `../../../utils/constants/codeIds.${
-        useTestCodeIds ? 'test.json' : 'json'
-      }`
-    )
+    this.codeIdsPath =
+      overrideCodeIdsPath ||
+      path.join(__dirname, '../../../utils/constants/codeIds.json')
 
     if (!fs.existsSync(this.codeIdsPath)) {
       fs.writeFileSync(this.codeIdsPath, '{}')
@@ -80,7 +78,8 @@ export class CodeIdConfig {
   }) {
     await Promise.all([
       this.setCodeIdUiConfig(options),
-      this.setIndexer && this.setCodeIdIndexerConfig(options),
+      !!this.indexerAnsibleGroupVarsPath &&
+        this.setCodeIdIndexerConfig(options),
     ])
   }
 
@@ -133,6 +132,13 @@ export class CodeIdConfig {
       const configName = contractNameToJsonConfigName(name)
       this._codeIds[chainId][version][configName] = codeId
 
+      // Sort by key.
+      this._codeIds[chainId][version] = Object.fromEntries(
+        Object.entries(this._codeIds[chainId][version]).sort((a, b) =>
+          a[0].localeCompare(b[0])
+        )
+      )
+
       this.save()
     } finally {
       // Release lock.
@@ -161,6 +167,10 @@ export class CodeIdConfig {
      */
     codeId: number
   }) {
+    if (!this.indexerAnsibleGroupVarsPath) {
+      throw new Error('Indexer Ansible group vars path not set')
+    }
+
     const indexerGroupVarsName = chainIdToIndexerGroupVarsName[chainId]
     if (!indexerGroupVarsName) {
       throw new Error(

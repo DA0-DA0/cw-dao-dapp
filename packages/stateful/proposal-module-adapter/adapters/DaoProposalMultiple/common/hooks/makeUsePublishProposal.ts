@@ -319,7 +319,7 @@ export const makeUsePublishProposal =
             proposalModule.supports(Feature.CastVoteOnProposalCreation)
               ? data.vote
               : undefined,
-          getSigningClient,
+          signingClient: getSigningClient,
           sender: walletAddress,
           funds: proposeFunds,
         })

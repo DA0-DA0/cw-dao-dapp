@@ -15,14 +15,7 @@ yarn starship:setup
 yarn starship:start
 ```
 
-4. Install contracts on Starship chain with the CLI in the
-   [`dispatch`](../dispatch/) package:
-
-```bash
-cd ../dispatch && yarn deploy -v VERSION -c juno --starship
-```
-
-5. Run the tests:
+4. Run the tests:
 
 ```bash
 yarn test:starship

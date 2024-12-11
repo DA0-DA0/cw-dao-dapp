@@ -160,7 +160,7 @@ export const useProposalActionState = ({
 
       await proposalModule.execute({
         proposalId: proposalNumber,
-        getSigningClient: signingClientGetter,
+        signingClient: signingClientGetter,
         sender: walletAddress,
         memo: metadata?.memo || (allowMemoOnExecute && memo ? memo : undefined),
         nonCriticalExtensionOptions:
@@ -225,7 +225,7 @@ export const useProposalActionState = ({
     try {
       await proposalModule.close({
         proposalId: proposalNumber,
-        getSigningClient,
+        signingClient: getSigningClient,
         sender: walletAddress,
       })
 

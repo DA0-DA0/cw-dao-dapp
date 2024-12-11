@@ -252,13 +252,15 @@ export class SingleChoiceProposalModule extends ProposalModuleBase<
   async propose({
     data: _data,
     vote,
-    getSigningClient,
+    signingClient,
     sender,
     funds,
   }: {
     data: SingleChoiceNewProposalData
     vote?: Vote
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
     funds?: Coin[]
   }): Promise<{
@@ -280,7 +282,10 @@ export class SingleChoiceProposalModule extends ProposalModuleBase<
       }),
     }
 
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
 
     let proposalNumber: number
     let isPreProposeApprovalProposal = false
@@ -398,15 +403,20 @@ export class SingleChoiceProposalModule extends ProposalModuleBase<
   async vote({
     proposalId,
     vote,
-    getSigningClient,
+    signingClient,
     sender,
   }: {
     proposalId: number
     vote: Vote
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
   }): Promise<void> {
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
 
     const Client =
       this.version === ContractVersion.V1
@@ -428,18 +438,23 @@ export class SingleChoiceProposalModule extends ProposalModuleBase<
 
   async execute({
     proposalId,
-    getSigningClient,
+    signingClient,
     sender,
     memo,
     nonCriticalExtensionOptions,
   }: {
     proposalId: number
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
     memo?: string
     nonCriticalExtensionOptions?: EncodeObject[]
   }): Promise<void> {
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
 
     const Client =
       this.version === ContractVersion.V1
@@ -459,14 +474,19 @@ export class SingleChoiceProposalModule extends ProposalModuleBase<
 
   async close({
     proposalId,
-    getSigningClient,
+    signingClient,
     sender,
   }: {
     proposalId: number
-    getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+    signingClient:
+      | SupportedSigningCosmWasmClient
+      | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
   }): Promise<void> {
-    const client = await getSigningClient()
+    const client =
+      typeof signingClient === 'function'
+        ? await signingClient()
+        : signingClient
 
     const Client =
       this.version === ContractVersion.V1

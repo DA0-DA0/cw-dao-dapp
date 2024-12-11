@@ -1,12 +1,10 @@
-import fs from 'fs'
 import path from 'path'
 
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import { stringToPath as stringToHdPath } from '@cosmjs/crypto'
-import { DirectSecp256k1HdWallet, EncodeObject } from '@cosmjs/proto-signing'
+import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing'
 import chalk from 'chalk'
 import { Command } from 'commander'
-import toml from 'toml'
 
 import {
   chainQueries,
@@ -15,42 +13,21 @@ import {
 } from '@dao-dao/state'
 import { StarshipSuite } from '@dao-dao/tests'
 import { ContractVersion, SupportedChainConfig } from '@dao-dao/types'
-import { MsgExec } from '@dao-dao/types/protobuf/codegen/cosmos/authz/v1beta1/tx'
-import { MsgStoreCode } from '@dao-dao/types/protobuf/codegen/cosmwasm/wasm/v1/tx'
-import { AccessType } from '@dao-dao/types/protobuf/codegen/cosmwasm/wasm/v1/types'
-import {
-  CHAIN_GAS_MULTIPLIER,
-  findEventsAttributeValue,
-  getChainForChainId,
-  getRpcForChainId,
-  gzipCompress,
-} from '@dao-dao/utils'
+import { getChainForChainId, getRpcForChainId } from '@dao-dao/utils'
 
+import { getDispatchConfig } from '../config'
 import { instantiateContract } from '../utils'
 import { CodeIdConfig } from './CodeIdConfig'
-import {
-  DeploySetContract,
-  chainIdToDeploymentArgs,
-  deploySets,
-} from './config'
+import { chainIdToDeploymentArgs } from './config'
+import { DeploySet, deploySets } from './DeploySet'
 
 const { log } = console
 
-/**
- * Path to the config file.
- */
-const configPath = path.join(__dirname, '../../config.toml')
-
-if (!fs.existsSync(configPath)) {
-  log(chalk.red(`Config file not found at ${configPath}`))
-  process.exit(1)
-}
-
-let config: any
+let config
 try {
-  config = toml.parse(fs.readFileSync(configPath, 'utf8'))
+  config = getDispatchConfig()
 } catch (err) {
-  log(chalk.red(`Error parsing ${configPath}: ${err}`))
+  log(chalk.red(`Error getting config: ${err}`))
   process.exit(1)
 }
 
@@ -64,6 +41,15 @@ const {
 
 if (!indexerAnsibleGroupVarsPath) {
   log(chalk.red('indexer_ansible_group_vars_path not set'))
+  process.exit(1)
+}
+
+if (
+  !contractDirs ||
+  !Array.isArray(contractDirs) ||
+  contractDirs.length === 0
+) {
+  log(chalk.red('contract_dirs not set'))
   process.exit(1)
 }
 
@@ -176,9 +162,10 @@ const main = async () => {
   } = getChainForChainId(chainId)
 
   const codeIds = new CodeIdConfig(
-    indexerAnsibleGroupVarsPath,
-    !!indexer,
+    indexer ? indexerAnsibleGroupVarsPath : undefined,
     starship
+      ? path.join(__dirname, '../../../utils/constants/codeIds.test.json')
+      : undefined
   )
 
   await queryClient.prefetchQuery(chainQueries.dynamicGasPrice({ chainId }))
@@ -204,172 +191,26 @@ const main = async () => {
     makeGetSignerOptions(queryClient)(chainName)
   )
 
-  const uploadContract = async ({
-    id,
-    file,
-    prefixLength,
-    restrictInstantiation,
-  }: {
-    id: string
-    file: string
-    prefixLength: number
-    restrictInstantiation?: boolean
-  }) => {
-    const wasmData = new Uint8Array(fs.readFileSync(file).buffer)
-    const compressedWasmData = await gzipCompress(wasmData)
-
-    const msgStoreCode = MsgStoreCode.fromPartial({
-      sender: authz || sender,
-      wasmByteCode: compressedWasmData,
-      instantiatePermission: restrictInstantiation
-        ? {
-            permission: AccessType.AnyOfAddresses,
-            addresses: [authz || sender],
-          }
-        : {
-            permission: AccessType.Everybody,
-            addresses: [],
-          },
-    })
-
-    const msg: EncodeObject = authz
-      ? {
-          typeUrl: MsgExec.typeUrl,
-          value: MsgExec.fromPartial({
-            grantee: sender,
-            msgs: [MsgStoreCode.toProtoMsg(msgStoreCode)],
-          }),
-        }
-      : {
-          typeUrl: MsgStoreCode.typeUrl,
-          value: msgStoreCode,
-        }
-
-    let transactionHash
-    try {
-      transactionHash = await client.signAndBroadcastSync(
-        sender,
-        [msg],
-        CHAIN_GAS_MULTIPLIER
-      )
-    } catch (err) {
-      if (
-        err instanceof Error &&
-        err.message.includes('authorization not found')
-      ) {
-        log(
-          chalk.red(
-            `[${id}]${' '.repeat(
-              prefixLength - id.length - 5
-            )}no authz permission granted`
-          )
-        )
-        process.exit(1)
-      } else {
-        log(
-          chalk.red(`[${id}]${' '.repeat(prefixLength - id.length - 5)}failed`)
-        )
-        throw err
-      }
-    }
-
-    log(
-      chalk.greenBright(
-        `[${id}]${' '.repeat(prefixLength - id.length - 5)}${transactionHash}`
-      )
-    )
-
-    // Poll for TX.
-    let events
-    let tries = 50
-    while (tries > 0) {
-      try {
-        events = (await client.getTx(transactionHash))?.events
-        if (events) {
-          break
-        }
-      } catch {}
-
-      tries--
-      await new Promise((resolve) => setTimeout(resolve, 300))
-    }
-
-    if (!events) {
-      log(
-        chalk.red(
-          `[${id}]${' '.repeat(prefixLength - id.length - 5)}TX not found`
-        )
-      )
-      process.exit(1)
-    }
-
-    const codeId = findEventsAttributeValue(events, 'store_code', 'code_id')
-
-    if (!codeId) {
-      log(
-        chalk.red(`[${id}]${' '.repeat(prefixLength - id.length - 5)}not found`)
-      )
-      process.exit(1)
-    }
-
-    log(
-      chalk.green(`[${id}]${' '.repeat(prefixLength - id.length - 5)}${codeId}`)
-    )
-
-    return Number(codeId)
-  }
-
   log()
-
-  const getContractFile = (contract: DeploySetContract) =>
-    typeof contract === 'string' ? contract : contract.file
-  const getContractName = (contract: DeploySetContract) =>
-    typeof contract === 'string' ? contract : contract.alias
-
-  const getContractPath = (contract: DeploySetContract) => {
-    if (
-      !contractDirs ||
-      !Array.isArray(contractDirs) ||
-      contractDirs.length === 0
-    ) {
-      log(chalk.red('contract_dirs not set'))
-      process.exit(1)
-    }
-
-    for (const contractDir of contractDirs) {
-      const file = path.join(contractDir, `${getContractFile(contract)}.wasm`)
-      if (fs.existsSync(file)) {
-        return file
-      }
-    }
-
-    log(
-      chalk.red(
-        `${getContractFile(contract)}.wasm not found in contract directories`
-      )
-    )
-    process.exit(1)
-  }
 
   // Upload polytone contracts only.
   if (mode === Mode.Polytone) {
-    const polytoneContracts = deploySets
-      .find((s) => s.name === 'polytone')
-      ?.contracts?.map((contract) => ({
-        id: getContractName(contract),
-        file: getContractPath(contract),
-      }))
+    const polytoneContracts = deploySets.find(
+      (s) => s.name === 'polytone'
+    )?.contracts
     if (!polytoneContracts) {
       log(chalk.red('polytone deploy set not found'))
       process.exit(1)
     }
 
-    for (const { id, file } of polytoneContracts) {
-      await uploadContract({
-        id,
-        file,
-        prefixLength: 32,
+    for (const contract of polytoneContracts) {
+      await contract.upload({
+        client,
+        sender,
+        authz,
+        logPrefixLength: 32,
         restrictInstantiation,
+        contractDirs,
       })
     }
 
@@ -387,20 +228,13 @@ const main = async () => {
     }
 
     // Get automatic deploy sets for this chain.
-    const chainDeploySets = deploySets.filter(
-      (s) =>
-        s.type !== 'manual' &&
-        (!s.chainIds || s.chainIds.includes(chainId)) &&
-        !s.skipChainIds?.includes(chainId)
-    )
+    const chainDeploySets = DeploySet.getAutoDeploySets(chainId)
 
     // Set console prefix length to the max contract name length plus space for
     // brackets and longest ID suffix (CONTRACT).
     consolePrefixLength =
       Math.max(
-        ...chainDeploySets.flatMap((s) =>
-          s.contracts.map((c) => getContractName(c).length)
-        )
+        ...chainDeploySets.flatMap((s) => s.contracts.map((c) => c.name.length))
       ) + 14
 
     try {
@@ -410,20 +244,18 @@ const main = async () => {
       const oneTimeDeploySets = chainDeploySets.filter((s) => s.type === 'once')
       for (const { contracts } of oneTimeDeploySets) {
         for (const contract of contracts) {
-          const name = getContractName(contract)
-
           // If exists, skip.
           const existingCodeId = await codeIds.getCodeId({
             chainId,
-            name,
+            name: contract.name,
             version,
           })
 
           if (existingCodeId !== null) {
             log(
               chalk.green(
-                `[${name}]${' '.repeat(
-                  consolePrefixLength - name.length - 5
+                `[${contract.name}]${' '.repeat(
+                  consolePrefixLength - contract.name.length - 5
                 )}${existingCodeId} (already set)`
               )
             )
@@ -432,37 +264,39 @@ const main = async () => {
           } else {
             const latest = await codeIds.getLatestCodeId({
               chainId,
-              name,
+              name: contract.name,
             })
 
             // Copy over the code ID from an earlier version if available.
             if (latest) {
               log(
                 chalk.green(
-                  `[${name}]${' '.repeat(
-                    consolePrefixLength - name.length - 5
+                  `[${contract.name}]${' '.repeat(
+                    consolePrefixLength - contract.name.length - 5
                   )}${latest.codeId} (set from version ${latest.version})`
                 )
               )
 
               await codeIds.setCodeId({
                 chainId,
-                name,
+                name: contract.name,
                 version,
                 codeId: latest.codeId,
               })
             } else {
               // Otherwise, upload the contract.
-              const codeId = await uploadContract({
-                id: name,
-                file: getContractPath(contract),
-                prefixLength: consolePrefixLength,
+              const codeId = await contract.upload({
+                client,
+                sender,
+                authz,
+                logPrefixLength: consolePrefixLength,
                 restrictInstantiation,
+                contractDirs,
               })
 
               await codeIds.setCodeId({
                 chainId,
-                name,
+                name: contract.name,
                 version,
                 codeId,
               })
@@ -477,36 +311,36 @@ const main = async () => {
       )
       for (const { contracts } of alwaysDeploySets) {
         for (const contract of contracts) {
-          const name = getContractName(contract)
-
           // If exists, skip.
           const existingCodeId = await codeIds.getCodeId({
             chainId,
-            name,
+            name: contract.name,
             version,
           })
 
           if (existingCodeId !== null) {
             log(
               chalk.green(
-                `[${name}]${' '.repeat(
-                  consolePrefixLength - name.length - 5
+                `[${contract.name}]${' '.repeat(
+                  consolePrefixLength - contract.name.length - 5
                 )}${existingCodeId} (already set)`
               )
             )
             continue
           } else {
             // Otherwise, upload the contract.
-            const codeId = await uploadContract({
-              id: name,
-              file: getContractPath(contract),
-              prefixLength: consolePrefixLength,
+            const codeId = await contract.upload({
+              client,
+              sender,
+              authz,
+              logPrefixLength: consolePrefixLength,
               restrictInstantiation,
+              contractDirs,
             })
 
             await codeIds.setCodeId({
               chainId,
-              name,
+              name: contract.name,
               version,
               codeId,
             })
@@ -552,7 +386,7 @@ const main = async () => {
           codeId: cwAdminFactoryCodeId,
           msg: {},
           label: 'daodao_admin_factory',
-          prefixLength: consolePrefixLength,
+          logPrefixLength: consolePrefixLength,
         })
       : ''
 

@@ -33,11 +33,11 @@
     "publish-all": "find . -name '*.log' -delete && lerna publish --no-private from-package"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.0",
-    "jest": "^29.5.0",
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
     "lerna": "^6.4.1",
     "patch-package": "^8.0.0",
-    "ts-jest": "^29.0.5",
+    "ts-jest": "^29.2.5",
     "turbo": "latest",
     "turbo-ignore": "latest"
   },

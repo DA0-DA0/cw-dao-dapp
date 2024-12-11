@@ -7,7 +7,7 @@ const eslintConfig = {
   root: true,
   overrides: [
     {
-      files: ['**/*.ts'],
+      files: ['**/*.d.ts', '**/*.ts', '**/*.tsx'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
       },

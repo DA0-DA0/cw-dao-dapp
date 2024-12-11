@@ -13,7 +13,7 @@ import {
   PreProposeModule,
 } from '@dao-dao/types'
 import { VetoConfig } from '@dao-dao/types/contracts/DaoProposalSingle.v2'
-import { isFeatureSupportedByVersion } from '@dao-dao/utils'
+import { isFeatureSupportedByVersion, SupportedSigningCosmWasmClient } from '@dao-dao/utils'
 
 export abstract class ProposalModuleBase<
   Dao extends IDaoBase = IDaoBase,
@@ -160,7 +160,7 @@ export abstract class ProposalModuleBase<
      * Cast a vote with the proposal.
      */
     vote?: Vote
-    getSigningClient: () => Promise<SigningCosmWasmClient>
+    signingClient: SupportedSigningCosmWasmClient | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
     funds?: Coin[]
   }): Promise<{
@@ -174,7 +174,7 @@ export abstract class ProposalModuleBase<
   abstract vote(options: {
     proposalId: number
     vote: Vote
-    getSigningClient: () => Promise<SigningCosmWasmClient>
+    signingClient: SupportedSigningCosmWasmClient | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
   }): Promise<void>
 
@@ -183,7 +183,7 @@ export abstract class ProposalModuleBase<
    */
   abstract execute(options: {
     proposalId: number
-    getSigningClient: () => Promise<SigningCosmWasmClient>
+    signingClient: SupportedSigningCosmWasmClient | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
     memo?: string
     nonCriticalExtensionOptions?: EncodeObject[]
@@ -194,7 +194,7 @@ export abstract class ProposalModuleBase<
    */
   abstract close(options: {
     proposalId: number
-    getSigningClient: () => Promise<SigningCosmWasmClient>
+    signingClient: SupportedSigningCosmWasmClient | (() => Promise<SupportedSigningCosmWasmClient>)
     sender: string
   }): Promise<void>
 
