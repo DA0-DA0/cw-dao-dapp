@@ -285,6 +285,29 @@ describe('delegations', () => {
       )
     ).delegates
 
-    console.log(delegates)
+    // Each delegator divides their voting power evenly among their delegates,
+    // and floors the result.
+
+    expect(delegates.length).toBe(10)
+    // 90 / 10 * floor((floor(100 / 10) / 100) * 50) = 45
+    expect(delegates[9].power).toBe('45')
+    // 45 + 90 / 10 * floor((floor(100 / 9) / 100) * 50) = 90
+    expect(delegates[8].power).toBe('90')
+    // 90 + 90 / 10 * floor((floor(100 / 8) / 100) * 50) = 144
+    expect(delegates[7].power).toBe('144')
+    // 144 + 90 / 10 * floor((floor(100 / 7) / 100) * 50) = 207
+    expect(delegates[6].power).toBe('207')
+    // 207 + 90 / 10 * floor((floor(100 / 6) / 100) * 50) = 279
+    expect(delegates[5].power).toBe('279')
+    // 279 + 90 / 10 * floor((floor(100 / 5) / 100) * 50) = 369
+    expect(delegates[4].power).toBe('369')
+    // 369 + 90 / 10 * floor((floor(100 / 4) / 100) * 50) = 477
+    expect(delegates[3].power).toBe('477')
+    // 477 + 90 / 10 * floor((floor(100 / 3) / 100) * 50) = 621
+    expect(delegates[2].power).toBe('621')
+    // 621 + 90 / 10 * floor((floor(100 / 2) / 100) * 50) = 846
+    expect(delegates[1].power).toBe('846')
+    // 846 + 90 / 10 * floor((floor(100 / 1) / 100) * 50) = 1296
+    expect(delegates[0].power).toBe('1296')
   })
 })
