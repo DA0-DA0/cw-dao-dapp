@@ -1,4 +1,5 @@
 import { coins } from '@cosmjs/proto-signing'
+import { describe, expect, it } from 'vitest'
 
 import { chainQueries } from '@dao-dao/state'
 import {
@@ -190,8 +191,6 @@ describe('delegations', () => {
       dao.coreAddress
     )
 
-    console.log('delegation address', delegationAddress)
-
     // Propose to set up delegations.
     const manageWidgetsAction = new ManageWidgetsAction({
       t: (key) => key,
@@ -218,8 +217,6 @@ describe('delegations', () => {
         address: delegationAddress,
       },
     })
-
-    console.log('msgs', msgs)
 
     await suite.createAndExecuteSingleChoiceProposal(
       dao,

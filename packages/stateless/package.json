@@ -8,7 +8,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@cosmjs/encoding": "^0.32.3",
+    "@cosmjs/encoding": "0.32.4",
     "@dao-dao/math": "2.6.0-rc.1",
     "@dao-dao/types": "2.6.0-rc.1",
     "@dao-dao/utils": "2.6.0-rc.1",

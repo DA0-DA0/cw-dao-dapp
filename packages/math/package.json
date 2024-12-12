@@ -5,15 +5,15 @@
   "scripts": {
     "format": "eslint . --fix",
     "lint": "eslint .",
-    "test": "jest"
+    "test": "vitest"
   },
   "dependencies": {
     "bignumber.js": "^9.1.2"
   },
   "devDependencies": {
     "@dao-dao/config": "2.6.0-rc.1",
-    "jest": "^29.1.1",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "vitest": "^2.1.8"
   },
   "prettier": "@dao-dao/config/prettier",
   "gitHead": "d7b959f412c3990123b0e2afb11f32acd9c3764c"

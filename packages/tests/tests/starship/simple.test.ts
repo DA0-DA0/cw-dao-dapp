@@ -1,4 +1,5 @@
 import { coins } from '@cosmjs/proto-signing'
+import { describe, expect, it } from 'vitest'
 
 import { chainQueries } from '@dao-dao/state'
 import {

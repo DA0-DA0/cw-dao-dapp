@@ -1,4 +1,4 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "../config/ts/base.json"
+  "extends": "@dao-dao/config/ts/base.json"
 }

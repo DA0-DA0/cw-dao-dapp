@@ -1,5 +1,5 @@
 {
   "extends": "@dao-dao/config/ts/base.json",
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "vitest.config.mts"],
   "exclude": ["node_modules"]
 }

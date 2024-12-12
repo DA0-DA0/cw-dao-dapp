@@ -1,5 +1,13 @@
 {
   "extends": "./packages/config/ts/base.json",
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "vitest.config.mts",
+    "packages/math/vitest.config.mts",
+    "packages/tests/vitest.config.mts",
+    "packages/utils/vitest.config.mts",
+    "packages/stateful/vitest.config.mts"
+  ],
   "exclude": ["node_modules"]
 }

@@ -42,14 +42,14 @@
       "name": "Debug Unit Tests",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/jest",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/vitest",
       "cwd": "${workspaceFolder}"
     },
     {
       "name": "Debug Starship Tests",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/jest",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/vitest",
       "cwd": "${workspaceFolder}/packages/tests",
       "args": ["--testPathPattern=starship"]
     }

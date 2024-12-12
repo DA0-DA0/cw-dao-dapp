@@ -1,4 +1,0 @@
-{
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "../config/ts/react-library.json"
-}

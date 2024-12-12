@@ -1,3 +1,5 @@
+import { beforeAll } from 'vitest'
+
 import { ContractVersion } from '@dao-dao/types'
 
 import { StarshipSuite } from './suite'

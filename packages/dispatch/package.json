@@ -28,11 +28,11 @@
   },
   "prettier": "@dao-dao/config/prettier",
   "dependencies": {
-    "@cosmjs/cosmwasm-stargate": "^0.32.3",
-    "@cosmjs/crypto": "^0.32.3",
-    "@cosmjs/proto-signing": "^0.32.3",
-    "@cosmjs/stargate": "^0.32.3",
-    "@cosmjs/tendermint-rpc": "^0.32.3",
+    "@cosmjs/cosmwasm-stargate": "0.32.4",
+    "@cosmjs/crypto": "0.32.4",
+    "@cosmjs/proto-signing": "0.32.4",
+    "@cosmjs/stargate": "0.32.4",
+    "@cosmjs/tendermint-rpc": "0.32.4",
     "proper-lockfile": "^4.1.2"
   }
 }

@@ -1,6 +1,6 @@
 {
   "extends": "@dao-dao/config/ts/react-library.json",
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "vitest.config.mts"],
   "exclude": ["node_modules"],
   "compilerOptions": {
     "forceConsistentCasingInFileNames": false
