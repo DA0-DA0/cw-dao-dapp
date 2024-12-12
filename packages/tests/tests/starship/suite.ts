@@ -8,7 +8,7 @@ import {
   SigningCosmWasmClient,
 } from '@cosmjs/cosmwasm-stargate'
 import { stringToPath as stringToHdPath } from '@cosmjs/crypto'
-import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing'
+import { DirectSecp256k1HdWallet, coins } from '@cosmjs/proto-signing'
 import { GasPrice } from '@cosmjs/stargate'
 import { QueryClient } from '@tanstack/react-query'
 import jsYaml from 'js-yaml'
@@ -22,6 +22,8 @@ import {
 import { CodeIdConfig, DeploySet, getDispatchConfig } from '@dao-dao/dispatch'
 import {
   CwDao,
+  DaoVoteDelegationClient,
+  DaoVotingTokenStakedClient,
   SingleChoiceProposalModule,
   chainQueries,
   makeGetSignerOptions,
@@ -461,6 +463,80 @@ export class StarshipSuite {
       proposalId: proposalNumber,
       signingClient: proposer.signingClient,
       sender: proposer.address,
+    })
+  }
+
+  /**
+   * Stake native tokens.
+   */
+  async stakeNativeTokens(
+    contract: string,
+    signer: StarshipSuiteSigner,
+    amount: number | string,
+    denom: string
+  ) {
+    await new DaoVotingTokenStakedClient(
+      signer.signingClient,
+      signer.address,
+      contract
+    ).stake(undefined, undefined, coins(amount, denom))
+  }
+
+  /**
+   * Register as a delegate.
+   */
+  async registerAsDelegate(contract: string, delegate: StarshipSuiteSigner) {
+    await new DaoVoteDelegationClient(
+      delegate.signingClient,
+      delegate.address,
+      contract
+    ).register()
+  }
+
+  /**
+   * Unregister as a delegate.
+   */
+  async unregisterAsDelegate(contract: string, delegate: StarshipSuiteSigner) {
+    await new DaoVoteDelegationClient(
+      delegate.signingClient,
+      delegate.address,
+      contract
+    ).unregister()
+  }
+
+  /**
+   * Delegate voting power to a given address.
+   */
+  async delegate(
+    contract: string,
+    delegator: StarshipSuiteSigner,
+    delegate: string,
+    percent: string
+  ) {
+    await new DaoVoteDelegationClient(
+      delegator.signingClient,
+      delegator.address,
+      contract
+    ).delegate({
+      delegate,
+      percent,
+    })
+  }
+
+  /**
+   * Undelegate voting power from a given address.
+   */
+  async undelegate(
+    contract: string,
+    delegator: StarshipSuiteSigner,
+    delegate: string
+  ) {
+    await new DaoVoteDelegationClient(
+      delegator.signingClient,
+      delegator.address,
+      contract
+    ).undelegate({
+      delegate,
     })
   }
 }

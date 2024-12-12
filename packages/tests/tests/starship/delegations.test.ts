@@ -1,7 +1,6 @@
-import { coins } from '@cosmjs/proto-signing'
 import { describe, expect, it } from 'vitest'
 
-import { chainQueries } from '@dao-dao/state'
+import { chainQueries, daoVoteDelegationQueries } from '@dao-dao/state'
 import {
   CwDao,
   SingleChoiceProposalModule,
@@ -17,7 +16,6 @@ import {
 import {
   CHAIN_GAS_MULTIPLIER,
   ContractName,
-  executeSmartContract,
   findWasmAttributeValue,
   instantiateSmartContract,
   mustGetSupportedChainConfig,
@@ -29,7 +27,7 @@ describe('delegations', () => {
   it('should create a token-based DAO with delegations', async () => {
     const chainConfig = mustGetSupportedChainConfig(suite.chainId)
 
-    const signers = await suite.makeSigners(10)
+    const signers = await suite.makeSigners(100)
 
     const totalSupply = 1_000_000
     const initialBalance = 100
@@ -147,15 +145,12 @@ describe('delegations', () => {
 
     // Stake 50 tokens for each signer.
     await Promise.all(
-      signers.map(({ address, signingClient }) =>
-        executeSmartContract(
-          signingClient,
-          address,
+      signers.map((signer) =>
+        suite.stakeNativeTokens(
           votingModule.address,
-          {
-            stake: {},
-          },
-          coins(50, govToken.denomOrAddress)
+          signer,
+          50,
+          govToken.denomOrAddress
         )
       )
     )
@@ -225,5 +220,71 @@ describe('delegations', () => {
       'Set up delegations',
       msgs
     )
+
+    const delegateSigners = signers.slice(0, 10)
+    const delegatorSigners = signers.slice(10)
+
+    // Register first 10 signers as delegates.
+
+    await Promise.all(
+      delegateSigners.map((signer) =>
+        suite.registerAsDelegate(delegationAddress, signer)
+      )
+    )
+
+    // Wait a block to ensure the delegations are registered.
+    await suite.waitOneBlock()
+
+    // Check that the delegations are registered.
+    let { delegates } = await suite.queryClient.fetchQuery(
+      daoVoteDelegationQueries.delegates(suite.queryClient, {
+        chainId: suite.chainId,
+        contractAddress: delegationAddress,
+        args: {
+          limit: 10,
+        },
+      })
+    )
+
+    expect(delegates.length).toBe(10)
+    expect(
+      delegateSigners.every((signer) =>
+        delegates.some((delegate) => delegate.delegate === signer.address)
+      )
+    ).toBe(true)
+
+    // Delegate voting power to delegates based on the index. In each set of 10
+    // delegates, the first delegates 100% of their voting power to the first
+    // delegate, the second delegates 50% of their voting power to the first two
+    // delegates, the third delegates 33% of their voting power to the first
+    // three delegates, and so on.
+    await Promise.all(
+      delegatorSigners.map(async (delegator, index) => {
+        const numDelegates = (index % delegates.length) + 1
+        const percent = (Math.floor(100 / numDelegates) / 100).toString()
+
+        for (const { delegate } of delegates.slice(0, numDelegates)) {
+          await suite.delegate(delegationAddress, delegator, delegate, percent)
+        }
+      })
+    )
+
+    // Wait a block to ensure the delegations are registered.
+    await suite.waitOneBlock()
+
+    // Check that the voting power is distributed correctly.
+    delegates = (
+      await suite.queryClient.fetchQuery(
+        daoVoteDelegationQueries.delegates(suite.queryClient, {
+          chainId: suite.chainId,
+          contractAddress: delegationAddress,
+          args: {
+            limit: 10,
+          },
+        })
+      )
+    ).delegates
+
+    console.log(delegates)
   })
 })
