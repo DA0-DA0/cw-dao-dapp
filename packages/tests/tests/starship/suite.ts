@@ -9,7 +9,7 @@ import {
 } from '@cosmjs/cosmwasm-stargate'
 import { stringToPath as stringToHdPath } from '@cosmjs/crypto'
 import { DirectSecp256k1HdWallet, coins } from '@cosmjs/proto-signing'
-import { GasPrice } from '@cosmjs/stargate'
+import { GasPrice, calculateFee } from '@cosmjs/stargate'
 import { QueryClient } from '@tanstack/react-query'
 import jsYaml from 'js-yaml'
 import lockfile from 'proper-lockfile'
@@ -31,6 +31,7 @@ import {
   makeReactQueryClient,
 } from '@dao-dao/state'
 import { AnyChain, ContractVersion, UnifiedCosmosMsg } from '@dao-dao/types'
+import { TxRaw } from '@dao-dao/types/protobuf/codegen/cosmos/tx/v1beta1/tx'
 import {
   _addChain,
   _addSupportedChain,
@@ -46,7 +47,8 @@ export type StarshipSuiteSigner = {
   mnemonic: string
   signer: DirectSecp256k1HdWallet
   address: string
-  signingClient: SigningCosmWasmClient
+  tapFaucet: () => Promise<void>
+  getSigningClient: () => Promise<SigningCosmWasmClient>
 }
 
 export class StarshipSuite {
@@ -214,21 +216,25 @@ export class StarshipSuite {
 
     const address = (await signer.getAccounts())[0].address
 
-    const signingClient = await SigningCosmWasmClient.connectWithSigner(
-      this.rpcEndpoint,
-      signer,
-      makeGetSignerOptions(this.queryClient)(this.chainName)
-    )
+    const getSigningClient = () =>
+      SigningCosmWasmClient.connectWithSigner(
+        this.rpcEndpoint,
+        signer,
+        makeGetSignerOptions(this.queryClient)(this.chainName)
+      )
+
+    const tapFaucet = () => this.tapFaucet(address)
 
     if (!noFaucet) {
-      await this.tapFaucet(address)
+      await tapFaucet()
     }
 
     return {
       mnemonic,
       signer,
       address,
-      signingClient,
+      tapFaucet,
+      getSigningClient,
     }
   }
 
@@ -243,38 +249,100 @@ export class StarshipSuite {
      * Number of signers to generate.
      */
     count: number,
-    /**
-     * Amount of tokens to send to each signer.
-     */
-    amount = 10000000
+    {
+      amount = 2_000_000,
+      noLock = false,
+    }: {
+      /**
+       * Amount of tokens to send to each signer. If zero, no tokens will be
+       * sent.
+       */
+      amount?: number
+      /**
+       * If true, will not establish a lock. This should only be used if the
+       * caller already has a lock, like in `ensureChainSetUp`.
+       */
+      noLock?: boolean
+    } = {}
   ): Promise<StarshipSuiteSigner[]> {
-    const faucetSigner = await this.makeSigner()
-    // Tap faucet enough times to generate the amount for each signer.
-    const faucetTapsNeeded = Math.ceil((amount * count) / 10000000000)
-    for (let i = 0; i < faucetTapsNeeded; i++) {
-      await this.tapFaucet(faucetSigner.address)
-    }
+    // Make signers in parallel.
+    const signers = await Promise.all(
+      [...new Array(count)].map(() => this.makeSigner({ noFaucet: true }))
+    )
 
-    // Make signer one at a time.
-    const signers: StarshipSuiteSigner[] = []
-    for (let i = 0; i < count; i++) {
-      signers.push(await this.makeSigner({ noFaucet: true }))
-    }
+    if (amount > 0) {
+      // Establish lock before tapping the faucet for a bunch of signers since
+      // this function is designed to fund signers as fast as the chain node can
+      // handle, and parallelized execution may cause the node to crash.
+      const releaseLock = noLock
+        ? () => {}
+        : await lockfile.lock(SUITE_LOCK_PATH, {
+            retries: {
+              forever: true,
+              minTimeout: 100,
+              factor: 1.1,
+              randomize: true,
+            },
+          })
 
-    // Send tokens to each signer, batched by 100.
-    for (let i = 0; i < signers.length; i += 100) {
-      await faucetSigner.signingClient.signAndBroadcast(
-        faucetSigner.address,
-        signers.slice(i, i + 100).map((signer) => ({
-          typeUrl: '/cosmos.bank.v1beta1.MsgSend',
-          value: {
-            fromAddress: faucetSigner.address,
-            toAddress: signer.address,
-            amount: coins(amount, this.denom),
-          },
-        })),
-        2
+      const faucetSigner = await this.makeSigner()
+      const faucetSignerClient = await faucetSigner.getSigningClient()
+
+      // Tap faucet enough times to generate the amount for each signer.
+      const faucetTapsNeeded = Math.ceil((amount * count) / 10_000_000_000)
+      for (let i = 0; i < faucetTapsNeeded; i++) {
+        await faucetSigner.tapFaucet()
+      }
+
+      // Send tokens to each signer, batched by 3,000.
+      const batchSize = 3_000
+      const batches = Math.ceil(signers.length / batchSize)
+      const getMessagesForBatch = (batch: number) =>
+        signers
+          .slice(batch * batchSize, (batch + 1) * batchSize)
+          .map((signer) => ({
+            typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+            value: {
+              fromAddress: faucetSigner.address,
+              toAddress: signer.address,
+              amount: coins(amount, this.denom),
+            },
+          }))
+
+      // Retrieve account number, sequence, and fee only once to avoid redundant
+      // queries. Use first batch to estimate gas.
+      const { accountNumber, sequence } = await faucetSignerClient.getSequence(
+        faucetSigner.address
       )
+      const gasEstimation = await faucetSignerClient.simulate(
+        faucetSigner.address,
+        getMessagesForBatch(0),
+        undefined
+      )
+      const fee = calculateFee(
+        Math.round(gasEstimation * 2),
+        faucetSignerClient['gasPrice']
+      )
+
+      // Broadcast the transactions in sequence.
+      for (let i = 0; i < batches; i++) {
+        const txRaw = await faucetSignerClient.sign(
+          faucetSigner.address,
+          getMessagesForBatch(i),
+          fee,
+          '',
+          {
+            accountNumber,
+            sequence: sequence + i,
+            chainId: this.chainId,
+          }
+        )
+        const txBytes = TxRaw.encode(txRaw).finish()
+        await faucetSignerClient.broadcastTx(txBytes)
+      }
+
+      // Release lock.
+      await releaseLock()
     }
 
     return signers
@@ -305,9 +373,7 @@ export class StarshipSuite {
       await this.client.getCodeDetails(1)
     } catch (err) {
       if (isErrorWithSubstring(err, 'no such code')) {
-        console.log(
-          'Contracts not uploaded. Uploading... (may take a few minutes)'
-        )
+        console.log('Contracts not uploaded. Uploading... (eta <1 min)')
         await this.uploadContracts()
         console.log('Uploaded contracts.')
       } else {
@@ -324,9 +390,7 @@ export class StarshipSuite {
 
     let config = mustGetSupportedChainConfig(this.chainId)
     if (!config.codeIds.CwAdminFactory) {
-      console.log(
-        'Contracts not configured. Uploading... (may take a few minutes)'
-      )
+      console.log('Contracts not configured. Uploading... (eta <1 min)')
       await this.uploadContracts()
       console.log('Uploaded contracts.')
 
@@ -368,9 +432,9 @@ export class StarshipSuite {
       config.factoryContractAddress = contracts[0]
     } else {
       console.log('Deploying new factory contract...')
-      const { address, signingClient } = await this.makeSigner()
+      const { address, getSigningClient } = await this.makeSigner()
       config.factoryContractAddress = await instantiateSmartContract(
-        signingClient,
+        getSigningClient,
         address,
         config.codeIds.CwAdminFactory,
         'CwAdminFactory',
@@ -394,7 +458,9 @@ export class StarshipSuite {
 
     const contracts = deploySets.flatMap((deploySet) => deploySet.contracts)
     // Make a signer for each contract so we can parallelize the uploads.
-    const signers = await this.makeSigners(contracts.length)
+    const signers = await this.makeSigners(contracts.length, {
+      noLock: true,
+    })
 
     await Promise.all(
       contracts.map(async (contract, index) => {
@@ -402,7 +468,7 @@ export class StarshipSuite {
 
         // Upload the contract.
         const codeId = await contract.upload({
-          client: signer.signingClient,
+          client: await signer.getSigningClient(),
           sender: signer.address,
           contractDirs,
         })
@@ -472,7 +538,7 @@ export class StarshipSuite {
         description: title,
         msgs,
       },
-      signingClient: proposer.signingClient,
+      signingClient: proposer.getSigningClient,
       sender: proposer.address,
     })
 
@@ -481,7 +547,7 @@ export class StarshipSuite {
       voters.map((voter) =>
         proposalModule.vote({
           proposalId: proposalNumber,
-          signingClient: voter.signingClient,
+          signingClient: voter.getSigningClient,
           sender: voter.address,
           vote: 'yes',
         })
@@ -491,7 +557,7 @@ export class StarshipSuite {
     // Execute the proposal.
     await proposalModule.execute({
       proposalId: proposalNumber,
-      signingClient: proposer.signingClient,
+      signingClient: proposer.getSigningClient,
       sender: proposer.address,
     })
   }
@@ -506,7 +572,7 @@ export class StarshipSuite {
     denom: string
   ) {
     await new DaoVotingTokenStakedClient(
-      signer.signingClient,
+      await signer.getSigningClient(),
       signer.address,
       contract
     ).stake(undefined, undefined, coins(amount, denom))
@@ -517,7 +583,7 @@ export class StarshipSuite {
    */
   async registerAsDelegate(contract: string, delegate: StarshipSuiteSigner) {
     await new DaoVoteDelegationClient(
-      delegate.signingClient,
+      await delegate.getSigningClient(),
       delegate.address,
       contract
     ).register()
@@ -528,7 +594,7 @@ export class StarshipSuite {
    */
   async unregisterAsDelegate(contract: string, delegate: StarshipSuiteSigner) {
     await new DaoVoteDelegationClient(
-      delegate.signingClient,
+      await delegate.getSigningClient(),
       delegate.address,
       contract
     ).unregister()
@@ -544,7 +610,7 @@ export class StarshipSuite {
     percent: string
   ) {
     await new DaoVoteDelegationClient(
-      delegator.signingClient,
+      await delegator.getSigningClient(),
       delegator.address,
       contract
     ).delegate({
@@ -562,7 +628,7 @@ export class StarshipSuite {
     delegate: string
   ) {
     await new DaoVoteDelegationClient(
-      delegator.signingClient,
+      await delegator.getSigningClient(),
       delegator.address,
       contract
     ).undelegate({

@@ -25,7 +25,8 @@ describe('simple', () => {
       suite.chainId
     )
 
-    const { address, signingClient } = await suite.makeSigner()
+    const { address, getSigningClient } = await suite.makeSigner()
+    const signingClient = await getSigningClient()
 
     const votingModuleInfo = Cw4VotingModule.generateModuleInstantiateInfo(
       suite.chainId,
@@ -170,7 +171,7 @@ describe('simple', () => {
     )
 
     const adminFactory = new CwAdminFactoryClient(
-      signers[0].signingClient,
+      await signers[0].getSigningClient(),
       signers[0].address,
       factoryContractAddress
     )
@@ -242,9 +243,9 @@ describe('simple', () => {
 
     // Stake 50 tokens for each signer.
     await Promise.all(
-      signers.map(({ address, signingClient }) =>
+      signers.map(({ address, getSigningClient }) =>
         executeSmartContract(
-          signingClient,
+          getSigningClient,
           address,
           dao.votingModule.address,
           {

@@ -6,6 +6,7 @@
   "scripts": {
     "format": "eslint . --fix",
     "lint": "eslint .",
+    "pretest": "npm run starship:start-ports",
     "test": "vitest",
     "starship": "starship --config starship.config.yml",
     "starship:setup": "./scripts/starship_setup.sh",

@@ -76,7 +76,7 @@ describe('delegations', () => {
     )
 
     const adminFactory = new CwAdminFactoryClient(
-      signers[0].signingClient,
+      await signers[0].getSigningClient(),
       signers[0].address,
       chainConfig.factoryContractAddress
     )
@@ -168,7 +168,7 @@ describe('delegations', () => {
     // Create delegations contract.
     const hookCaller = await votingModule.getHookCaller()
     const delegationAddress = await instantiateSmartContract(
-      signers[0].signingClient,
+      signers[0].getSigningClient,
       signers[0].address,
       chainConfig.codeIds.DaoVoteDelegation,
       `DAO DAO Vote Delegation (${Date.now()})`,
