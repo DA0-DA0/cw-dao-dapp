@@ -12,6 +12,7 @@ import { DirectSecp256k1HdWallet, coins } from '@cosmjs/proto-signing'
 import { GasPrice } from '@cosmjs/stargate'
 import { QueryClient } from '@tanstack/react-query'
 import jsYaml from 'js-yaml'
+import lockfile from 'proper-lockfile'
 import {
   ChainConfig,
   ConfigContext,
@@ -38,6 +39,8 @@ import {
   isErrorWithSubstring,
   mustGetSupportedChainConfig,
 } from '@dao-dao/utils'
+
+const SUITE_LOCK_PATH = path.join(__dirname, 'suite.ts')
 
 export type StarshipSuiteSigner = {
   mnemonic: string
@@ -230,8 +233,7 @@ export class StarshipSuite {
   }
 
   /**
-   * Generate many signers and potentially provide them with tokens from the
-   * faucet.
+   * Generate many signers and provide them with tokens from the faucet.
    *
    * This is preferred when generating multiple signers and tapping the faucet,
    * since the faucet endpoint should not be parallelized.
@@ -241,24 +243,38 @@ export class StarshipSuite {
      * Number of signers to generate.
      */
     count: number,
-    {
-      noFaucet = false,
-    }: {
-      /**
-       * If true, will not tap the faucet. Defaults to false.
-       */
-      noFaucet?: boolean
-    } = {}
+    /**
+     * Amount of tokens to send to each signer.
+     */
+    amount = 10000000
   ): Promise<StarshipSuiteSigner[]> {
-    const signers = await Promise.all(
-      [...new Array(count)].map(() => this.makeSigner({ noFaucet: true }))
-    )
+    const faucetSigner = await this.makeSigner()
+    // Tap faucet enough times to generate the amount for each signer.
+    const faucetTapsNeeded = Math.ceil((amount * count) / 10000000000)
+    for (let i = 0; i < faucetTapsNeeded; i++) {
+      await this.tapFaucet(faucetSigner.address)
+    }
 
-    if (!noFaucet) {
-      // Tap faucet one at a time for each signer.
-      for (const signer of signers) {
-        await this.tapFaucet(signer.address)
-      }
+    // Make signer one at a time.
+    const signers: StarshipSuiteSigner[] = []
+    for (let i = 0; i < count; i++) {
+      signers.push(await this.makeSigner({ noFaucet: true }))
+    }
+
+    // Send tokens to each signer, batched by 100.
+    for (let i = 0; i < signers.length; i += 100) {
+      await faucetSigner.signingClient.signAndBroadcast(
+        faucetSigner.address,
+        signers.slice(i, i + 100).map((signer) => ({
+          typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+          value: {
+            fromAddress: faucetSigner.address,
+            toAddress: signer.address,
+            amount: coins(amount, this.denom),
+          },
+        })),
+        2
+      )
     }
 
     return signers
@@ -273,6 +289,17 @@ export class StarshipSuite {
    *   config.
    */
   async ensureChainSetUp() {
+    // Establish lock before potentially uploading contracts/instantiating the
+    // factory so that parallelized tests do not perform redundant operations.
+    const releaseLock = await lockfile.lock(SUITE_LOCK_PATH, {
+      retries: {
+        forever: true,
+        minTimeout: 100,
+        factor: 1.1,
+        randomize: true,
+      },
+    })
+
     // Ensure the contracts are deployed. Upload them if not.
     try {
       await this.client.getCodeDetails(1)
@@ -350,6 +377,9 @@ export class StarshipSuite {
         {}
       )
     }
+
+    // Release lock.
+    await releaseLock()
   }
 
   private async uploadContracts() {
