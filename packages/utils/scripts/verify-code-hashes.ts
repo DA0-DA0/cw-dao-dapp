@@ -9,7 +9,7 @@ import { ContractVersion } from '@dao-dao/types'
 
 import { getCosmWasmClientForChainId } from '../client'
 import { SUPPORTED_CHAINS } from '../constants/chains'
-import { retry } from '../network'
+import { retry } from '../misc'
 
 const errors: Record<string, any> = {}
 const successes: Record<string, any> = {}

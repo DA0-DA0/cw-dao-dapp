@@ -39,19 +39,20 @@
       }
     },
     {
-      "name": "Debug Unit Tests",
+      "name": "Debug All Tests",
       "type": "node",
       "request": "launch",
+      "outputCapture": "std",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/vitest",
       "cwd": "${workspaceFolder}"
     },
     {
-      "name": "Debug Starship Tests",
+      "name": "Debug Integration Tests",
       "type": "node",
       "request": "launch",
+      "outputCapture": "std",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/vitest",
-      "cwd": "${workspaceFolder}/packages/tests",
-      "args": ["--testPathPattern=starship"]
+      "cwd": "${workspaceFolder}/packages/tests"
     }
   ]
 }

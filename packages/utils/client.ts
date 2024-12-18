@@ -25,7 +25,7 @@ import {
 } from '@dao-dao/types/protobuf'
 
 import { getLcdForChainId, getRpcForChainId, isSecretNetwork } from './chain'
-import { retry } from './network'
+import { retry } from './misc'
 import { SecretCosmWasmClient } from './secret'
 
 type HandleConnect<T, P> = (chainId: string, ...args: P[]) => Promise<T>

@@ -1,4 +1,3 @@
-import { coins } from '@cosmjs/proto-signing'
 import { describe, expect, it } from 'vitest'
 
 import { chainQueries } from '@dao-dao/state'
@@ -12,7 +11,6 @@ import { CwAdminFactoryClient } from '@dao-dao/state/contracts/CwAdminFactory'
 import {
   CHAIN_GAS_MULTIPLIER,
   ContractName,
-  executeSmartContract,
   findWasmAttributeValue,
   mustGetSupportedChainConfig,
 } from '@dao-dao/utils'
@@ -123,6 +121,9 @@ describe('simple', () => {
     )
 
     const signers = await suite.makeSigners(5)
+
+    // Ensure first signer has enough funds to create the DAO.
+    await signers[0].tapFaucet()
 
     const totalSupply = 1_000_000
     const initialBalance = 100
@@ -241,17 +242,14 @@ describe('simple', () => {
     ).power
     expect(totalVotingPower).toBe('0')
 
-    // Stake 50 tokens for each signer.
+    // Stake half tokens for each signer.
     await Promise.all(
-      signers.map(({ address, getSigningClient }) =>
-        executeSmartContract(
-          getSigningClient,
-          address,
+      signers.map((signer) =>
+        suite.stakeNativeTokens(
           dao.votingModule.address,
-          {
-            stake: {},
-          },
-          coins(50, govToken.denomOrAddress)
+          signer,
+          initialBalance / 2,
+          govToken.denomOrAddress
         )
       )
     )
@@ -264,6 +262,8 @@ describe('simple', () => {
         dao.votingModule.getTotalVotingPowerQuery()
       )
     ).power
-    expect(totalVotingPower).toBe((50 * signers.length).toString())
+    expect(totalVotingPower).toBe(
+      ((initialBalance / 2) * signers.length).toString()
+    )
   })
 })

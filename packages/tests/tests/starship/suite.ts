@@ -35,6 +35,7 @@ import { TxRaw } from '@dao-dao/types/protobuf/codegen/cosmos/tx/v1beta1/tx'
 import {
   _addChain,
   _addSupportedChain,
+  batch,
   getChainForChainName,
   instantiateSmartContract,
   isErrorWithSubstring,
@@ -542,17 +543,20 @@ export class StarshipSuite {
       sender: proposer.address,
     })
 
-    // Vote on the proposal.
-    await Promise.all(
-      voters.map((voter) =>
+    // Vote on the proposal in batches of 100.
+    await batch({
+      list: voters,
+      batchSize: 100,
+      task: (voter) =>
         proposalModule.vote({
           proposalId: proposalNumber,
           signingClient: voter.getSigningClient,
           sender: voter.address,
           vote: 'yes',
-        })
-      )
-    )
+        }),
+      tries: 3,
+      delayMs: 1000,
+    })
 
     // Execute the proposal.
     await proposalModule.execute({
