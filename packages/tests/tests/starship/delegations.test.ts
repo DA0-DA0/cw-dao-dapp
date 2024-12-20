@@ -543,12 +543,12 @@ describe('delegations', () => {
         chainId: suite.chainId,
         contractAddress: delegationAddress,
         args: {
-          limit: 100,
+          limit: 40,
         },
       })
     )
 
-    expect(delegates.length).toBe(100)
+    expect(delegates.length).toBe(40)
     expect(
       delegates.every((delegate) =>
         delegateSigners.some((signer) => signer.address === delegate.delegate)
