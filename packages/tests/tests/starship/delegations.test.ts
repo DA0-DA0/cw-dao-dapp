@@ -14,13 +14,12 @@ import {
   WidgetId,
 } from '@dao-dao/types'
 import {
-  batch,
   CHAIN_GAS_MULTIPLIER,
   ContractName,
+  batch,
   findWasmAttributeValue,
   instantiateSmartContract,
   mustGetSupportedChainConfig,
-  retry,
 } from '@dao-dao/utils'
 
 import { suite } from './common'
@@ -530,8 +529,7 @@ describe('delegations', () => {
     await batch({
       list: delegateSigners,
       batchSize: 100,
-      task: (signer) =>
-        suite.registerAsDelegate(delegationAddress, signer),
+      task: (signer) => suite.registerAsDelegate(delegationAddress, signer),
       tries: 3,
       delayMs: 1000,
     })

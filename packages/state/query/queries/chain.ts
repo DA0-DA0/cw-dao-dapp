@@ -209,13 +209,16 @@ export const fetchBlock = async ({
 /**
  * Fetch the timestamp for a given block height.
  */
-export const fetchBlockTimestamp = async (queryClient: QueryClient, {
-  chainId,
-  height,
-}: {
-  chainId: string
-  height: number
-}): Promise<number> => {
+export const fetchBlockTimestamp = async (
+  queryClient: QueryClient,
+  {
+    chainId,
+    height,
+  }: {
+    chainId: string
+    height: number
+  }
+): Promise<number> => {
   const block = await queryClient.fetchQuery(
     chainQueries.block({
       chainId,
@@ -1392,9 +1395,7 @@ export const chainQueries = {
   /**
    * Fetch a block, optionally a specific height, or the latest block.
    */
-  block: (
-    options: Parameters<typeof fetchBlock>[0]
-  ) =>
+  block: (options: Parameters<typeof fetchBlock>[0]) =>
     queryOptions({
       queryKey: ['chain', 'block', options],
       queryFn: () => fetchBlock(options),

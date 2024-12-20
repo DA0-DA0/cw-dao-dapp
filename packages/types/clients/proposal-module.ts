@@ -83,7 +83,9 @@ export interface IProposalModuleBase<
      * Cast a vote with the proposal.
      */
     vote?: Vote
-    signingClient: SigningCosmWasmClient | (() => Promise<SigningCosmWasmClient>)
+    signingClient:
+      | SigningCosmWasmClient
+      | (() => Promise<SigningCosmWasmClient>)
     sender: string
     funds?: Coin[]
   }): Promise<{
@@ -97,7 +99,9 @@ export interface IProposalModuleBase<
   vote(options: {
     proposalId: number
     vote: Vote
-    signingClient: SigningCosmWasmClient | (() => Promise<SigningCosmWasmClient>)
+    signingClient:
+      | SigningCosmWasmClient
+      | (() => Promise<SigningCosmWasmClient>)
     sender: string
   }): Promise<void>
 
@@ -106,7 +110,9 @@ export interface IProposalModuleBase<
    */
   execute(options: {
     proposalId: number
-    signingClient: SigningCosmWasmClient | (() => Promise<SigningCosmWasmClient>)
+    signingClient:
+      | SigningCosmWasmClient
+      | (() => Promise<SigningCosmWasmClient>)
     sender: string
     memo?: string
     nonCriticalExtensionOptions?: EncodeObject[]
@@ -117,7 +123,9 @@ export interface IProposalModuleBase<
    */
   close(options: {
     proposalId: number
-    signingClient: SigningCosmWasmClient | (() => Promise<SigningCosmWasmClient>)
+    signingClient:
+      | SigningCosmWasmClient
+      | (() => Promise<SigningCosmWasmClient>)
     sender: string
   }): Promise<void>
 
