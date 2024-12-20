@@ -1,4 +1,6 @@
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import { toHex } from '@cosmjs/encoding'
+import { OfflineSigner } from '@cosmjs/proto-signing'
 import { ChainContext, WalletAccount } from '@cosmos-kit/core'
 import { useChain, useManager } from '@cosmos-kit/react-lite'
 import { SecretUtils } from '@keplr-wallet/types'
@@ -58,7 +60,17 @@ export type UseWalletReturn = Omit<ChainContext, 'chain'> & {
   /**
    * Fetch the relevant signing client for the current wallet.
    */
-  getSigningClient: () => Promise<SupportedSigningCosmWasmClient>
+  getSigningClient: (
+    /**
+     * The preferred signer type. Defaults to 'amino'.
+     */
+    preferredSignType?: 'direct' | 'amino',
+    /**
+     * Whether or not to allow signer fallback if preferred doesn't exist.
+     * Defaults to true.
+     */
+    allowFallback?: boolean
+  ) => Promise<SupportedSigningCosmWasmClient>
   /**
    * Fetch SecretUtils from the wallet if available.
    */
@@ -283,10 +295,41 @@ export const useWallet = ({
         )
       }
 
+      const getSigningCosmWasmClient = async (
+        preferredSignType: 'direct' | 'amino' = 'amino',
+        allowFallback = true
+      ) => {
+        let signer: OfflineSigner
+        try {
+          signer =
+            preferredSignType === 'direct'
+              ? walletChainRef.current.getOfflineSignerDirect()
+              : walletChainRef.current.getOfflineSignerAmino()
+        } catch (err) {
+          console.error('Failed to get preferred signer', err)
+
+          // Fallback to any signer if preferred signer is unavailable.
+          if (allowFallback) {
+            signer = walletChainRef.current.getOfflineSigner()
+          } else {
+            throw new Error(`${preferredSignType} signer not available.`, {
+              cause: err,
+            })
+          }
+        }
+
+        return await SigningCosmWasmClient.connectWithSigner(
+          getRpcForChainId(chain.chainId),
+          signer,
+          makeGetSignerOptions(queryClient)(chain.chainName)
+        )
+      }
+
       // Get relevant signing client based on chain.
-      const getSigningClient = isSecretNetwork(chain.chainId)
-        ? getSecretSigningCosmWasmClient
-        : walletChainRef.current.getSigningCosmWasmClient
+      const getSigningClient: () => Promise<SupportedSigningCosmWasmClient> =
+        isSecretNetwork(chain.chainId)
+          ? getSecretSigningCosmWasmClient
+          : getSigningCosmWasmClient
 
       return {
         ...walletChainRef.current,

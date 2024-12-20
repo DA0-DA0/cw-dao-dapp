@@ -1,6 +1,5 @@
 import { fromBase64 } from '@cosmjs/encoding'
 import { EncodeObject } from '@cosmjs/proto-signing'
-import { SigningStargateClient } from '@cosmjs/stargate'
 import {
   BookOutlined,
   Close,
@@ -39,7 +38,6 @@ import {
   proposalCreatedCardPropsAtom,
   proposalDraftsAtom,
 } from '@dao-dao/state/recoil'
-import { makeGetSignerOptions } from '@dao-dao/state/utils'
 import {
   Button,
   ErrorPage,
@@ -78,7 +76,6 @@ import {
   getDisplayNameForChainId,
   getImageUrlForChainId,
   getNullWalletForChain,
-  getRpcForChainId,
   govProposalActionDataToDecodedContent,
   isCosmWasmStargateMsg,
   makeEmptyUnifiedProfile,
@@ -291,14 +288,8 @@ const InnerNewGovProposal = ({
   const { t } = useTranslation()
   const router = useRouter()
   const chainContext = useConfiguredChainContext()
-  const {
-    isWalletConnected,
-    getOfflineSigner,
-    getOfflineSignerAmino,
-    getOfflineSignerDirect,
-    chain,
-    chainWallet,
-  } = useWallet()
+  const { isWalletConnected, getSigningClient, chain, chainWallet } =
+    useWallet()
   const { getDaoProposalPath } = useDaoNavHelpers()
   const queryClient = useQueryClient()
 
@@ -420,19 +411,8 @@ const InnerNewGovProposal = ({
 
       setLoading(true)
       try {
-        let signer
-        try {
-          signer = holdingAltForDirectSign
-            ? getOfflineSignerDirect()
-            : getOfflineSignerAmino()
-        } catch {
-          signer = getOfflineSigner()
-        }
-
-        const signingClient = await SigningStargateClient.connectWithSigner(
-          getRpcForChainId(chain.chainId),
-          signer,
-          makeGetSignerOptions(queryClient)(chain.chainName)
+        const signingClient = await getSigningClient(
+          holdingAltForDirectSign ? 'direct' : 'amino'
         )
 
         const { events } = await signingClient.signAndBroadcast(
@@ -521,14 +501,11 @@ const InnerNewGovProposal = ({
     },
     [
       isWalletConnected,
-      chain,
       chainWallet,
       t,
       action,
       walletAddress,
-      getOfflineSigner,
-      getOfflineSignerAmino,
-      getOfflineSignerDirect,
+      getSigningClient,
       holdingAltForDirectSign,
       chainContext.chainId,
       chainContext.config.name,

@@ -191,8 +191,10 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
         ),
       }}
       signerOptions={{
-        signingStargate: getSigningOptions,
-        signingCosmwasm: getSigningOptions,
+        // Force ignore version type mismatch caused by dependencies.
+        signingStargate: getSigningOptions as any,
+        // Force ignore version type mismatch caused by dependencies.
+        signingCosmwasm: getSigningOptions as any,
       }}
       walletConnectOptions={{
         signClient: {

@@ -387,7 +387,8 @@ export const SelfRelayExecuteModal = ({
                 estimatedBlockTime: 3000,
                 // How long it waits until looking for acks.
                 estimatedIndexerTime: 3000,
-                gasPrice: new DynamicGasPrice(queryClient, chain),
+                // Force ignore version type mismatch caused by dependencies.
+                gasPrice: new DynamicGasPrice(queryClient, chain) as any,
               }
             )
           )

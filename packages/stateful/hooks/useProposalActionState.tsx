@@ -1,18 +1,12 @@
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import { toUtf8 } from '@cosmjs/encoding'
-import { OfflineSigner } from '@cosmjs/proto-signing'
 import { CancelOutlined, Key, Send } from '@mui/icons-material'
-import { useQueryClient } from '@tanstack/react-query'
 import { usePlausible } from 'next-plausible'
 import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import { useRecoilValue } from 'recoil'
 
-import {
-  DaoProposalSingleCommonSelectors,
-  makeGetSignerOptions,
-} from '@dao-dao/state'
+import { DaoProposalSingleCommonSelectors } from '@dao-dao/state'
 import {
   ProposalCrossChainRelayStatus,
   ProposalStatusAndInfoProps,
@@ -32,7 +26,6 @@ import {
   DAO_CORE_ALLOW_MEMO_ON_EXECUTE_ITEM_KEY,
   NEUTRON_GOVERNANCE_DAO,
   extractProposalDescriptionAndMetadata,
-  getRpcForChainId,
   processError,
 } from '@dao-dao/utils'
 
@@ -73,7 +66,6 @@ export const useProposalActionState = ({
   onCloseSuccess,
 }: UseProposalActionStateOptions): UseProposalActionStateReturn => {
   const { t } = useTranslation()
-  const queryClient = useQueryClient()
   const dao = useDao()
   const {
     options: { proposalNumber },
@@ -83,8 +75,6 @@ export const useProposalActionState = ({
     isWalletConnected,
     address: walletAddress = '',
     getSigningClient,
-    getOfflineSignerDirect,
-    getOfflineSigner,
   } = useWallet()
   const { isMember = false } = useMembership()
   const plausible = usePlausible<PlausibleEvents>()
@@ -123,44 +113,26 @@ export const useProposalActionState = ({
 
       // if gaia metaprotocols extension data exists, must use direct signer.
       // amino signing does not support it i guess...
-      let signingClientGetter = getSigningClient
-      if (metadata?.gaiaMetaprotocolsExtensionData?.length) {
-        try {
-          let signer: OfflineSigner
-          try {
-            signer = getOfflineSignerDirect()
-          } catch {
-            // fallback to signer if direct signer function is unavailable. this
-            // may or may not be a direct signer, so verify
-            signer = getOfflineSigner()
-            if (!('signDirect' in signer)) {
-              throw new Error('Direct signer not available.')
+      const signingClient = metadata?.gaiaMetaprotocolsExtensionData?.length
+        ? async () => {
+            try {
+              return await getSigningClient('direct', false)
+            } catch (err) {
+              console.error(
+                'Failed to retrieve direct signer for Gaia Metaprotocols Extension proposal execution.',
+                err
+              )
+
+              throw new Error(
+                t('error.browserExtensionWalletRequiredForProposalExecution')
+              )
             }
           }
-
-          signingClientGetter = async () =>
-            await SigningCosmWasmClient.connectWithSigner(
-              getRpcForChainId(proposalModule.chainId),
-              signer,
-              makeGetSignerOptions(queryClient)(
-                proposalModule.dao.chain.chainName
-              )
-            )
-        } catch (err) {
-          console.error(
-            'Failed to retrieve direct signer for Gaia Metaprotocols Extension proposal execution.',
-            err
-          )
-
-          throw new Error(
-            t('error.browserExtensionWalletRequiredForProposalExecution')
-          )
-        }
-      }
+        : getSigningClient
 
       await proposalModule.execute({
         proposalId: proposalNumber,
-        signingClient: signingClientGetter,
+        signingClient,
         sender: walletAddress,
         memo: metadata?.memo || (allowMemoOnExecute && memo ? memo : undefined),
         nonCriticalExtensionOptions:
@@ -207,9 +179,6 @@ export const useProposalActionState = ({
     allowMemoOnExecute,
     memo,
     onExecuteSuccess,
-    getOfflineSignerDirect,
-    getOfflineSigner,
-    queryClient,
     t,
     plausible,
     dao,

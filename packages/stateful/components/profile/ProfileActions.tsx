@@ -1,6 +1,4 @@
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import { toHex } from '@cosmjs/encoding'
-import { useQueryClient } from '@tanstack/react-query'
 import cloneDeep from 'lodash.clonedeep'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -10,7 +8,6 @@ import { useTranslation } from 'react-i18next'
 import { useRecoilState, useSetRecoilState } from 'recoil'
 
 import {
-  makeGetSignerOptions,
   meTransactionAtom,
   refreshSavedTxsAtom,
   savedTxsSelector,
@@ -32,7 +29,6 @@ import {
   KVPK_API_BASE,
   ME_SAVED_TX_PREFIX,
   decodeJsonFromBase64,
-  getRpcForChainId,
   objectMatchesStructure,
   processError,
 } from '@dao-dao/utils'
@@ -44,14 +40,11 @@ import { WalletChainSwitcher } from '../wallet'
 
 export const ProfileActions = () => {
   const { t } = useTranslation()
-  const queryClient = useQueryClient()
 
   const {
     address: walletAddress = '',
     hexPublicKey,
-    getOfflineSigner,
-    getOfflineSignerAmino,
-    getOfflineSignerDirect,
+    getSigningClient,
     chain,
   } = useWallet({
     loadAccount: true,
@@ -135,21 +128,9 @@ export const ProfileActions = () => {
       setTxHash('')
 
       try {
-        let signer
-        try {
-          signer = holdingAltForDirectSign
-            ? getOfflineSignerDirect()
-            : getOfflineSignerAmino()
-        } catch {
-          signer = getOfflineSigner()
-        }
-
-        const signingCosmWasmClient =
-          await SigningCosmWasmClient.connectWithSigner(
-            getRpcForChainId(chain.chainId),
-            signer,
-            makeGetSignerOptions(queryClient)(chain.chainName)
-          )
+        const signingCosmWasmClient = await getSigningClient(
+          holdingAltForDirectSign ? 'direct' : 'amino'
+        )
 
         const encodeObjects = data.map((msg) =>
           cwMsgToEncodeObject(chain.chainId, msg, walletAddress)
@@ -168,16 +149,7 @@ export const ProfileActions = () => {
         setError(error)
       }
     },
-    [
-      chain,
-      getOfflineSigner,
-      getOfflineSignerAmino,
-      getOfflineSignerDirect,
-      holdingAltForDirectSign,
-      queryClient,
-      t,
-      walletAddress,
-    ]
+    [chain.chainId, getSigningClient, holdingAltForDirectSign, t, walletAddress]
   )
 
   const { ready: txSavesReady, postRequest: postTxSavesRequest } =
