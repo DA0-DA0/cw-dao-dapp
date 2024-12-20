@@ -550,8 +550,8 @@ describe('delegations', () => {
 
     expect(delegates.length).toBe(40)
     expect(
-      delegates.every((delegate) =>
-        delegateSigners.some((signer) => signer.address === delegate.delegate)
+      delegates.every(({ delegate }) =>
+        delegateSigners.some((signer) => signer.address === delegate)
       )
     ).toBe(true)
   })

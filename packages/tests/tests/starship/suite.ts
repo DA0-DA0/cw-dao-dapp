@@ -251,7 +251,7 @@ export class StarshipSuite {
      */
     count: number,
     {
-      amount = 2_000_000,
+      amount = 1_000_000,
       noLock = false,
     }: {
       /**
@@ -296,7 +296,7 @@ export class StarshipSuite {
       }
 
       // Send tokens to each signer, batched by 3,000.
-      const batchSize = 3_000
+      const batchSize = 1_000
       const batches = Math.ceil(signers.length / batchSize)
       const getMessagesForBatch = (batch: number) =>
         signers
