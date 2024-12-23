@@ -19,6 +19,7 @@ import {
   generateMnemonic,
   useChain,
 } from 'starshipjs'
+import { expect } from 'vitest'
 
 import { CodeIdConfig, DeploySet, getDispatchConfig } from '@dao-dao/dispatch'
 import {
@@ -522,7 +523,8 @@ export class StarshipSuite {
     proposer: StarshipSuiteSigner,
     voters: StarshipSuiteSigner[],
     title: string,
-    msgs: UnifiedCosmosMsg[]
+    msgs: UnifiedCosmosMsg[],
+    expectExecutionResult: 'success' | 'failure' | 'any' = 'success'
   ) {
     const proposalModule = dao.proposalModules.find(
       (m) => m instanceof SingleChoiceProposalModule
@@ -564,6 +566,17 @@ export class StarshipSuite {
       signingClient: proposer.getSigningClient,
       sender: proposer.address,
     })
+
+    // Ensure the proposal execution succeeded.
+    if (expectExecutionResult !== 'any') {
+      const { proposal } = await proposalModule.getProposal({
+        proposalId: proposalNumber,
+      })
+
+      expect(proposal.status).toBe(
+        expectExecutionResult === 'success' ? 'executed' : 'execution_failed'
+      )
+    }
   }
 
   /**

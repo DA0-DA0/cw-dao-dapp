@@ -316,7 +316,7 @@ describe('delegations', () => {
     expect(delegates[0].power).toBe('1296')
   })
 
-  it('should create a large token-based DAO with delegations', async () => {
+  it.only('should create a large token-based DAO with delegations and test gas limits', async () => {
     const chainConfig = mustGetSupportedChainConfig(suite.chainId)
 
     const signers = await suite.makeSigners(1_000)
@@ -325,7 +325,7 @@ describe('delegations', () => {
     await signers[0].tapFaucet()
 
     const totalSupply = 100_000_000
-    const initialBalance = 1_000
+    const initialBalance = 2_000
     const initialDaoBalance = totalSupply - initialBalance * signers.length
 
     const factoryTokenDenomCreationFee = await suite.queryClient.fetchQuery(
@@ -439,7 +439,8 @@ describe('delegations', () => {
     ).power
     expect(totalVotingPower).toBe('0')
 
-    // Stake all tokens for each signer in batches of 100.
+    // Stake half tokens for each signer in batches of 100.
+    const initialStaked = initialBalance / 2
     await batch({
       list: signers,
       batchSize: 100,
@@ -447,7 +448,7 @@ describe('delegations', () => {
         suite.stakeNativeTokens(
           votingModule.address,
           signer,
-          initialBalance,
+          initialStaked,
           govToken.denomOrAddress
         ),
       tries: 3,
@@ -462,7 +463,7 @@ describe('delegations', () => {
         votingModule.getTotalVotingPowerQuery()
       )
     ).power
-    expect(totalVotingPower).toBe((initialBalance * signers.length).toString())
+    expect(totalVotingPower).toBe((initialStaked * signers.length).toString())
 
     // Create delegations contract.
     const hookCaller = await votingModule.getHookCaller()
@@ -495,7 +496,7 @@ describe('delegations', () => {
         chain: suite.chain,
         config: chainConfig,
       },
-      address: signers[0].address,
+      address: dao.coreAddress,
       context: {
         type: ActionContextType.Dao,
         dao,
@@ -524,6 +525,7 @@ describe('delegations', () => {
     // Register first 1,000 signers as delegates.
     const delegateSigners = signers.slice(0, signers.length / 10)
     const delegatorSigners = signers.slice(signers.length / 10)
+    const delegator = delegatorSigners[0]
 
     // Register delegates in batches of 100.
     await batch({
@@ -552,6 +554,83 @@ describe('delegations', () => {
     expect(
       delegates.every(({ delegate }) =>
         delegateSigners.some((signer) => signer.address === delegate)
+      )
+    ).toBe(true)
+    expect(delegates.every(({ power }) => power === '0')).toBe(true)
+
+    // TEST 1: Update voting power for a delegator, which loops through all
+    // delegates and updates their delegated voting power. This should cause a
+    // gas error if there are too many delegates to update.
+
+    // Delegate 0.5% each to first 100 delegates.
+    const percentDelegated = 0.005
+    await (
+      await delegator.getSigningClient()
+    ).executeMultiple(
+      delegator.address,
+      delegateSigners.slice(0, 100).map(({ address }) => ({
+        contractAddress: delegationAddress,
+        msg: {
+          delegate: {
+            delegate: address,
+            percent: percentDelegated.toString(),
+          },
+        },
+      })),
+      CHAIN_GAS_MULTIPLIER
+    )
+
+    // Wait a block to ensure the delegations are registered.
+    await suite.waitOneBlock()
+
+    // Check that the voting power is distributed correctly.
+    delegates = (
+      await suite.queryClient.fetchQuery(
+        daoVoteDelegationQueries.delegates(suite.queryClient, {
+          chainId: suite.chainId,
+          contractAddress: delegationAddress,
+          args: {
+            limit: 30,
+          },
+        })
+      )
+    ).delegates
+
+    expect(delegates.length).toBe(30)
+    expect(
+      delegates.every(
+        ({ power }) => power === (initialStaked * percentDelegated).toString()
+      )
+    ).toBe(true)
+
+    // Stake the other half of the tokens, which should update all delegations.
+    await suite.stakeNativeTokens(
+      votingModule.address,
+      delegator,
+      initialBalance - initialStaked,
+      govToken.denomOrAddress
+    )
+
+    // Wait a block to ensure the staking is complete.
+    await suite.waitOneBlock()
+
+    // Check that the voting power is updated correctly.
+    delegates = (
+      await suite.queryClient.fetchQuery(
+        daoVoteDelegationQueries.delegates(suite.queryClient, {
+          chainId: suite.chainId,
+          contractAddress: delegationAddress,
+          args: {
+            limit: 35,
+          },
+        })
+      )
+    ).delegates
+
+    expect(delegates.length).toBe(35)
+    expect(
+      delegates.every(
+        ({ power }) => power === (initialBalance * percentDelegated).toString()
       )
     ).toBe(true)
   })
