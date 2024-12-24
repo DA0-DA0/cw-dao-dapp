@@ -1186,6 +1186,29 @@
       "DaoVotingCw4": 8028,
       "DaoVotingCw721Staked": 8030,
       "DaoVotingTokenStaked": 8032
+    },
+    "2.7.0-alpha.2": {
+      "Cw1Whitelist": 4618,
+      "Cw4Group": 4619,
+      "Cw721Base": 4620,
+      "CwAdminFactory": 8687,
+      "CwPayrollFactory": 8688,
+      "CwTokenfactoryIssuer": 8703,
+      "CwTokenSwap": 8689,
+      "CwVesting": 8701,
+      "DaoDaoCore": 8690,
+      "DaoPreProposeApprovalMultiple": 8691,
+      "DaoPreProposeApprovalSingle": 8692,
+      "DaoPreProposeApprover": 8693,
+      "DaoPreProposeMultiple": 8694,
+      "DaoPreProposeSingle": 8695,
+      "DaoProposalMultiple": 8696,
+      "DaoProposalSingle": 8697,
+      "DaoRewardsDistributor": 8698,
+      "DaoVoteDelegation": 8699,
+      "DaoVotingCw4": 8700,
+      "DaoVotingCw721Staked": 8702,
+      "DaoVotingTokenStaked": 8704
     }
   },
   "provider": {
