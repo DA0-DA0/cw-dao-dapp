@@ -1,4 +1,4 @@
-import { DaoWidget, WidgetId } from '@dao-dao/types'
+import { DaoWidget, IDaoBase, WidgetId } from '@dao-dao/types'
 
 import { DAO_WIDGET_ITEM_NAMESPACE } from './constants'
 import { getFilteredDaoItemsByPrefix } from './dao'
@@ -15,11 +15,11 @@ export const getWidgetStorageItemKey = (id: WidgetId | string): string =>
 /**
  * Get the DAO widgets from the DAO storage items.
  *
- * @param items The DAO storage items.
+ * @param dao The DAO client.
  * @returns Parsed DAO widgets.
  */
-export const getDaoWidgets = (items: Record<string, string>): DaoWidget[] =>
-  getFilteredDaoItemsByPrefix(items, getWidgetStorageItemKey(''))
+export const getDaoWidgets = (dao: IDaoBase): DaoWidget[] =>
+  getFilteredDaoItemsByPrefix(dao.info.items, getWidgetStorageItemKey(''))
     .map(([id, widgetJson]): DaoWidget | undefined => {
       try {
         return {

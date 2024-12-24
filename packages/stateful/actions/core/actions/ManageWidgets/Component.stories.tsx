@@ -2,6 +2,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react'
 
 import { CHAIN_ID } from '@dao-dao/storybook'
 import { ReactHookFormDecorator } from '@dao-dao/storybook/decorators'
+import { ContractVersion } from '@dao-dao/types'
 
 import { SuspenseLoader } from '../../../../components'
 import { PressWidget, getWidgets } from '../../../../widgets'
@@ -27,7 +28,10 @@ Default.args = {
   isCreating: true,
   errors: {},
   options: {
-    availableWidgets: getWidgets(CHAIN_ID),
+    availableWidgets: getWidgets({
+      chainId: CHAIN_ID,
+      version: ContractVersion.V260,
+    }),
     existingWidgets: [
       {
         id: PressWidget.id,

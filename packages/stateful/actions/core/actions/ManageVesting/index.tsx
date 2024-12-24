@@ -467,7 +467,7 @@ export class ManageVestingAction extends ActionBase<ManageVestingData> {
 
     this.widgetData =
       options.context.type === ActionContextType.Dao
-        ? getDaoWidgets(options.context.dao.info.items).find(
+        ? getDaoWidgets(options.context.dao).find(
             ({ id }) => id === WidgetId.VestingPayments
           )?.values
         : undefined

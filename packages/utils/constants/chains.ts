@@ -464,7 +464,7 @@ const BASE_SUPPORTED_CHAINS: Omit<
           govProp: 'https://testnet.ping.pub/juno/gov/REPLACE',
           wallet: 'https://testnet.ping.pub/juno/account/REPLACE',
         },
-        latestVersion: ContractVersion.V270Alpha1,
+        latestVersion: ContractVersion.V260,
       },
       {
         chainId: ChainId.OsmosisTestnet,

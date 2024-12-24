@@ -41,7 +41,7 @@ export enum ContractVersion {
   V260 = '2.6.0',
 
   // delegations testing
-  V270Alpha1 = '2.7.0-alpha.1',
+  V270Alpha2 = '2.7.0-alpha.2',
 }
 
 /**
@@ -114,4 +114,8 @@ export enum Feature {
    * outstanding claims.
    */
   UnlimitedNftClaims,
+  /**
+   * Vote delegation was added.
+   */
+  VoteDelegation,
 }

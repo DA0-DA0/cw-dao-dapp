@@ -2,6 +2,7 @@ import { EscalatorWarningRounded } from '@mui/icons-material'
 
 import {
   ActionContextType,
+  ContractVersion,
   VoteDelegationWidgetData,
   Widget,
   WidgetId,
@@ -21,6 +22,7 @@ export const VoteDelegationWidget: Widget<VoteDelegationWidgetData> = {
   IconFilled: EscalatorWarningRounded,
   location: WidgetLocation.Manual,
   visibilityContext: WidgetVisibilityContext.Always,
+  minVersion: ContractVersion.V270Alpha2,
   // supportsDaoCreation: true,
   defaultValues: {
     address: '',

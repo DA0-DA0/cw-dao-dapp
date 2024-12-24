@@ -1,4 +1,5 @@
-import { Widget } from '@dao-dao/types'
+import { Widget, WidgetFilterOptions } from '@dao-dao/types'
+import { versionGte } from '@dao-dao/utils'
 
 import {
   PressWidget,
@@ -8,7 +9,11 @@ import {
 } from './widgets'
 
 // Add widgets here.
-export const getWidgets = (chainId: string): readonly Widget[] =>
+export const getWidgets = ({
+  chainId,
+  version,
+  isDaoCreation = false,
+}: WidgetFilterOptions): readonly Widget[] =>
   [
     // MintNftWidget,
     VestingPaymentsWidget,
@@ -16,8 +21,11 @@ export const getWidgets = (chainId: string): readonly Widget[] =>
     VoteDelegationWidget,
     PressWidget,
   ].filter(
-    (widget) => !widget.isChainSupported || widget.isChainSupported(chainId)
+    (widget) =>
+      (!widget.isChainSupported || widget.isChainSupported(chainId)) &&
+      (!widget.minVersion || versionGte(version, widget.minVersion)) &&
+      (!isDaoCreation || widget.supportsDaoCreation)
   )
 
-export const getWidgetById = (chainId: string, id: string) =>
-  getWidgets(chainId).find((widget) => widget.id === id)
+export const getWidgetById = (options: WidgetFilterOptions, id: string) =>
+  getWidgets(options).find((widget) => widget.id === id)

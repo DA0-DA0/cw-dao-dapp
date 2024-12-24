@@ -12,6 +12,7 @@ import {
   ProcessedMessage,
 } from './actions'
 import { UnifiedCosmosMsg } from './contracts'
+import { ContractVersion } from './features'
 
 export enum WidgetId {
   MintNft = 'mint_nft',
@@ -89,6 +90,10 @@ export type Widget<Variables extends Record<string, unknown> = any> = {
    */
   isChainSupported?: (chainId: string) => boolean
   /**
+   * Minimum version of the DAO contracts that the widget is supported on.
+   */
+  minVersion?: ContractVersion
+  /**
    * Whether or not the widget can be enabled on DAO creation. Defaults to
    * false.
    */
@@ -161,4 +166,22 @@ export type LoadedWidget<Data extends Record<string, unknown> = any> = {
   widget: Widget
   daoWidget: DaoWidget<Data>
   WidgetComponent: ComponentType
+}
+
+/**
+ * Options used to filter widgets.
+ */
+export type WidgetFilterOptions = {
+  /**
+   * Chain ID.
+   */
+  chainId: string
+  /**
+   * Version of the DAO contracts.
+   */
+  version: ContractVersion
+  /**
+   * Whether or not we're in the DAO creation context. Defaults to false.
+   */
+  isDaoCreation?: boolean
 }

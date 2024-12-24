@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useChain, useDao } from '@dao-dao/stateless'
+import { useDao } from '@dao-dao/stateless'
 import {
   LoadedWidget,
   LoadingData,
@@ -27,18 +27,23 @@ export const useWidgets = ({
   location,
 }: UseWidgetsOptions = {}): UseWidgetsResult => {
   const { t } = useTranslation()
-  const { chainId } = useChain()
-  const { items } = useDao().info
+  const dao = useDao()
   const { isMember = false } = useMembership()
 
   const loadingWidgets = useMemo((): LoadingData<LoadedWidget[]> => {
-    const daoWidgets = getDaoWidgets(items)
+    const daoWidgets = getDaoWidgets(dao)
 
     return {
       loading: false,
       data: daoWidgets
         .map((daoWidget): LoadedWidget | undefined => {
-          const widget = getWidgetById(chainId, daoWidget.id)
+          const widget = getWidgetById(
+            {
+              chainId: dao.chainId,
+              version: dao.coreVersion,
+            },
+            daoWidget.id
+          )
           // Enforce location filter.
           if (!widget || (location && widget.location !== location)) {
             return
@@ -74,7 +79,7 @@ export const useWidgets = ({
         // Filter out any undefined widgets.
         .filter((widget): widget is LoadedWidget => !!widget),
     }
-  }, [items, isMember, t, location, chainId])
+  }, [dao, isMember, t, location])
 
   return loadingWidgets
 }

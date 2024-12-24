@@ -1,3 +1,4 @@
+import { coins } from '@cosmjs/proto-signing'
 import { describe, expect, it } from 'vitest'
 
 import { chainQueries, daoVoteDelegationQueries } from '@dao-dao/state'
@@ -11,8 +12,10 @@ import { ManageWidgetsAction } from '@dao-dao/stateful/actions/core/actions'
 import {
   ActionChainContextType,
   ActionContextType,
+  ProposalStatusEnum,
   WidgetId,
 } from '@dao-dao/types'
+import { MsgSend } from '@dao-dao/types/protobuf/codegen/cosmos/bank/v1beta1/tx'
 import {
   CHAIN_GAS_MULTIPLIER,
   ContractName,
@@ -28,14 +31,14 @@ describe('delegations', () => {
   it('should create a token-based DAO with delegations', async () => {
     const chainConfig = mustGetSupportedChainConfig(suite.chainId)
 
-    const signers = await suite.makeSigners(100)
+    const members = await suite.makeSigners(100)
 
-    // Ensure first signer has enough funds to create the DAO.
-    await signers[0].tapFaucet()
+    // Ensure first member has enough funds to create the DAO.
+    await members[0].tapFaucet()
 
     const totalSupply = 1_000_000
     const initialBalance = 100
-    const initialDaoBalance = totalSupply - initialBalance * signers.length
+    const initialDaoBalance = totalSupply - initialBalance * members.length
 
     const factoryTokenDenomCreationFee = await suite.queryClient.fetchQuery(
       chainQueries.tokenFactoryDenomCreationFee({ chainId: suite.chainId })
@@ -48,7 +51,7 @@ describe('delegations', () => {
             symbol: 'TEST',
             decimals: 6,
             name: 'Test Token',
-            initialBalances: signers.map(({ address }) => ({
+            initialBalances: members.map(({ address }) => ({
               address,
               amount: initialBalance.toString(),
             })),
@@ -60,9 +63,12 @@ describe('delegations', () => {
 
     const proposalModuleSingleInfo =
       SingleChoiceProposalModule.generateModuleInstantiateInfo(suite.chainId, {
-        // Make any single vote pass.
         threshold: {
-          absolute_count: { threshold: '1' },
+          absolute_percentage: {
+            percentage: {
+              majority: {},
+            },
+          },
         },
         // 1 hour
         maxVotingPeriod: { time: 60 * 60 },
@@ -81,8 +87,8 @@ describe('delegations', () => {
     )
 
     const adminFactory = new CwAdminFactoryClient(
-      await signers[0].getSigningClient(),
-      signers[0].address,
+      await members[0].getSigningClient(),
+      members[0].address,
       chainConfig.factoryContractAddress
     )
 
@@ -148,12 +154,12 @@ describe('delegations', () => {
     ).power
     expect(totalVotingPower).toBe('0')
 
-    // Stake 50 tokens for each signer.
+    // Stake 50 tokens for each member.
     await Promise.all(
-      signers.map((signer) =>
+      members.map((member) =>
         suite.stakeNativeTokens(
           votingModule.address,
-          signer,
+          member,
           50,
           govToken.denomOrAddress
         )
@@ -168,13 +174,16 @@ describe('delegations', () => {
         votingModule.getTotalVotingPowerQuery()
       )
     ).power
-    expect(totalVotingPower).toBe((50 * signers.length).toString())
+    expect(totalVotingPower).toBe((50 * members.length).toString())
 
     // Create delegations contract.
     const hookCaller = await votingModule.getHookCaller()
+    // a delegate can only utilize at most 10% of total voting power, even if
+    // they are delegated more.
+    const vpCapPercent = 0.1
     const delegationAddress = await instantiateSmartContract(
-      signers[0].getSigningClient,
-      signers[0].address,
+      members[0].getSigningClient,
+      members[0].address,
       chainConfig.codeIds.DaoVoteDelegation,
       `DAO DAO Vote Delegation (${Date.now()})`,
       {
@@ -182,14 +191,14 @@ describe('delegations', () => {
         // 90 days assuming 3 seconds per block.
         delegation_validity_blocks: (90 * 24 * 3600) / 3,
         no_sync_proposal_modules: false,
-        // a delegate can only utilize at most 10% of total voting power, even
-        // if they are delegated more.
-        vp_cap_percent: '0.1',
+        vp_cap_percent: vpCapPercent.toString(),
         vp_hook_callers: [hookCaller],
       },
       undefined,
       dao.coreAddress
     )
+
+    const delegatedVpCap = Math.floor(Number(totalVotingPower) * vpCapPercent)
 
     // Propose to set up delegations.
     const manageWidgetsAction = new ManageWidgetsAction({
@@ -201,7 +210,7 @@ describe('delegations', () => {
         chain: suite.chain,
         config: chainConfig,
       },
-      address: signers[0].address,
+      address: dao.coreAddress,
       context: {
         type: ActionContextType.Dao,
         dao,
@@ -220,20 +229,19 @@ describe('delegations', () => {
 
     await suite.createAndExecuteSingleChoiceProposal(
       dao,
-      signers[0],
-      // Only need one voter to pass the proposal.
-      signers.slice(0, 1),
+      members[0],
+      members,
       'Set up delegations',
       msgs
     )
 
-    // Register first 10 signers as delegates.
-    const delegateSigners = signers.slice(0, 10)
-    const delegatorSigners = signers.slice(10)
+    // Register first 10 members as delegates.
+    const delegateMembers = members.slice(0, 10)
+    const delegatorMembers = members.slice(10)
 
     await Promise.all(
-      delegateSigners.map((signer) =>
-        suite.registerAsDelegate(delegationAddress, signer)
+      delegateMembers.map((member) =>
+        suite.registerAsDelegate(delegationAddress, member)
       )
     )
 
@@ -253,8 +261,8 @@ describe('delegations', () => {
 
     expect(delegates.length).toBe(10)
     expect(
-      delegateSigners.every((signer) =>
-        delegates.some((delegate) => delegate.delegate === signer.address)
+      delegateMembers.every((member) =>
+        delegates.some((delegate) => delegate.delegate === member.address)
       )
     ).toBe(true)
 
@@ -264,7 +272,7 @@ describe('delegations', () => {
     // delegates, the third delegates 33% of their voting power to the first
     // three delegates, and so on.
     await Promise.all(
-      delegatorSigners.map(async (delegator, index) => {
+      delegatorMembers.map(async (delegator, index) => {
         const numDelegates = (index % delegates.length) + 1
         const percent = (Math.floor(100 / numDelegates) / 100).toString()
 
@@ -314,19 +322,74 @@ describe('delegations', () => {
     expect(delegates[1].power).toBe('846')
     // 846 + 90 / 10 * floor((floor(100 / 1) / 100) * 50) = 1296
     expect(delegates[0].power).toBe('1296')
+
+    // Create a proposal.
+    const { proposalNumber } = await suite.createSingleChoiceProposal(
+      dao,
+      members[0],
+      'Test proposal'
+    )
+
+    // Vote on the proposal by all the delegates, which together carry enough
+    // voting power to pass the proposal. It should *not* pass early, since
+    // their delegators can still override their delegates' votes and change the
+    // outcome. Thus, it should still be open.
+    let proposal = await suite.voteOnSingleChoiceProposal(
+      proposalModule,
+      proposalNumber,
+      delegateMembers,
+      'yes'
+    )
+
+    expect(proposal.status).toBe(ProposalStatusEnum.Open)
+    const delegatesYesVp =
+      // Personal VP of all delegates: 50 * 10 = 500
+      50 * delegateMembers.length +
+      // Delegated VP of all delegates, each capped at 10% of total VP.
+      [1296, 846, 621, 477, 369, 279, 207, 144, 90, 45].reduce(
+        (acc, curr) => acc + Math.min(curr, delegatedVpCap),
+        0
+      )
+    expect(proposal.votes.yes).toBe(BigInt(delegatesYesVp).toString())
+    expect(proposal.individual_votes.yes).toBe(
+      BigInt(50 * delegateMembers.length).toString()
+    )
+
+    // Vote no with 51 delegators to definitively reject the proposal,
+    // overriding their delegates' votes.
+    proposal = await suite.voteOnSingleChoiceProposal(
+      proposalModule,
+      proposalNumber,
+      delegatorMembers.slice(0, 51),
+      'no'
+    )
+
+    expect(proposal.status).toBe(ProposalStatusEnum.Rejected)
+    // Partial yes votes from delegates were overridden by their delegators.
+    expect(Number(proposal.votes.yes)).toBeLessThan(delegatesYesVp)
+    // 51 delegators voted no.
+    expect(proposal.votes.no).toBe(BigInt(50 * 51).toString())
+    // Just delegates voted yes.
+    expect(proposal.individual_votes.yes).toBe(
+      BigInt(50 * delegateMembers.length).toString()
+    )
+    // 51 delegators voted no.
+    expect(proposal.individual_votes.no).toBe(BigInt(50 * 51).toString())
   })
 
   it.only('should create a large token-based DAO with delegations and test gas limits', async () => {
     const chainConfig = mustGetSupportedChainConfig(suite.chainId)
 
-    const signers = await suite.makeSigners(1_000)
+    const creator = await suite.makeSigner()
+    const creatorSigningClient = await creator.getSigningClient()
 
-    // Ensure first signer has enough funds to create the DAO.
-    await signers[0].tapFaucet()
+    const members = await suite.makeSigners(5_000)
 
-    const totalSupply = 100_000_000
+    // Ensure creator has enough funds to create the DAO.
+    await creator.tapFaucet()
+
+    // How much to give to each member.
     const initialBalance = 2_000
-    const initialDaoBalance = totalSupply - initialBalance * signers.length
 
     const factoryTokenDenomCreationFee = await suite.queryClient.fetchQuery(
       chainQueries.tokenFactoryDenomCreationFee({ chainId: suite.chainId })
@@ -339,11 +402,12 @@ describe('delegations', () => {
             symbol: 'TEST',
             decimals: 6,
             name: 'Test Token',
-            initialBalances: signers.map(({ address }) => ({
-              address,
-              amount: initialBalance.toString(),
-            })),
-            initialDaoBalance: initialDaoBalance.toString(),
+            initialBalances: [
+              {
+                address: creator.address,
+                amount: BigInt(members.length * initialBalance).toString(),
+              },
+            ],
             funds: factoryTokenDenomCreationFee,
           },
         },
@@ -372,8 +436,8 @@ describe('delegations', () => {
     )
 
     const adminFactory = new CwAdminFactoryClient(
-      await signers[0].getSigningClient(),
-      signers[0].address,
+      creatorSigningClient,
+      creator.address,
       chainConfig.factoryContractAddress
     )
 
@@ -430,7 +494,7 @@ describe('delegations', () => {
         denom: govToken.denomOrAddress,
       })
     )
-    expect(supply).toBe(totalSupply.toString())
+    expect(supply).toBe(BigInt(members.length * initialBalance).toString())
 
     let totalVotingPower = (
       await suite.queryClient.fetchQuery(
@@ -439,20 +503,43 @@ describe('delegations', () => {
     ).power
     expect(totalVotingPower).toBe('0')
 
-    // Stake half tokens for each signer in batches of 100.
-    const initialStaked = initialBalance / 2
+    // Send tokens to each member in batches of 1,000.
     await batch({
-      list: signers,
+      list: members,
+      batchSize: 1_000,
+      grouped: true,
+      task: (recipients) =>
+        creatorSigningClient.signAndBroadcast(
+          creator.address,
+          recipients.map(({ address }) => ({
+            typeUrl: MsgSend.typeUrl,
+            value: MsgSend.fromPartial({
+              fromAddress: creator.address,
+              toAddress: address,
+              amount: coins(initialBalance, govToken.denomOrAddress),
+            }),
+          })),
+          CHAIN_GAS_MULTIPLIER
+        ),
+      tries: 3,
+      delayMs: 1_000,
+    })
+
+    // Stake half tokens for each member in batches of 100.
+    const initialStaked = initialBalance / 2
+    const remainingUnstaked = initialBalance - initialStaked
+    await batch({
+      list: members,
       batchSize: 100,
-      task: (signer) =>
+      task: (member) =>
         suite.stakeNativeTokens(
           votingModule.address,
-          signer,
+          member,
           initialStaked,
           govToken.denomOrAddress
         ),
       tries: 3,
-      delayMs: 1000,
+      delayMs: 1_000,
     })
 
     // Wait a block to ensure the staking is complete.
@@ -463,13 +550,13 @@ describe('delegations', () => {
         votingModule.getTotalVotingPowerQuery()
       )
     ).power
-    expect(totalVotingPower).toBe((initialStaked * signers.length).toString())
+    expect(totalVotingPower).toBe((initialStaked * members.length).toString())
 
     // Create delegations contract.
     const hookCaller = await votingModule.getHookCaller()
     const delegationAddress = await instantiateSmartContract(
-      signers[0].getSigningClient,
-      signers[0].address,
+      creator.getSigningClient,
+      creator.address,
       chainConfig.codeIds.DaoVoteDelegation,
       `DAO DAO Vote Delegation (${Date.now()})`,
       {
@@ -515,25 +602,26 @@ describe('delegations', () => {
 
     await suite.createAndExecuteSingleChoiceProposal(
       dao,
-      signers[0],
+      members[0],
       // Only need one voter to pass the proposal.
-      signers.slice(0, 1),
+      members.slice(0, 1),
       'Set up delegations',
       msgs
     )
 
-    // Register first 1,000 signers as delegates.
-    const delegateSigners = signers.slice(0, signers.length / 10)
-    const delegatorSigners = signers.slice(signers.length / 10)
-    const delegator = delegatorSigners[0]
+    // Register first 300 members as delegates.
+    const numDelegates = 300
+    const delegateMembers = members.slice(0, numDelegates)
+    const delegatorMembers = members.slice(numDelegates)
+    const delegator = delegatorMembers[0]
 
     // Register delegates in batches of 100.
     await batch({
-      list: delegateSigners,
+      list: delegateMembers,
       batchSize: 100,
-      task: (signer) => suite.registerAsDelegate(delegationAddress, signer),
+      task: (member) => suite.registerAsDelegate(delegationAddress, member),
       tries: 3,
-      delayMs: 1000,
+      delayMs: 1_000,
     })
 
     // Wait a block to ensure the delegations are registered.
@@ -553,32 +641,45 @@ describe('delegations', () => {
     expect(delegates.length).toBe(40)
     expect(
       delegates.every(({ delegate }) =>
-        delegateSigners.some((signer) => signer.address === delegate)
+        delegateMembers.some((member) => member.address === delegate)
       )
     ).toBe(true)
-    expect(delegates.every(({ power }) => power === '0')).toBe(true)
+    expect(delegates).toEqual(
+      delegates.map((d) => ({
+        ...d,
+        power: '0',
+      }))
+    )
 
     // TEST 1: Update voting power for a delegator, which loops through all
     // delegates and updates their delegated voting power. This should cause a
     // gas error if there are too many delegates to update.
 
-    // Delegate 0.5% each to first 100 delegates.
-    const percentDelegated = 0.005
-    await (
-      await delegator.getSigningClient()
-    ).executeMultiple(
-      delegator.address,
-      delegateSigners.slice(0, 100).map(({ address }) => ({
-        contractAddress: delegationAddress,
-        msg: {
-          delegate: {
-            delegate: address,
-            percent: percentDelegated.toString(),
-          },
-        },
-      })),
-      CHAIN_GAS_MULTIPLIER
-    )
+    // Delegate to each of the delegates in batches of 100. Round to 5 decimal
+    // places to avoid infinitely repeating decimals.
+    const percentDelegated = Math.floor(100_000 / numDelegates / 3) / 100_000
+    const delegatorSigningClient = await delegator.getSigningClient()
+    await batch({
+      list: delegateMembers,
+      batchSize: 100,
+      grouped: true,
+      task: (delegates) =>
+        delegatorSigningClient.executeMultiple(
+          delegator.address,
+          delegates.map(({ address }) => ({
+            contractAddress: delegationAddress,
+            msg: {
+              delegate: {
+                delegate: address,
+                percent: percentDelegated.toString(),
+              },
+            },
+          })),
+          CHAIN_GAS_MULTIPLIER
+        ),
+      tries: 3,
+      delayMs: 1_000,
+    })
 
     // Wait a block to ensure the delegations are registered.
     await suite.waitOneBlock()
@@ -597,17 +698,18 @@ describe('delegations', () => {
     ).delegates
 
     expect(delegates.length).toBe(30)
-    expect(
-      delegates.every(
-        ({ power }) => power === (initialStaked * percentDelegated).toString()
-      )
-    ).toBe(true)
+    expect(delegates).toEqual(
+      delegates.map((d) => ({
+        ...d,
+        power: BigInt(Math.floor(initialStaked * percentDelegated)).toString(),
+      }))
+    )
 
     // Stake the other half of the tokens, which should update all delegations.
     await suite.stakeNativeTokens(
       votingModule.address,
       delegator,
-      initialBalance - initialStaked,
+      remainingUnstaked,
       govToken.denomOrAddress
     )
 
@@ -628,10 +730,157 @@ describe('delegations', () => {
     ).delegates
 
     expect(delegates.length).toBe(35)
-    expect(
-      delegates.every(
-        ({ power }) => power === (initialBalance * percentDelegated).toString()
-      )
-    ).toBe(true)
+    expect(delegates).toEqual(
+      delegates.map((d) => ({
+        ...d,
+        power: BigInt(Math.floor(initialBalance * percentDelegated)).toString(),
+      }))
+    )
+
+    // Undo the half stake so that all members are equal again.
+    await suite.unstakeNativeTokens(
+      votingModule.address,
+      delegator,
+      remainingUnstaked
+    )
+
+    // Wait a block to ensure the staking is complete.
+    await suite.waitOneBlock()
+
+    // TEST 2: Override all delegates' votes, which loops through all delegates
+    // and updates both their ballots and unvoted delegated voting power on that
+    // proposal. This should cause a gas error if there are too many delegates
+    // to update.
+
+    let { proposalNumber, proposal } = await suite.createSingleChoiceProposal(
+      dao,
+      members[0],
+      'Test'
+    )
+
+    // Get the unvoted delegated voting power for each delegate from the
+    // previous list query.
+    let unvotedDelegateVotingPowers = await Promise.all(
+      delegates.map(async ({ delegate }) => {
+        const { effective, total } = await suite.queryClient.fetchQuery(
+          daoVoteDelegationQueries.unvotedDelegatedVotingPower(
+            suite.queryClient,
+            {
+              chainId: suite.chainId,
+              contractAddress: delegationAddress,
+              args: {
+                delegate,
+                height: proposal.start_height,
+                proposalModule: proposalModule.address,
+                proposalId: proposalNumber,
+              },
+            }
+          )
+        )
+
+        return {
+          effective,
+          total,
+        }
+      })
+    )
+
+    // Verify that the unvoted delegated voting power is equal to the total
+    // delegated voting power, since the delegator has not voted yet.
+    expect(unvotedDelegateVotingPowers).toEqual(
+      delegates.map(() => ({
+        effective: BigInt(
+          Math.floor(initialStaked * percentDelegated)
+        ).toString(),
+        total: BigInt(Math.floor(initialStaked * percentDelegated)).toString(),
+      }))
+    )
+
+    // All delegates vote on the proposal in batches of 100.
+    await batch({
+      list: delegateMembers,
+      batchSize: 100,
+      task: (delegate) =>
+        proposalModule.vote({
+          proposalId: proposalNumber,
+          signingClient: delegate.getSigningClient,
+          sender: delegate.address,
+          vote: 'yes',
+        }),
+      tries: 3,
+      delayMs: 1000,
+    })
+
+    // Verify votes have been tallied with their personal voting power and the
+    // delegated voting power.
+    proposal = (
+      await proposalModule.getProposal({
+        proposalId: proposalNumber,
+      })
+    ).proposal
+    expect(proposal.votes.yes).toBe(
+      BigInt(
+        (initialStaked + Math.floor(initialStaked * percentDelegated)) *
+          numDelegates
+      ).toString()
+    )
+
+    // Delegator overrides all delegates' votes, which should update all the
+    // delegate's ballots and unvoted delegated voting power.
+    await proposalModule.vote({
+      proposalId: proposalNumber,
+      signingClient: delegator.getSigningClient,
+      sender: delegator.address,
+      vote: 'no',
+    })
+
+    // Verify vote tallies have been updated with the delegator's vote, removing
+    // the delegator's delegated voting power from the delegates' yes votes and
+    // adding the delegator's full voting power to the no votes.
+    proposal = (
+      await proposalModule.getProposal({
+        proposalId: proposalNumber,
+      })
+    ).proposal
+    expect(proposal.votes.yes).toBe(
+      BigInt(initialStaked * numDelegates).toString()
+    )
+    expect(proposal.votes.no).toBe(BigInt(initialStaked).toString())
+
+    // Get the unvoted delegated voting power for each delegate from the
+    // previous list query, after the delegator has voted.
+    unvotedDelegateVotingPowers = await Promise.all(
+      delegates.map(async ({ delegate }) => {
+        const { effective, total } = await suite.queryClient.fetchQuery(
+          daoVoteDelegationQueries.unvotedDelegatedVotingPower(
+            suite.queryClient,
+            {
+              chainId: suite.chainId,
+              contractAddress: delegationAddress,
+              args: {
+                delegate,
+                height: proposal.start_height,
+                proposalModule: proposalModule.address,
+                proposalId: proposalNumber,
+              },
+            }
+          )
+        )
+
+        return {
+          effective,
+          total,
+        }
+      })
+    )
+
+    // Verify that the unvoted delegated voting power is now 0, since the
+    // delegator voted.
+    expect(unvotedDelegateVotingPowers).toEqual(
+      delegates.map(() => ({
+        effective: '0',
+        total: '0',
+      }))
+    )
   })
 })

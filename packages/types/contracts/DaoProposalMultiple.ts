@@ -459,6 +459,10 @@ export interface MultipleChoiceProposal {
   total_power: Uint128
   veto?: VetoConfig | null
   votes: MultipleChoiceVotes
+  /**
+   * v2.7.0+
+   */
+  individual_votes: MultipleChoiceVotes
   voting_strategy: VotingStrategy
 }
 export interface CheckedMultipleChoiceOption {

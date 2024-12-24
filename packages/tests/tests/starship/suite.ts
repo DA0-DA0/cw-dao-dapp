@@ -32,6 +32,7 @@ import {
   makeReactQueryClient,
 } from '@dao-dao/state'
 import { AnyChain, ContractVersion, UnifiedCosmosMsg } from '@dao-dao/types'
+import { MsgSend } from '@dao-dao/types/protobuf/codegen/cosmos/bank/v1beta1/tx'
 import { TxRaw } from '@dao-dao/types/protobuf/codegen/cosmos/tx/v1beta1/tx'
 import {
   _addChain,
@@ -296,19 +297,19 @@ export class StarshipSuite {
         await faucetSigner.tapFaucet()
       }
 
-      // Send tokens to each signer, batched by 3,000.
+      // Send tokens to each signer, batched by 1,000.
       const batchSize = 1_000
       const batches = Math.ceil(signers.length / batchSize)
       const getMessagesForBatch = (batch: number) =>
         signers
           .slice(batch * batchSize, (batch + 1) * batchSize)
           .map((signer) => ({
-            typeUrl: '/cosmos.bank.v1beta1.MsgSend',
-            value: {
+            typeUrl: MsgSend.typeUrl,
+            value: MsgSend.fromPartial({
               fromAddress: faucetSigner.address,
               toAddress: signer.address,
               amount: coins(amount, this.denom),
-            },
+            }),
           }))
 
       // Retrieve account number, sequence, and fee only once to avoid redundant
@@ -516,15 +517,13 @@ export class StarshipSuite {
   }
 
   /**
-   * Create, pass, and execute a single-choice proposal in a DAO.
+   * Create a single-choice proposal in a DAO.
    */
-  async createAndExecuteSingleChoiceProposal(
+  async createSingleChoiceProposal(
     dao: CwDao,
     proposer: StarshipSuiteSigner,
-    voters: StarshipSuiteSigner[],
     title: string,
-    msgs: UnifiedCosmosMsg[],
-    expectExecutionResult: 'success' | 'failure' | 'any' = 'success'
+    msgs: UnifiedCosmosMsg[] = []
   ) {
     const proposalModule = dao.proposalModules.find(
       (m) => m instanceof SingleChoiceProposalModule
@@ -545,37 +544,107 @@ export class StarshipSuite {
       sender: proposer.address,
     })
 
+    const { proposal } = await proposalModule.getProposal({
+      proposalId: proposalNumber,
+    })
+
+    return {
+      proposalModule,
+      proposalNumber,
+      proposal,
+    }
+  }
+
+  /**
+   * Vote on a single-choice proposal in a DAO.
+   */
+  async voteOnSingleChoiceProposal(
+    proposalModule: SingleChoiceProposalModule,
+    proposalNumber: number,
+    voters: StarshipSuiteSigner | StarshipSuiteSigner[],
+    vote: 'yes' | 'no' | 'abstain'
+  ) {
     // Vote on the proposal in batches of 100.
     await batch({
-      list: voters,
+      list: [voters].flat(),
       batchSize: 100,
       task: (voter) =>
         proposalModule.vote({
           proposalId: proposalNumber,
           signingClient: voter.getSigningClient,
           sender: voter.address,
-          vote: 'yes',
+          vote,
         }),
       tries: 3,
       delayMs: 1000,
     })
 
-    // Execute the proposal.
+    const { proposal } = await proposalModule.getProposal({
+      proposalId: proposalNumber,
+    })
+
+    return proposal
+  }
+
+  /**
+   * Execute a single-choice proposal in a DAO.
+   */
+  async executeSingleChoiceProposal(
+    proposalModule: SingleChoiceProposalModule,
+    proposalNumber: number,
+    proposer: StarshipSuiteSigner
+  ) {
     await proposalModule.execute({
       proposalId: proposalNumber,
       signingClient: proposer.getSigningClient,
       sender: proposer.address,
     })
 
+    const { proposal } = await proposalModule.getProposal({
+      proposalId: proposalNumber,
+    })
+
+    return proposal
+  }
+
+  /**
+   * Create, pass, and execute a single-choice proposal in a DAO.
+   */
+  async createAndExecuteSingleChoiceProposal(
+    dao: CwDao,
+    proposer: StarshipSuiteSigner,
+    voters: StarshipSuiteSigner[],
+    title: string,
+    msgs?: UnifiedCosmosMsg[],
+    expectExecutionResult: 'success' | 'failure' | 'any' = 'success'
+  ) {
+    const { proposalModule, proposalNumber } =
+      await this.createSingleChoiceProposal(dao, proposer, title, msgs)
+
+    await this.voteOnSingleChoiceProposal(
+      proposalModule,
+      proposalNumber,
+      voters,
+      'yes'
+    )
+
+    const proposal = await this.executeSingleChoiceProposal(
+      proposalModule,
+      proposalNumber,
+      proposer
+    )
+
     // Ensure the proposal execution succeeded.
     if (expectExecutionResult !== 'any') {
-      const { proposal } = await proposalModule.getProposal({
-        proposalId: proposalNumber,
-      })
-
       expect(proposal.status).toBe(
         expectExecutionResult === 'success' ? 'executed' : 'execution_failed'
       )
+    }
+
+    return {
+      proposalModule,
+      proposalNumber,
+      proposal,
     }
   }
 
@@ -593,6 +662,23 @@ export class StarshipSuite {
       signer.address,
       contract
     ).stake(undefined, undefined, coins(amount, denom))
+  }
+
+  /**
+   * Unstake native tokens.
+   */
+  async unstakeNativeTokens(
+    contract: string,
+    signer: StarshipSuiteSigner,
+    amount: number | string
+  ) {
+    await new DaoVotingTokenStakedClient(
+      await signer.getSigningClient(),
+      signer.address,
+      contract
+    ).unstake({
+      amount: BigInt(amount).toString(),
+    })
   }
 
   /**

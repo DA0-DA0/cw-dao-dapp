@@ -4,9 +4,9 @@ import {
   ActionBase,
   HammerAndWrenchEmoji,
   Loader,
-  useActionOptions,
+  useDao,
 } from '@dao-dao/stateless'
-import { DaoWidget, UnifiedCosmosMsg } from '@dao-dao/types'
+import { DaoWidget, IDaoBase, UnifiedCosmosMsg } from '@dao-dao/types'
 import {
   ActionComponent,
   ActionContextType,
@@ -30,10 +30,15 @@ import {
 } from './Component'
 
 const Component: ActionComponent = (props) => {
-  const {
-    chain: { chainId },
-  } = useActionOptions()
-  const availableWidgets = useMemo(() => getWidgets(chainId), [chainId])
+  const dao = useDao()
+  const availableWidgets = useMemo(
+    () =>
+      getWidgets({
+        chainId: dao.chainId,
+        version: dao.coreVersion,
+      }),
+    [dao]
+  )
   const loadingExistingWidgets = useWidgets()
 
   return (
@@ -67,6 +72,7 @@ export class ManageWidgetsAction extends ActionBase<ManageWidgetsData> {
     values: {},
   }
 
+  private readonly dao: IDaoBase
   public readonly availableWidgets: DaoWidget[]
   private manageStorageItemsAction: ManageStorageItemsAction
 
@@ -87,8 +93,9 @@ export class ManageWidgetsAction extends ActionBase<ManageWidgetsData> {
       matchPriority: manageStorageItemsAction.metadata.matchPriority! + 1,
     })
 
+    this.dao = options.context.dao
     this.manageStorageItemsAction = manageStorageItemsAction
-    this.availableWidgets = getDaoWidgets(options.context.dao.info.items)
+    this.availableWidgets = getDaoWidgets(this.dao)
   }
 
   setup() {
@@ -111,9 +118,10 @@ export class ManageWidgetsAction extends ActionBase<ManageWidgetsData> {
 
     // Optionally add additional widget messages when updating a widget.
     if (setting) {
-      const widget = getWidgets(this.options.chain.chainId).find(
-        (w) => w.id === id
-      )
+      const widget = getWidgets({
+        chainId: this.dao.chainId,
+        version: this.dao.coreVersion,
+      }).find((w) => w.id === id)
       if (widget?.editAction) {
         msgs.push(
           ...[await widget.editAction.encode(values, this.options)].flat()
@@ -125,6 +133,10 @@ export class ManageWidgetsAction extends ActionBase<ManageWidgetsData> {
   }
 
   async match(messages: ProcessedMessage[]): Promise<ActionMatch> {
+    if (this.options.context.type !== ActionContextType.Dao) {
+      throw new Error('Not DAO context')
+    }
+
     const manageStorageItemsMatch =
       this.manageStorageItemsAction.match(messages)
     if (!manageStorageItemsMatch) {
@@ -142,9 +154,10 @@ export class ManageWidgetsAction extends ActionBase<ManageWidgetsData> {
     // Optionally match additional widget messages when updating a widget.
     if (setting) {
       const widgetId = key.substring(DAO_WIDGET_ITEM_NAMESPACE.length)
-      const widget = getWidgets(this.options.chain.chainId).find(
-        (w) => w.id === widgetId
-      )
+      const widget = getWidgets({
+        chainId: this.dao.chainId,
+        version: this.dao.coreVersion,
+      }).find((w) => w.id === widgetId)
       if (widget?.editAction && messages.length > 1) {
         const values = JSON.parse(value)
         const widgetMatch = await widget.editAction.match(

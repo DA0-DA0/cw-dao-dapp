@@ -460,6 +460,10 @@ export interface SingleChoiceProposal {
   total_power: Uint128
   veto?: VetoConfig | null
   votes: Votes
+  /**
+   * v2.7.0+
+   */
+  individual_votes: Votes
 }
 export interface Votes {
   abstain: Uint128

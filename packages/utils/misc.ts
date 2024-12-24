@@ -74,8 +74,10 @@ export const retry = async <T extends unknown>(
  * attempt.
  *
  * @param list List of items to process.
+ * @param grouped Whether to group the items into batches. Defaults to false.
+ * @param task Function to execute for each item when grouped is false, or for
+ * each batch when grouped is true.
  * @param batchSize Size of each batch.
- * @param fn Function to execute for each item.
  * @param tries Number of times to retry the task.
  * @param delayMs Number of milliseconds to wait between retries.
  * @returns Result of the callback.
@@ -83,25 +85,38 @@ export const retry = async <T extends unknown>(
 export const batch = async <T extends unknown>({
   list,
   batchSize,
-  task,
   tries,
   delayMs,
+  ...args
 }: {
   list: T[]
   batchSize: number
-  task: (item: T, attempt: number) => Promise<any>
   tries?: number
   delayMs?: number
-}): Promise<void> => {
+} & (
+  | {
+      grouped?: false
+      task: (item: T, attempt: number) => Promise<any>
+    }
+  | {
+      grouped: true
+      task: (items: T[], attempt: number) => Promise<any>
+    }
+)): Promise<void> => {
   for (let i = 0; i < list.length; i += batchSize) {
-    await Promise.all(
-      list
-        .slice(i, i + batchSize)
-        .map((item) =>
+    const items = list.slice(i, i + batchSize)
+    if (args.grouped) {
+      await (tries
+        ? retry(tries, (attempt) => args.task(items, attempt), delayMs)
+        : args.task(items, 1))
+    } else {
+      await Promise.all(
+        items.map((item) =>
           tries
-            ? retry(tries, (attempt) => task(item, attempt), delayMs)
-            : task(item, 1)
+            ? retry(tries, (attempt) => args.task(item, attempt), delayMs)
+            : args.task(item, 1)
         )
-    )
+      )
+    }
   }
 }
