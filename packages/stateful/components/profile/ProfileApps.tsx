@@ -34,7 +34,7 @@ import {
   getDisplayNameForChainId,
 } from '@dao-dao/utils'
 
-import { useProfile, useWallet } from '../../hooks'
+import { useProfile } from '../../hooks'
 import { ConnectWallet } from '../ConnectWallet'
 import { ProfileActions } from './ProfileActions'
 
@@ -45,7 +45,6 @@ export const ProfileApps = () => {
     msgs: UnifiedCosmosMsg[]
   }>()
   const close = useCallback(() => setState(undefined), [])
-  const { chainWallet } = useWallet()
 
   const [fullScreen, setFullScreen] = useState(false)
 
@@ -112,16 +111,26 @@ export const ProfileApps = () => {
       ) => {
         decodeDirect(signer, signDoc)
       },
-      addChain: (...args: any[]) => {
-        console.log('ADD CHAIN', args)
-      },
+      // addChain: async (record: ChainRecord) => {
+      //   await wallet.client?.addChain?.(record)
+      //   return {
+      //     type: 'success',
+      //   }
+      // },
+      sign: () => ({
+        type: 'error',
+        value: 'Unsupported.',
+      }),
+      signArbitrary: () => ({
+        type: 'error',
+        value: 'Unsupported.',
+      }),
+      suggestToken: () => ({
+        type: 'success',
+      }),
       connect: async (_chainIds: string | string[]) => {
-        if (!chainWallet) {
-          throw new Error(t('error.logInToContinue'))
-        }
-
         const chainIds = [_chainIds].flat()
-        const allChainWallets = chainWallet.mainWallet.getChainWalletList(false)
+        const allChainWallets = wallet.getChainWalletList(false)
         const chainWallets = chainIds.map(
           (chainId) => allChainWallets.find((cw) => cw.chainId === chainId)!
         )
@@ -141,7 +150,9 @@ export const ProfileApps = () => {
         }
 
         // Connect to all chain wallets.
-        await Promise.all(chainWallets.map((w) => w.connect(false)))
+        await Promise.all(
+          chainWallets.map((w) => !w.isWalletConnected && w.connect(false))
+        )
 
         return {
           type: 'success',
