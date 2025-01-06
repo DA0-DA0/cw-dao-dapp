@@ -232,21 +232,21 @@ export const ManageStakingComponent: ActionComponent<
 
   // Perform validation.
   useEffect(() => {
-    if (!amount) {
+    if (!amount && errors?._error) {
       clearErrors((fieldNamePrefix + '_error') as '_error')
       return
     }
 
     const validation = validate()
-    if (validation === true) {
+    if (validation === true && errors?._error) {
       clearErrors((fieldNamePrefix + '_error') as '_error')
-    } else if (typeof validation === 'string') {
+    } else if (typeof validation === 'string' && !errors?._error) {
       setError((fieldNamePrefix + '_error') as '_error', {
         type: 'custom',
         message: validation,
       })
     }
-  }, [setError, clearErrors, validate, fieldNamePrefix, amount])
+  }, [setError, clearErrors, validate, fieldNamePrefix, amount, errors?._error])
 
   // A warning if the denom was not found in the treasury or the amount is too
   // high. We don't want to make this an error because often people want to

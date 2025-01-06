@@ -21,6 +21,7 @@ import {
 } from '@dao-dao/stateless'
 import {
   ActionKeyAndData,
+  LoadingDataWithError,
   UnifiedCosmosMsg,
   decodedStargateMsgToCw,
   getAminoTypes,
@@ -213,11 +214,11 @@ export const ProfileApps = () => {
 
 type InnerProfileAppsMatcherProps = {
   close: () => void
-  actionKeysAndData: ActionKeyAndData[]
+  data: LoadingDataWithError<ActionKeyAndData[]>
 }
 
 const InnerProfileApps = (
-  props: Omit<InnerProfileAppsMatcherProps, 'actionKeysAndData'>
+  props: Omit<InnerProfileAppsMatcherProps, 'data'>
 ) => {
   const matcher = useActionMatcher()
   const data = useLoadingPromise({
@@ -232,26 +233,17 @@ const InnerProfileApps = (
               })
             )
           )
-        : ([] as ActionKeyAndData[]),
+        : // Never resolve.
+          new Promise<ActionKeyAndData[]>(() => {}),
     deps: [matcher.status],
   })
 
-  return data.loading ? (
-    <div className="flex flex-col gap-2">
-      <ActionCardLoader />
-      <ActionCardLoader />
-      <ActionCardLoader />
-    </div>
-  ) : data.errored ? (
-    <ErrorPage error={data.error} />
-  ) : (
-    <InnerProfileAppsMatcher {...props} actionKeysAndData={data.data} />
-  )
+  return <InnerProfileAppsMatcher {...props} data={data} />
 }
 
 const InnerProfileAppsMatcher = ({
   close,
-  actionKeysAndData,
+  data,
 }: InnerProfileAppsMatcherProps) => {
   const { t } = useTranslation()
   const { connected, profile } = useProfile()
@@ -264,11 +256,15 @@ const InnerProfileAppsMatcher = ({
 
   // Set transaction atom once actions are loaded.
   useEffect(() => {
+    if (data.loading || data.errored) {
+      return
+    }
+
     setWalletTransactionAtom({
-      actions: actionKeysAndData,
+      actions: data.data,
     })
     setReady(true)
-  }, [chainId, actionKeysAndData, setWalletTransactionAtom])
+  }, [chainId, data, setWalletTransactionAtom])
 
   return (
     <Modal
@@ -300,14 +296,16 @@ const InnerProfileAppsMatcher = ({
       onClose={close}
       visible
     >
-      {ready ? (
-        <ProfileActions />
-      ) : (
+      {data.loading || !ready ? (
         <div className="flex flex-col gap-2">
           <ActionCardLoader />
           <ActionCardLoader />
           <ActionCardLoader />
         </div>
+      ) : data.errored ? (
+        <ErrorPage error={data.error} />
+      ) : (
+        <ProfileActions />
       )}
     </Modal>
   )

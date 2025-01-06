@@ -34,6 +34,7 @@ import {
   AccountType,
   ActionKeyAndData,
   BaseNewProposalProps,
+  LoadingDataWithError,
   ProposalDraft,
   UnifiedCosmosMsg,
   decodedStargateMsgToCw,
@@ -371,11 +372,11 @@ export const AppsTab = () => {
 
 type ActionMatcherAndProposerProps = {
   close: () => void
-  actionKeysAndData: ActionKeyAndData[]
+  data: LoadingDataWithError<ActionKeyAndData[]>
 }
 
 const ActionMatcherAndProposer = (
-  props: Omit<ActionMatcherAndProposerProps, 'actionKeysAndData'>
+  props: Omit<ActionMatcherAndProposerProps, 'data'>
 ) => {
   const matcher = useActionMatcher()
   const data = useLoadingPromise({
@@ -390,26 +391,17 @@ const ActionMatcherAndProposer = (
               })
             )
           )
-        : ([] as ActionKeyAndData[]),
+        : // Never resolve.
+          new Promise<ActionKeyAndData[]>(() => {}),
     deps: [matcher.status],
   })
 
-  return data.loading ? (
-    <div className="flex flex-col gap-2">
-      <ActionCardLoader />
-      <ActionCardLoader />
-      <ActionCardLoader />
-    </div>
-  ) : data.errored ? (
-    <ErrorPage error={data.error} />
-  ) : (
-    <InnerActionMatcherAndProposer {...props} actionKeysAndData={data.data} />
-  )
+  return <InnerActionMatcherAndProposer {...props} data={data} />
 }
 
 const InnerActionMatcherAndProposer = ({
   close,
-  actionKeysAndData,
+  data,
 }: ActionMatcherAndProposerProps) => {
   const { t } = useTranslation()
   const { coreAddress } = useDao()
@@ -428,19 +420,23 @@ const InnerActionMatcherAndProposer = ({
     defaultValues: {
       title: '',
       description: '',
-      actionData: actionKeysAndData,
+      actionData: [],
     },
   })
   const proposalData = formMethods.watch()
 
-  // If contents of matched action data change, update form.
+  // If contents of matched action data finish loading or change, update form.
   useDeepCompareEffect(() => {
+    if (data.loading || data.errored) {
+      return
+    }
+
     formMethods.reset({
       title: proposalData.title,
       description: proposalData.description,
-      actionData: actionKeysAndData,
+      actionData: data.data,
     })
-  }, [actionKeysAndData])
+  }, [data])
 
   const setProposalCreatedCardProps = useSetRecoilState(
     proposalCreatedCardPropsAtom
@@ -592,22 +588,32 @@ const InnerActionMatcherAndProposer = ({
       onClose={close}
       visible
     >
-      <FormProvider {...formMethods}>
-        <SuspenseLoader fallback={<Loader />}>
-          <NewProposal
-            ProposalDaoInfoCards={ProposalDaoInfoCards}
-            actionsReadOnlyMode
-            deleteDraft={deleteDraft}
-            draft={draft}
-            draftSaving={draftSaving}
-            drafts={drafts}
-            onCreateSuccess={onCreateSuccess}
-            proposalModuleSelector={null}
-            saveDraft={saveDraft}
-            unloadDraft={unloadDraft}
-          />
-        </SuspenseLoader>
-      </FormProvider>
+      {data.loading ? (
+        <div className="flex flex-col gap-2">
+          <ActionCardLoader />
+          <ActionCardLoader />
+          <ActionCardLoader />
+        </div>
+      ) : data.errored ? (
+        <ErrorPage error={data.error} />
+      ) : (
+        <FormProvider {...formMethods}>
+          <SuspenseLoader fallback={<Loader />}>
+            <NewProposal
+              ProposalDaoInfoCards={ProposalDaoInfoCards}
+              actionsReadOnlyMode
+              deleteDraft={deleteDraft}
+              draft={draft}
+              draftSaving={draftSaving}
+              drafts={drafts}
+              onCreateSuccess={onCreateSuccess}
+              proposalModuleSelector={null}
+              saveDraft={saveDraft}
+              unloadDraft={unloadDraft}
+            />
+          </SuspenseLoader>
+        </FormProvider>
+      )}
     </Modal>
   )
 }

@@ -1,5 +1,5 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import { useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 
 import { SuspenseLoader, WalletChainSwitcher } from '@dao-dao/stateful'
 import {
@@ -29,7 +29,11 @@ const Template: ComponentStory<typeof ProfileActions> = (args) => {
     },
   })
 
-  return <ProfileActions {...args} formMethods={formMethods} />
+  return (
+    <FormProvider {...formMethods}>
+      <ProfileActions {...args} />
+    </FormProvider>
+  )
 }
 
 export const Default = Template.bind({})
@@ -66,9 +70,6 @@ Default.args = {
   },
   saving: false,
   WalletChainSwitcher,
-
-  // Overwritten in template.
-  formMethods: {} as any,
 }
 
 export const LoadingSaves = Template.bind({})

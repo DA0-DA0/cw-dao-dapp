@@ -3,11 +3,11 @@ import { toHex } from '@cosmjs/encoding'
 import { useQueryClient } from '@tanstack/react-query'
 import cloneDeep from 'lodash.clonedeep'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { FormProvider, useForm, useFormContext } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
-import { useRecoilState, useSetRecoilState } from 'recoil'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
 
 import {
   makeGetSignerOptions,
@@ -20,7 +20,9 @@ import {
   ProfileActionsProps,
   ProfileActions as StatelessProfileActions,
   useCachedLoading,
+  useChain,
   useHoldingKey,
+  useUpdatingRef,
 } from '@dao-dao/stateless'
 import {
   AccountTxForm,
@@ -57,18 +59,15 @@ export const ProfileActions = () => {
     loadAccount: true,
   })
 
-  const [_meTransactionAtom, setWalletTransactionAtom] = useRecoilState(
-    meTransactionAtom(chain.chainId)
-  )
+  const meTransactionSave = useRecoilValue(meTransactionAtom(chain.chainId))
+  // Only set defaults once to prevent unnecessary useForm re-renders.
+  const [firstMeTransactionSave] = useState(() => cloneDeep(meTransactionSave))
 
   const formMethods = useForm<AccountTxForm>({
     mode: 'onChange',
-    // Don't clone every render.
-    defaultValues: useMemo(
-      () => cloneDeep(_meTransactionAtom),
-      [_meTransactionAtom]
-    ),
+    defaultValues: firstMeTransactionSave,
   })
+
   // Trigger validation on first render, in case loaded from localStorage.
   useEffect(() => {
     formMethods.trigger()
@@ -108,17 +107,6 @@ export const ProfileActions = () => {
       formMethods.reset(prefillData)
     }
   }, [formMethods, router.query])
-
-  const meTransaction = formMethods.watch()
-  // Debounce saving latest data to atom and thus localStorage every second.
-  useEffect(() => {
-    // Deep clone to prevent values from becoming readOnly.
-    const timeout = setTimeout(
-      () => setWalletTransactionAtom(cloneDeep(meTransaction)),
-      1000
-    )
-    return () => clearTimeout(timeout)
-  }, [setWalletTransactionAtom, meTransaction])
 
   const holdingAltForDirectSign = useHoldingKey({ key: 'alt' })
 
@@ -277,19 +265,55 @@ export const ProfileActions = () => {
   const actionEncodeContext = useActionEncodeContext()
 
   return (
-    <StatelessProfileActions
-      SuspenseLoader={SuspenseLoader}
-      WalletChainSwitcher={WalletChainSwitcher}
-      actionEncodeContext={actionEncodeContext}
-      deleteSave={deleteSave}
-      error={error}
-      execute={execute}
-      formMethods={formMethods}
-      holdingAltForDirectSign={holdingAltForDirectSign}
-      save={save}
-      saves={savesLoading}
-      saving={saving}
-      txHash={txHash}
-    />
+    <FormProvider {...formMethods}>
+      <StatelessProfileActions
+        SuspenseLoader={SuspenseLoader}
+        WalletChainSwitcher={WalletChainSwitcher}
+        actionEncodeContext={actionEncodeContext}
+        deleteSave={deleteSave}
+        error={error}
+        execute={execute}
+        holdingAltForDirectSign={holdingAltForDirectSign}
+        save={save}
+        saves={savesLoading}
+        saving={saving}
+        txHash={txHash}
+      />
+
+      <FormSaver />
+    </FormProvider>
   )
+}
+
+// Component responsible for listening to form changes and save it to local
+// storage periodically.
+const FormSaver = () => {
+  const { chainId } = useChain()
+  const { watch, getValues } = useFormContext<AccountTxForm>()
+
+  const setWalletTransactionAtom = useSetRecoilState(meTransactionAtom(chainId))
+
+  const saveQueuedRef = useRef(false)
+  const saveLatestProposalRef = useUpdatingRef(() =>
+    setWalletTransactionAtom(cloneDeep(getValues()))
+  )
+
+  const data = watch()
+
+  // Save latest data to atom (and thus localStorage) every second.
+  useEffect(() => {
+    // Queue save in 1 second if not already queued.
+    if (saveQueuedRef.current) {
+      return
+    }
+    saveQueuedRef.current = true
+
+    // Save in one second.
+    setTimeout(() => {
+      saveLatestProposalRef.current()
+      saveQueuedRef.current = false
+    }, 1000)
+  }, [saveLatestProposalRef, data])
+
+  return null
 }

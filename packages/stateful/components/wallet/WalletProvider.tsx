@@ -189,7 +189,9 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
         ),
       }}
       signerOptions={{
+        // @ts-ignore
         signingStargate: getSigningOptions,
+        // @ts-ignore
         signingCosmwasm: getSigningOptions,
       }}
       walletConnectOptions={{

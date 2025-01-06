@@ -134,6 +134,7 @@ export const WalletUi = (props: WalletModalProps) => {
                 .filter(Boolean)
                 .map((chainId) =>
                   convertChain(
+                    // @ts-ignore
                     getChainForChainId(chainId).chainRegistry!,
                     [maybeGetAssetListForChainId(chainId)].filter(
                       (al): al is AssetList => !!al
