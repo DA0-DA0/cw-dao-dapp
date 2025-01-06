@@ -1,8 +1,8 @@
-import { DaoApp as DaoApp } from '@dao-dao/types'
+import { App as App } from '@dao-dao/types'
 
 import { MAINNET } from './env'
 
-export const DAO_APPS: DaoApp[] = [
+export const APPS: App[] = [
   {
     name: 'DAO DAO',
     imageUrl: '/apps/daodao.png',

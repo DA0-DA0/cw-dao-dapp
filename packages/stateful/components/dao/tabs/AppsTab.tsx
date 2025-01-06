@@ -19,12 +19,12 @@ import {
 import {
   ActionCardLoader,
   ActionMatcherProvider,
+  AppsRenderer,
   ErrorPage,
   Loader,
   Modal,
   ProfileImage,
   ProfileNameDisplayAndEditor,
-  AppsTab as StatelessAppsTab,
   StatusCard,
   useActionMatcher,
   useDao,
@@ -345,7 +345,7 @@ export const AppsTab = () => {
 
   return singleChoiceProposalModule ? (
     <>
-      <StatelessAppsTab
+      <AppsRenderer
         fullScreen={fullScreen}
         iframeRef={iframeRef}
         setFullScreen={setFullScreen}

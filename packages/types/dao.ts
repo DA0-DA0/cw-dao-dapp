@@ -538,7 +538,7 @@ export type DaoWebSocketChannelInfo = {
   coreAddress: string
 }
 
-export type DaoApp = {
+export type App = {
   /**
    * App name.
    */

@@ -10,22 +10,31 @@ import {
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
-import { DAO_APPS, toAccessibleImageUrl } from '@dao-dao/utils'
+import { APPS, toAccessibleImageUrl } from '@dao-dao/utils'
 
-import { useQuerySyncedState } from '../../../hooks'
-import { Button } from '../../buttons'
-import { IconButton } from '../../icon_buttons'
-import { TextInput } from '../../inputs'
-import { StatusCard } from '../../StatusCard'
-import { Tooltip } from '../../tooltip'
+import { useQuerySyncedState } from '../../hooks'
+import { Button } from '../buttons'
+import { IconButton } from '../icon_buttons'
+import { TextInput } from '../inputs'
+import { StatusCard } from '../StatusCard'
+import { Tooltip } from '../tooltip'
 
-export type AppsTabProps = {
+export type AppsRendererProps = {
+  /**
+   * The reference to set the iframe for the apps passthrough functionality.
+   */
   iframeRef: RefCallback<HTMLIFrameElement | null>
+  /**
+   * Whether the apps renderer is in full screen mode.
+   */
   fullScreen: boolean
+  /**
+   * Set the full screen mode.
+   */
   setFullScreen: Dispatch<SetStateAction<boolean>>
 }
 
-export const AppsTab = (props: AppsTabProps) => {
+export const AppsRenderer = (props: AppsRendererProps) => {
   const [url, setUrl] = useQuerySyncedState({
     param: 'url',
     defaultValue: '',
@@ -34,7 +43,7 @@ export const AppsTab = (props: AppsTabProps) => {
   return props.fullScreen ? (
     createPortal(
       <div className="hd-screen wd-screen fixed top-0 left-0 z-[38] bg-background-base p-safe pt-safe-or-4">
-        <InnerAppsTab
+        <InnerAppsRenderer
           className="h-full w-full"
           setUrl={setUrl}
           url={url}
@@ -44,11 +53,11 @@ export const AppsTab = (props: AppsTabProps) => {
       document.body
     )
   ) : (
-    <InnerAppsTab setUrl={setUrl} url={url} {...props} />
+    <InnerAppsRenderer setUrl={setUrl} url={url} {...props} />
   )
 }
 
-type InnerAppsTabProps = AppsTabProps & {
+type InnerAppsRendererProps = AppsRendererProps & {
   url: string
   setUrl: Dispatch<SetStateAction<string>>
   className?: string
@@ -58,14 +67,14 @@ type InnerAppsTabProps = AppsTabProps & {
 // URLs.
 const ALLOWED_URL_REGEX = /^https?:\/\/.+$/
 
-const InnerAppsTab = ({
+const InnerAppsRenderer = ({
   iframeRef,
   fullScreen,
   setFullScreen,
   url,
   setUrl,
   className,
-}: InnerAppsTabProps) => {
+}: InnerAppsRendererProps) => {
   const { t } = useTranslation()
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null)
   const [inputUrl, setInputUrl] = useState<string>(url)
@@ -121,11 +130,11 @@ const InnerAppsTab = ({
   }, [setInputUrl, url])
 
   // If no app URL matching, choose the last one (custom) with empty URL.
-  const selectedAppIndex = DAO_APPS.findIndex(
+  const selectedAppIndex = APPS.findIndex(
     ({ url: appUrl }) => appUrl === url || !appUrl
   )
 
-  const customSelected = !!url && selectedAppIndex === DAO_APPS.length - 1
+  const customSelected = !!url && selectedAppIndex === APPS.length - 1
 
   return (
     <div className={clsx('flex flex-col gap-2', className)}>
@@ -135,7 +144,7 @@ const InnerAppsTab = ({
           fullScreen && 'px-safe-offset-4'
         )}
       >
-        {DAO_APPS.map(({ platform, name, imageUrl, url: appUrl }, index) => {
+        {APPS.map(({ platform, name, imageUrl, url: appUrl }, index) => {
           const isCustom = !appUrl
           const selected = index === selectedAppIndex
 

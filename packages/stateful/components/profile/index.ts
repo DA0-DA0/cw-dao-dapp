@@ -1,6 +1,7 @@
 export * from './MergeProfilesModal'
 export * from './ProfileActions'
 export * from './ProfileAddChains'
+export * from './ProfileApps'
 export * from './ProfileDaos'
 export * from './ProfileFeed'
 export * from './ProfileProposalCard'

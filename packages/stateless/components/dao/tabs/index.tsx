@@ -1,4 +1,3 @@
-export * from './AppsTab'
 export * from './GovProposalsTab'
 export * from './MembersTab'
 export * from './NeutronVotingVaultsTab'
