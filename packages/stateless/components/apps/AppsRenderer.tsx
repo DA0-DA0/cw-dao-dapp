@@ -5,6 +5,7 @@ import {
   RefCallback,
   SetStateAction,
   useEffect,
+  useRef,
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -34,31 +35,72 @@ export type AppsRendererProps = {
   setFullScreen: Dispatch<SetStateAction<boolean>>
 }
 
-export const AppsRenderer = (props: AppsRendererProps) => {
+export const AppsRenderer = ({
+  iframeRef,
+  fullScreen,
+  setFullScreen,
+}: AppsRendererProps) => {
   const [url, setUrl] = useQuerySyncedState({
     param: 'url',
     defaultValue: '',
   })
 
-  return props.fullScreen ? (
+  let urlValid = false
+  try {
+    urlValid = !!url && !!new URL(url).href && ALLOWED_URL_REGEX.test(url)
+  } catch {
+    // Ignore.
+  }
+
+  // Set full screen first time when URL is set. If the user manually closes the
+  // full screen app, we don't want to open it again.
+  const openedFullScreenRef = useRef(false)
+  useEffect(() => {
+    if (urlValid && !openedFullScreenRef.current) {
+      setFullScreen(true)
+      openedFullScreenRef.current = true
+    }
+  }, [setFullScreen, urlValid, url])
+
+  // If URL is set on mount, open full screen.
+  useEffect(() => {
+    if (urlValid) {
+      setFullScreen(true)
+      openedFullScreenRef.current = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return fullScreen ? (
     createPortal(
       <div className="hd-screen wd-screen fixed top-0 left-0 z-[38] bg-background-base p-safe pt-safe-or-4">
         <InnerAppsRenderer
           className="h-full w-full"
+          fullScreen={fullScreen}
+          iframeRef={iframeRef}
+          setFullScreen={setFullScreen}
           setUrl={setUrl}
           url={url}
-          {...props}
+          urlValid={urlValid}
         />
       </div>,
       document.body
     )
   ) : (
-    <InnerAppsRenderer setUrl={setUrl} url={url} {...props} />
+    <InnerAppsRenderer
+      fullScreen={fullScreen}
+      iframeRef={iframeRef}
+      setFullScreen={setFullScreen}
+      setUrl={setUrl}
+      url={url}
+      urlValid={urlValid}
+    />
   )
 }
 
 type InnerAppsRendererProps = AppsRendererProps & {
   url: string
+  urlValid: boolean
   setUrl: Dispatch<SetStateAction<string>>
   className?: string
 }
@@ -72,6 +114,7 @@ const InnerAppsRenderer = ({
   fullScreen,
   setFullScreen,
   url,
+  urlValid,
   setUrl,
   className,
 }: InnerAppsRendererProps) => {
@@ -85,20 +128,16 @@ const InnerAppsRenderer = ({
     }
   }
 
-  // On first iframe mount, go to URL.
+  // On URL change, navigate iframe to it if valid.
   useEffect(() => {
     try {
-      if (
-        iframe &&
-        (url === '' || (url && new URL(url).href)) &&
-        ALLOWED_URL_REGEX.test(url)
-      ) {
+      if (iframe && urlValid) {
         iframe.src = url
       }
     } catch {
       // Ignore.
     }
-  }, [iframe, url])
+  }, [iframe, url, urlValid])
 
   // Add event handler to inform iframe that it's wrapped in DAO DAO if it asks.
   useEffect(() => {
