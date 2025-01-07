@@ -25,11 +25,16 @@ import {
   UnifiedCosmosMsg,
   WalletChainSwitcherProps,
 } from '@dao-dao/types'
-import { encodeActions, processError, validateRequired } from '@dao-dao/utils'
+import {
+  convertActionKeysAndDataToActions,
+  encodeActions,
+  processError,
+  validateRequired,
+} from '@dao-dao/utils'
 
 import { useActionsContext, useChainContext } from '../../contexts'
 import { useHoldingKey } from '../../hooks'
-import { ActionsEditor, RawActionsRenderer } from '../actions'
+import { ActionsEditor, ActionsRenderer, RawActionsRenderer } from '../actions'
 import { Button, ButtonLink } from '../buttons'
 import { CopyToClipboard } from '../CopyToClipboard'
 import { IconButton } from '../icon_buttons'
@@ -54,6 +59,7 @@ export type ProfileActionsProps = {
   holdingAltForDirectSign: boolean
   WalletChainSwitcher: ComponentType<WalletChainSwitcherProps>
   actionEncodeContext: ActionEncodeContext
+  actionsReadOnlyMode?: boolean
 }
 
 export const ProfileActions = ({
@@ -68,6 +74,7 @@ export const ProfileActions = ({
   holdingAltForDirectSign,
   WalletChainSwitcher,
   actionEncodeContext,
+  actionsReadOnlyMode,
 }: ProfileActionsProps) => {
   const { t } = useTranslation()
   const { config } = useChainContext()
@@ -189,24 +196,36 @@ export const ProfileActions = ({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-row justify-between">
-        <p className="secondary-text">
-          {t('info.transactionBuilderDescription')}
-        </p>
+      {!actionsReadOnlyMode && (
+        <div className="flex flex-row justify-between">
+          <p className="secondary-text">
+            {t('info.transactionBuilderDescription')}
+          </p>
 
-        <WalletChainSwitcher headerMode type="configured" />
-      </div>
+          <WalletChainSwitcher headerMode type="configured" />
+        </div>
+      )}
 
       <form
         className="flex flex-col gap-4"
         noValidate={holdingShiftForForce}
         onSubmit={handleSubmit(onSubmitForm, onSubmitError)}
       >
-        <ActionsEditor
-          SuspenseLoader={SuspenseLoader}
-          actionDataErrors={errors?.actions}
-          actionDataFieldName="actions"
-        />
+        {actionsReadOnlyMode ? (
+          <ActionsRenderer
+            SuspenseLoader={SuspenseLoader}
+            actionData={convertActionKeysAndDataToActions(
+              actionMap,
+              actionData
+            )}
+          />
+        ) : (
+          <ActionsEditor
+            SuspenseLoader={SuspenseLoader}
+            actionDataErrors={errors?.actions}
+            actionDataFieldName="actions"
+          />
+        )}
 
         <div className="mt-4 flex flex-row items-center justify-between gap-6 border-y border-border-secondary py-6">
           <p className="title-text text-text-body">

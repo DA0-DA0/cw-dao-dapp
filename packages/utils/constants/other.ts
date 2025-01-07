@@ -230,3 +230,12 @@ export const DAOS_HIDDEN_FROM_SEARCH = [
  * stored at the end of the description field.
  */
 export const PROPOSAL_DESCRIPTION_METADATA_SEPARATOR = '\n~@~@~@~\n'
+
+// Wallet account secp256k1 public keys are expected to be 33 bytes starting
+// with 0x02 or 0x03. This will be used when simulating requests, but not when
+// signing since we intercept messages. This may cause problems with some dApps
+// if simulation fails...
+export const EMPTY_PUB_KEY = new Uint8Array([
+  0x02,
+  ...[...new Array(32)].map(() => 0),
+])

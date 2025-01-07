@@ -10,7 +10,7 @@ import {
 } from '@dao-dao/types'
 
 export abstract class ActionBase<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > implements Action<Data>
 {
   public abstract readonly key: ActionKey

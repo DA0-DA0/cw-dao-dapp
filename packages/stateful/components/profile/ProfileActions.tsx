@@ -44,7 +44,9 @@ import { useCfWorkerAuthPostRequest, useWallet } from '../../hooks'
 import { SuspenseLoader } from '../SuspenseLoader'
 import { WalletChainSwitcher } from '../wallet'
 
-export const ProfileActions = () => {
+export const ProfileActions = ({
+  actionsReadOnlyMode,
+}: Pick<ProfileActionsProps, 'actionsReadOnlyMode'>) => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
 
@@ -270,6 +272,7 @@ export const ProfileActions = () => {
         SuspenseLoader={SuspenseLoader}
         WalletChainSwitcher={WalletChainSwitcher}
         actionEncodeContext={actionEncodeContext}
+        actionsReadOnlyMode={actionsReadOnlyMode}
         deleteSave={deleteSave}
         error={error}
         execute={execute}

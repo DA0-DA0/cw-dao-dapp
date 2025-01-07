@@ -1,7 +1,9 @@
 import { CloseFullscreen, OpenInFull } from '@mui/icons-material'
 import clsx from 'clsx'
 import {
+  ComponentType,
   Dispatch,
+  ReactNode,
   RefCallback,
   SetStateAction,
   useEffect,
@@ -11,14 +13,17 @@ import {
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
+import { AddressInputProps } from '@dao-dao/types'
 import { APPS, toAccessibleImageUrl } from '@dao-dao/utils'
 
 import { useQuerySyncedState } from '../../hooks'
 import { Button } from '../buttons'
 import { IconButton } from '../icon_buttons'
-import { TextInput } from '../inputs'
+import { SegmentedControls, TextInput } from '../inputs'
 import { StatusCard } from '../StatusCard'
 import { Tooltip } from '../tooltip'
+
+export type AppsRendererExecutionType = 'normal' | 'authzExec' | 'daoAdminExec'
 
 export type AppsRendererProps = {
   /**
@@ -33,12 +38,42 @@ export type AppsRendererProps = {
    * Set the full screen mode.
    */
   setFullScreen: Dispatch<SetStateAction<boolean>>
+  /**
+   * The type of execution.
+   */
+  executionType: AppsRendererExecutionType
+  /**
+   * Set the execution type.
+   */
+  setExecutionType: Dispatch<SetStateAction<AppsRendererExecutionType>>
+  /**
+   * The other (non-normal execution type) address.
+   */
+  otherAddress: string
+  /**
+   * Set the other (non-normal execution type) address.
+   */
+  setOtherAddress: Dispatch<SetStateAction<string>>
+  /**
+   * Stateful AddressInput component.
+   */
+  AddressInput: ComponentType<AddressInputProps>
+  /**
+   * The chain picker node.
+   */
+  chainPicker: ReactNode
 }
 
 export const AppsRenderer = ({
   iframeRef,
   fullScreen,
   setFullScreen,
+  executionType,
+  setExecutionType,
+  otherAddress,
+  setOtherAddress,
+  AddressInput,
+  chainPicker,
 }: AppsRendererProps) => {
   const [url, setUrl] = useQuerySyncedState({
     param: 'url',
@@ -71,30 +106,30 @@ export const AppsRenderer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const props: InnerAppsRendererProps = {
+    fullScreen,
+    iframeRef,
+    setFullScreen,
+    setUrl,
+    url,
+    urlValid,
+    executionType,
+    setExecutionType,
+    otherAddress,
+    setOtherAddress,
+    AddressInput,
+    chainPicker,
+  }
+
   return fullScreen ? (
     createPortal(
       <div className="hd-screen wd-screen fixed top-0 left-0 z-[38] bg-background-base p-safe pt-safe-or-4">
-        <InnerAppsRenderer
-          className="h-full w-full"
-          fullScreen={fullScreen}
-          iframeRef={iframeRef}
-          setFullScreen={setFullScreen}
-          setUrl={setUrl}
-          url={url}
-          urlValid={urlValid}
-        />
+        <InnerAppsRenderer {...props} className="h-full w-full" />
       </div>,
       document.body
     )
   ) : (
-    <InnerAppsRenderer
-      fullScreen={fullScreen}
-      iframeRef={iframeRef}
-      setFullScreen={setFullScreen}
-      setUrl={setUrl}
-      url={url}
-      urlValid={urlValid}
-    />
+    <InnerAppsRenderer {...props} />
   )
 }
 
@@ -117,6 +152,12 @@ const InnerAppsRenderer = ({
   urlValid,
   setUrl,
   className,
+  executionType,
+  setExecutionType,
+  otherAddress,
+  setOtherAddress,
+  AddressInput,
+  chainPicker,
 }: InnerAppsRendererProps) => {
   const { t } = useTranslation()
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null)
@@ -274,6 +315,36 @@ const InnerAppsRenderer = ({
             variant="ghost"
           />
         </Tooltip>
+      </div>
+
+      <div
+        className={clsx(
+          'flex flex-col gap-3 p-3 bg-background-tertiary rounded-md',
+          fullScreen && 'mx-safe-offset-4'
+        )}
+      >
+        <SegmentedControls<AppsRendererExecutionType>
+          onSelect={(value) => setExecutionType(value)}
+          selected={executionType}
+          tabs={[
+            { label: t('title.normal'), value: 'normal' },
+            { label: t('title.authzExec'), value: 'authzExec' },
+            { label: t('title.daoAdminExec'), value: 'daoAdminExec' },
+          ]}
+        />
+
+        {executionType !== 'normal' && (
+          <div className="flex flex-row gap-2 items-stretch">
+            {chainPicker}
+
+            <AddressInput
+              containerClassName="grow"
+              setValue={(_, value) => setOtherAddress(value)}
+              type={executionType === 'daoAdminExec' ? 'contract' : undefined}
+              value={otherAddress}
+            />
+          </div>
+        )}
       </div>
 
       <iframe

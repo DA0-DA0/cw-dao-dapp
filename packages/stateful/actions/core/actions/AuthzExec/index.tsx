@@ -208,9 +208,10 @@ export class AuthzExecAction extends ActionBase<AuthzExecData> {
         stargate: {
           typeUrl: MsgExec.typeUrl,
           value: {
-            grantee: getChainAddressForActionOptions(this.options, chainId),
+            grantee:
+              getChainAddressForActionOptions(this.options, chainId) ?? '',
             msgs: msgs.map((msg) => cwMsgToProtobuf(chainId, msg, address)),
-          } as MsgExec,
+          } satisfies MsgExec,
         },
       })
     )
@@ -257,8 +258,8 @@ export class AuthzExecAction extends ActionBase<AuthzExecData> {
       // Technically each message could have a different address. While we don't
       // support that on creation, we can still detect and render them correctly
       // in the component.
-      address: '',
-      msgs: [],
+      address: msgsPerSender.length === 1 ? msgsPerSender[0].sender : '',
+      msgs: msgsPerSender.length === 1 ? msgsPerSender[0].msgs : [],
       _msgs: msgsPerSender,
     }
   }

@@ -14,6 +14,7 @@ export class ActionMatcher implements IActionMatcher {
   private _status: 'idle' | 'loading' | 'error' | 'ready' = 'idle'
   private _error?: Error
   private _matches?: ActionDecoder[]
+  private _messages?: UnifiedCosmosMsg[]
 
   constructor(
     public options: ActionOptions,
@@ -67,10 +68,19 @@ export class ActionMatcher implements IActionMatcher {
     return this._error || new Error('Unknown matcher error')
   }
 
+  get messages() {
+    if (!this._messages) {
+      throw new Error('Messages not set')
+    }
+
+    return this._messages
+  }
+
   async match(messages: UnifiedCosmosMsg[]): Promise<ActionDecoder[]> {
     this._status = 'loading'
     this._error = undefined
     this._matches = undefined
+    this._messages = messages
 
     try {
       const matches: ActionDecoder[] = []

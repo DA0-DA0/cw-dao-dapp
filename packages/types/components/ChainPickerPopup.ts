@@ -105,6 +105,8 @@ export type WalletChainSwitcherProps = {
    * The chain type to show. Supported chains have native DAO DAO deployments,
    * whereas configured chains include supported chains and others which show up
    * in the UI in various places, such as the governance UI.
+   *
+   * Defaults to 'supported'.
    */
   type?: 'supported' | 'configured'
   /**

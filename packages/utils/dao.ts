@@ -2,10 +2,10 @@ import { TFunction } from 'react-i18next'
 
 import { HugeDecimal } from '@dao-dao/math'
 import {
-  Account,
   AccountType,
   BreadcrumbCrumb,
   DaoDropdownInfo,
+  DaoInfo,
   DaoParentInfo,
   DaoRewardDistribution,
   DaoSource,
@@ -15,7 +15,8 @@ import {
 import { InstantiateMsg as DaoDaoCoreInstantiateMsg } from '@dao-dao/types/contracts/DaoDaoCore'
 import { EmissionRate } from '@dao-dao/types/contracts/DaoRewardsDistributor'
 
-import { getSupportedChainConfig } from './chain'
+import { getAccountAddress } from './account'
+import { getDisplayNameForChainId, getSupportedChainConfig } from './chain'
 import { convertDurationToHumanReadableString } from './conversion'
 
 export const getParentDaoBreadcrumbs = (
@@ -70,36 +71,6 @@ export const getFundsFromDaoInstantiateMsg = ({
   ...(voting_module_instantiate_info.funds || []),
   ...proposal_modules_instantiate_info.flatMap(({ funds }) => funds || []),
 ]
-
-// Gets the account on the specified chain or undefined if nonexistent.
-export const getAccount = ({
-  accounts,
-  chainId,
-  types = [AccountType.Base, AccountType.Polytone],
-}: {
-  accounts: readonly Account[]
-  chainId?: string
-  types?: readonly AccountType[]
-}): Account | undefined =>
-  accounts.find(
-    (account) =>
-      types.includes(account.type) && (!chainId || account.chainId === chainId)
-  )
-
-// Gets the account address on the specified chain or undefined if nonexistent.
-export const getAccountAddress = (
-  ...params: Parameters<typeof getAccount>
-): string | undefined => getAccount(...params)?.address
-
-// Gets the chain ID for an address or undefined if nonexistent.
-export const getAccountChainId = ({
-  accounts,
-  address,
-}: {
-  accounts: readonly Account[]
-  address: string
-}): string | undefined =>
-  accounts.find((account) => account.address === address)?.chainId
 
 /**
  * Filter DAO items by prefix and remove the prefix from the key.
@@ -200,16 +171,55 @@ export const getHumanReadableRewardDistributionLabel = (
     'immediate' in emissionRate
       ? t('title.immediate')
       : 'paused' in emissionRate
-      ? t('title.paused')
-      : t('info.amountEveryDuration', {
-          amount: HugeDecimal.from(
-            emissionRate.linear.amount
-          ).toInternationalizedHumanReadableString({
-            decimals: distribution.token.decimals,
-          }),
-          duration: convertDurationToHumanReadableString(
-            t,
-            emissionRate.linear.duration
-          ),
-        })
+        ? t('title.paused')
+        : t('info.amountEveryDuration', {
+            amount: HugeDecimal.from(
+              emissionRate.linear.amount
+            ).toInternationalizedHumanReadableString({
+              decimals: distribution.token.decimals,
+            }),
+            duration: convertDurationToHumanReadableString(
+              t,
+              emissionRate.linear.duration
+            ),
+          })
   }`
+
+/**
+ * Get the DAO address for a chain ID, prioritizing native accounts.
+ */
+export const getDaoAddressForChainId = (dao: DaoInfo, chainId: string) => {
+  // If chain ID is empty (user or client error I believe when using the Apps
+  // interface), just return core DAO address since the not found error won't be
+  // helpful.
+  if (!chainId) {
+    console.error(
+      '`chainId` should not be empty in `addressForChainId`, but it is. Returning core DAO address.'
+    )
+    return dao.coreAddress
+  }
+
+  const address =
+    getAccountAddress({
+      accounts: dao.accounts,
+      chainId,
+      types: [AccountType.Base, AccountType.Polytone],
+    }) ||
+    // Fallback to ICA if exists, but don't use if a native or polytone
+    // account exists.
+    getAccountAddress({
+      accounts: dao.accounts,
+      chainId,
+      types: [AccountType.Ica],
+    })
+
+  if (!address) {
+    throw new Error(
+      `DAO is missing an account on ${getDisplayNameForChainId(
+        chainId
+      )} (${chainId}).`
+    )
+  }
+
+  return address
+}

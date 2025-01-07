@@ -34,7 +34,9 @@ export const AddressInput = <
   // Null if not within a FormProvider.
   const formContext = useFormContext<FV>()
   const watch = props.watch || formContext?.watch
-  const formValue = watch?.(props.fieldName) as string | undefined
+  const formValue = (
+    props.fieldName ? watch?.(props.fieldName) : props.value
+  ) as string | undefined
 
   const hasFormValue =
     formValue &&

@@ -618,6 +618,10 @@ export interface IActionMatcher {
    * Error if the matcher errored. Throw an error if not yet errored.
    */
   get error(): Error
+  /**
+   * Messages that are being matched.
+   */
+  get messages(): UnifiedCosmosMsg[]
 }
 
 /**

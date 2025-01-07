@@ -10,14 +10,9 @@ import { chainQueries } from '@dao-dao/state/query'
 import {
   refreshWalletBalancesIdAtom,
   walletChainIdAtom,
-  walletHexPublicKeySelector,
 } from '@dao-dao/state/recoil'
 import { makeGetSignerOptions } from '@dao-dao/state/utils'
-import {
-  useCachedLoading,
-  useChainContextIfAvailable,
-  useUpdatingRef,
-} from '@dao-dao/stateless'
+import { useChainContextIfAvailable, useUpdatingRef } from '@dao-dao/stateless'
 import { AnyChain, LoadingData } from '@dao-dao/types'
 import {
   SecretSigningCosmWasmClient,
@@ -28,6 +23,8 @@ import {
   isSecretNetwork,
   maybeGetChainForChainId,
 } from '@dao-dao/utils'
+
+import { useQueryLoadingData } from './query'
 
 export type UseWalletOptions = {
   /**
@@ -152,11 +149,11 @@ export const useWallet = ({
   const [account, setAccount] = useState<WalletAccount>()
   const [hexPublicKeyData, setHexPublicKeyData] = useState<string>()
 
-  const hexPublicKeyFromChain = useCachedLoading(
+  const hexPublicKeyFromChain = useQueryLoadingData(
     _walletChain.address && loadAccount
-      ? walletHexPublicKeySelector({
-          walletAddress: _walletChain.address,
+      ? chainQueries.walletHexPublicKey({
           chainId: _walletChain.chain.chain_id,
+          address: _walletChain.address,
         })
       : undefined,
     undefined

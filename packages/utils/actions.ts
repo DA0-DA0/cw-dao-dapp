@@ -8,7 +8,7 @@ import {
   UnifiedCosmosMsg,
 } from '@dao-dao/types'
 
-import { getAccountAddress } from './dao'
+import { getAccountAddress } from './account'
 
 /**
  * Encode actions.

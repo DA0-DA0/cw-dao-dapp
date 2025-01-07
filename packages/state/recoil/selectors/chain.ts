@@ -1,6 +1,5 @@
 import { parsePacketsFromTendermintEvents } from '@confio/relayer/build/lib/utils'
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate'
-import { fromBase64, toHex } from '@cosmjs/encoding'
 import { Coin, IndexedTx, StargateClient } from '@cosmjs/stargate'
 import {
   noWait,
@@ -764,25 +763,6 @@ export const transactionPacketsSelector = selectorFamily<
     async ({ get }) => {
       const tx = get(transactionSelector(params))
       return tx && parsePacketsFromTendermintEvents(tx.events)
-    },
-})
-
-export const walletHexPublicKeySelector = selectorFamily<
-  string | undefined,
-  WithChainId<{ walletAddress: string }>
->({
-  key: 'walletHexPublicKey',
-  get:
-    ({ walletAddress, chainId }) =>
-    async ({ get }) => {
-      const client = get(cosmWasmClientForChainSelector(chainId))
-      const account = await client.getAccount(walletAddress)
-      // x/group (multisig) addresses are not strings but sets of public keys
-      // with a threshold, so they don't have a valid single public key.
-      if (!account?.pubkey?.value || typeof account.pubkey.value !== 'string') {
-        return
-      }
-      return toHex(fromBase64(account.pubkey.value))
     },
 })
 
