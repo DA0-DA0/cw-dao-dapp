@@ -407,8 +407,8 @@ const main = async () => {
       srcChainId === ChainId.NeutronMainnet
         ? srcIbcClient
         : destChainId === ChainId.NeutronMainnet
-        ? destIbcClient
-        : undefined
+          ? destIbcClient
+          : undefined
     if (neutronIbcClient) {
       neutronIbcClient.query.staking.params = async () => {
         const interchainSecurityClient =
