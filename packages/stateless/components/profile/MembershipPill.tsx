@@ -24,8 +24,8 @@ export const MembershipPill = ({
   const text = loadingIsMember
     ? t('info.loadingMembership')
     : isMember
-    ? t('title.memberOfDao', { daoName })
-    : t('title.notAMember')
+      ? t('title.memberOfDao', { daoName })
+      : t('title.notAMember')
   const Icon = isMember ? Check : Close
 
   return (

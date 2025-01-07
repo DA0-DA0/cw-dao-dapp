@@ -43,8 +43,8 @@ export const formatDate = (date: Date, both = false) =>
   (both
     ? dateFormatterDayAndYear
     : date.getFullYear() === new Date().getFullYear()
-    ? dateFormatterNoYear
-    : dateFormatterNoDay
+      ? dateFormatterNoYear
+      : dateFormatterNoDay
   ).format(date)
 
 // Shows month and date. Adds year if not this year.
@@ -106,16 +106,16 @@ export const formatExpiration = (t: TFunction, expiration: Expiration) =>
   'never' in expiration
     ? t('info.na')
     : 'at_height' in expiration
-    ? t('info.blockHeightValue', {
-        height: expiration.at_height.toLocaleString(),
-      })
-    : formatDateTimeTz(
-        // always returns date when 'at_time' is used
-        convertExpirationToDate(
-          // Unused
-          0,
-          expiration,
-          // Unused
-          0
-        )!
-      )
+      ? t('info.blockHeightValue', {
+          height: expiration.at_height.toLocaleString(),
+        })
+      : formatDateTimeTz(
+          // always returns date when 'at_time' is used
+          convertExpirationToDate(
+            // Unused
+            0,
+            expiration,
+            // Unused
+            0
+          )!
+        )

@@ -113,31 +113,32 @@ export const NewProposalMain = () => {
         </div>
       </div>
 
-      {isMember && proposalModule.supports(Feature.CastVoteOnProposalCreation) && (
-        <ProposalInstantVoter
-          className="pt-10 border-t border-border-secondary"
-          fieldName="vote"
-          isSelected={(option, vote) => option.option_id === vote.option_id}
-          options={[
-            ...choices.map(({ title }, index) => ({
-              Icon: Circle,
-              label: title,
-              value: { option_id: index },
-              color:
-                MULTIPLE_CHOICE_OPTION_COLORS[
-                  index % MULTIPLE_CHOICE_OPTION_COLORS.length
-                ],
-            })),
-            // "None of the Above" is automatically added.
-            {
-              Icon: Block,
-              label: 'None of the Above',
-              value: { option_id: choices.length },
-              color: 'var(--icon-tertiary)',
-            },
-          ]}
-        />
-      )}
+      {isMember &&
+        proposalModule.supports(Feature.CastVoteOnProposalCreation) && (
+          <ProposalInstantVoter
+            className="pt-10 border-t border-border-secondary"
+            fieldName="vote"
+            isSelected={(option, vote) => option.option_id === vote.option_id}
+            options={[
+              ...choices.map(({ title }, index) => ({
+                Icon: Circle,
+                label: title,
+                value: { option_id: index },
+                color:
+                  MULTIPLE_CHOICE_OPTION_COLORS[
+                    index % MULTIPLE_CHOICE_OPTION_COLORS.length
+                  ],
+              })),
+              // "None of the Above" is automatically added.
+              {
+                Icon: Block,
+                label: 'None of the Above',
+                value: { option_id: choices.length },
+                color: 'var(--icon-tertiary)',
+              },
+            ]}
+          />
+        )}
     </div>
   )
 }

@@ -70,16 +70,16 @@ export const FundRewardDistributionComponent: ActionComponent<
     !isCreating || tokens.loading || tokens.updating || !selectedDistribution
       ? undefined
       : amount &&
-        selectedBalance
-          .toHumanReadable(selectedDistribution.token.decimals)
-          .lt(amount)
-      ? t('error.insufficientFundsWarning', {
-          amount: selectedBalance.toInternationalizedHumanReadableString({
-            decimals: selectedDistribution.token.decimals,
-          }),
-          tokenSymbol: selectedDistribution.token.symbol,
-        })
-      : undefined
+          selectedBalance
+            .toHumanReadable(selectedDistribution.token.decimals)
+            .lt(amount)
+        ? t('error.insufficientFundsWarning', {
+            amount: selectedBalance.toInternationalizedHumanReadableString({
+              decimals: selectedDistribution.token.decimals,
+            }),
+            tokenSymbol: selectedDistribution.token.symbol,
+          })
+        : undefined
 
   const minAmount = HugeDecimal.one.toHumanReadableNumber(
     selectedDistribution?.token.decimals ?? 0

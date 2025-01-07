@@ -75,10 +75,10 @@ export const ProposalVoteTally = ({
                 statusKey === ProposalStatusEnum.NeutronTimelocked
                   ? t('title.currentWinner')
                   : statusKey === ProposalStatusEnum.Rejected ||
-                    statusKey === ProposalStatusEnum.Vetoed ||
-                    statusKey === ProposalStatusEnum.NeutronOverruled
-                  ? t('title.noWinner')
-                  : t('title.winner')}
+                      statusKey === ProposalStatusEnum.Vetoed ||
+                      statusKey === ProposalStatusEnum.NeutronOverruled
+                    ? t('title.noWinner')
+                    : t('title.winner')}
               </p>
             </div>
 
@@ -90,9 +90,9 @@ export const ProposalVoteTally = ({
                   isTie
                     ? t('title.tied')
                     : statusKey === ProposalStatusEnum.Rejected
-                    ? t('proposalStatusTitle.rejected')
-                    : // If not rejected nor tied, winningChoice should always be defined.
-                      winningChoice?.title ?? t('info.unknown')
+                      ? t('proposalStatusTitle.rejected')
+                      : // If not rejected nor tied, winningChoice should always be defined.
+                        (winningChoice?.title ?? t('info.unknown'))
                 }
               />
             </p>

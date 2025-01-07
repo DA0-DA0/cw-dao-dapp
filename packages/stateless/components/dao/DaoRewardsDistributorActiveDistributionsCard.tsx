@@ -32,20 +32,20 @@ export const DaoRewardsDistributorActiveDistributionsCard = ({
     distributions.loading || distributions.errored
       ? undefined
       : selected
-      ? distributions.data.find(
-          (d) => selected === getUniqueRewardDistributionKey(d)
-        )
-      : undefined
+        ? distributions.data.find(
+            (d) => selected === getUniqueRewardDistributionKey(d)
+          )
+        : undefined
 
   const [showPaused, setShowPaused] = useState(false)
   const distributionsToShow =
     distributions.loading || distributions.errored
       ? []
       : showPaused
-      ? distributions.data
-      : distributions.data.filter(
-          (d) => !('paused' in d.active_epoch.emission_rate)
-        )
+        ? distributions.data
+        : distributions.data.filter(
+            (d) => !('paused' in d.active_epoch.emission_rate)
+          )
   const pausedDistributionsExist =
     !distributions.loading &&
     !distributions.errored &&
@@ -63,12 +63,12 @@ export const DaoRewardsDistributorActiveDistributionsCard = ({
           {distributions.loading || distributions.errored
             ? t('title.activeDistributions')
             : showPaused && pausedDistributionsExist
-            ? t('title.numDistributions', {
-                count: distributions.data.length,
-              })
-            : t('title.numActiveDistributions', {
-                count: distributionsToShow.length,
-              })}
+              ? t('title.numDistributions', {
+                  count: distributions.data.length,
+                })
+              : t('title.numActiveDistributions', {
+                  count: distributionsToShow.length,
+                })}
         </p>
 
         {distributions.loading ? (

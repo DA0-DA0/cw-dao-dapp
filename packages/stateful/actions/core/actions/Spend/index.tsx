@@ -199,20 +199,20 @@ const StatefulSpendComponent: ComponentType<
     context.type === ActionContextType.Dao
       ? maxVotingPeriodSelector || constSelector(undefined)
       : context.type === ActionContextType.Wallet
-      ? // Wallets execute transactions right away, so there's no voting delay.
-        constSelector({
-          time: 0,
-        })
-      : context.type === ActionContextType.Gov
-      ? constSelector({
-          // Seconds
-          time: context.params.votingPeriod
-            ? Number(context.params.votingPeriod.seconds) +
-              context.params.votingPeriod.nanos / 1e9
-            : // If no voting period loaded, default to 30 days.
-              30 * 24 * 60 * 60,
-        })
-      : constSelector(undefined)
+        ? // Wallets execute transactions right away, so there's no voting delay.
+          constSelector({
+            time: 0,
+          })
+        : context.type === ActionContextType.Gov
+          ? constSelector({
+              // Seconds
+              time: context.params.votingPeriod
+                ? Number(context.params.votingPeriod.seconds) +
+                  context.params.votingPeriod.nanos / 1e9
+                : // If no voting period loaded, default to 30 days.
+                  30 * 24 * 60 * 60,
+            })
+          : constSelector(undefined)
   )
 
   // If creating, use all token balances since they need to choose among them,
@@ -221,27 +221,27 @@ const StatefulSpendComponent: ComponentType<
     props.isCreating
       ? loadingAllTokenBalances
       : loadingToken.loading
-      ? loadingToken
-      : {
-          loading: false,
-          updating: loadingToken.updating,
-          data: !loadingToken.errored
-            ? [
-                {
-                  token: loadingToken.data,
-                  // Not used once already created.
-                  balance: '0',
-                  // Only address is checked so the specific account type is not
-                  // a big deal.
-                  owner: {
-                    type: AccountType.Base,
-                    chainId: fromChainId,
-                    address: from,
+        ? loadingToken
+        : {
+            loading: false,
+            updating: loadingToken.updating,
+            data: !loadingToken.errored
+              ? [
+                  {
+                    token: loadingToken.data,
+                    // Not used once already created.
+                    balance: '0',
+                    // Only address is checked so the specific account type is not
+                    // a big deal.
+                    owner: {
+                      type: AccountType.Base,
+                      chainId: fromChainId,
+                      address: from,
+                    },
                   },
-                },
-              ]
-            : [],
-        }
+                ]
+              : [],
+          }
 
   const selectedToken = loadingTokens.loading
     ? undefined
@@ -299,19 +299,19 @@ const StatefulSpendComponent: ComponentType<
           index === 0
             ? from
             : // Use profile address if set, falling back to transforming the address (which is unreliable due to different chains using different HD paths).
-            context.type === ActionContextType.Wallet
-            ? context.profile?.chains[chainId]?.address ||
-              transformBech32Address(address, chainId)
-            : // Otherwise try to find an account (DAOs and gov).
-              getAccountAddress({
-                accounts: accounts.data,
-                chainId,
-                types: [
-                  AccountType.Base,
-                  AccountType.Polytone,
-                  AccountType.Ica,
-                ],
-              })
+              context.type === ActionContextType.Wallet
+              ? context.profile?.chains[chainId]?.address ||
+                transformBech32Address(address, chainId)
+              : // Otherwise try to find an account (DAOs and gov).
+                getAccountAddress({
+                  accounts: accounts.data,
+                  chainId,
+                  types: [
+                    AccountType.Base,
+                    AccountType.Polytone,
+                    AccountType.Ica,
+                  ],
+                })
         )
   // Get missing accounts for skip route.
   const missingAccountChainIds =
@@ -360,33 +360,33 @@ const StatefulSpendComponent: ComponentType<
           errored: false,
         }
       : props.isCreating &&
-        !useDirectIbcPath &&
-        !skipRoute.loading &&
-        !skipRoute.errored &&
-        // Can only use skip route if only one TX is required.
-        skipRoute.data.txs_required === 1 &&
-        // Only use skip IBC path if loads message successfully.
-        !skipRouteMessageLoading.loading &&
-        !skipRouteMessageLoading.errored
-      ? {
-          loading: false,
-          errored: false,
-          updating: skipRoute.updating,
-          data: skipRoute.data.chain_ids,
-        }
-      : !props.isCreating && pfmChainPath?.length
-      ? {
-          loading: false,
-          errored: false,
-          data: pfmChainPath,
-        }
-      : // Fallback to just showing one hop if failed to load actual path.
-        {
-          loading: false,
-          errored: false,
-          updating: false,
-          data: [fromChainId, toChainId],
-        }
+          !useDirectIbcPath &&
+          !skipRoute.loading &&
+          !skipRoute.errored &&
+          // Can only use skip route if only one TX is required.
+          skipRoute.data.txs_required === 1 &&
+          // Only use skip IBC path if loads message successfully.
+          !skipRouteMessageLoading.loading &&
+          !skipRouteMessageLoading.errored
+        ? {
+            loading: false,
+            errored: false,
+            updating: skipRoute.updating,
+            data: skipRoute.data.chain_ids,
+          }
+        : !props.isCreating && pfmChainPath?.length
+          ? {
+              loading: false,
+              errored: false,
+              data: pfmChainPath,
+            }
+          : // Fallback to just showing one hop if failed to load actual path.
+            {
+              loading: false,
+              errored: false,
+              updating: false,
+              data: [fromChainId, toChainId],
+            }
     : // Not IBC.
       {
         loading: true,
@@ -400,17 +400,17 @@ const StatefulSpendComponent: ComponentType<
           errored: false,
         }
       : skipRoute.errored
-      ? {
-          loading: false,
-          errored: true,
-          error: skipRoute.error,
-        }
-      : {
-          loading: false,
-          errored: false,
-          updating: skipRoute.updating,
-          data: HugeDecimal.from(skipRoute.data.amount_out),
-        }
+        ? {
+            loading: false,
+            errored: true,
+            error: skipRoute.error,
+          }
+        : {
+            loading: false,
+            errored: false,
+            updating: skipRoute.updating,
+            data: HugeDecimal.from(skipRoute.data.amount_out),
+          }
     : {
         loading: false,
         errored: false,
@@ -423,24 +423,24 @@ const StatefulSpendComponent: ComponentType<
     ibcPath.loading || ibcPath.errored
       ? undefined
       : MAINNET &&
-        // If selected token is from Noble.
-        selectedToken &&
-        selectedToken.token.source.chainId === ChainId.NobleMainnet &&
-        // If Noble is one of the non-destination chains, meaning it will be
-        // transferred out of Noble at some point.
-        ibcPath.data.slice(0, -1).includes(ChainId.NobleMainnet)
-      ? nobleQueries.ibcTransferFee()
-      : undefined
+          // If selected token is from Noble.
+          selectedToken &&
+          selectedToken.token.source.chainId === ChainId.NobleMainnet &&
+          // If Noble is one of the non-destination chains, meaning it will be
+          // transferred out of Noble at some point.
+          ibcPath.data.slice(0, -1).includes(ChainId.NobleMainnet)
+        ? nobleQueries.ibcTransferFee()
+        : undefined
   )
   const neutronTransferFee = useQueryLoadingDataWithError(
     ibcPath.loading || ibcPath.errored
       ? undefined
       : MAINNET &&
-        // If Neutron is one of the non-destination chains, meaning it will be
-        // transferred out of Neutron at some point.
-        ibcPath.data.slice(0, -1).includes(ChainId.NeutronMainnet)
-      ? neutronQueries.ibcTransferFee(queryClient)
-      : undefined
+          // If Neutron is one of the non-destination chains, meaning it will be
+          // transferred out of Neutron at some point.
+          ibcPath.data.slice(0, -1).includes(ChainId.NeutronMainnet)
+        ? neutronQueries.ibcTransferFee(queryClient)
+        : undefined
   )
 
   // Store skip route message once loaded successfully during creation.
@@ -962,9 +962,9 @@ export class SpendAction extends ActionBase<SpendData> {
         denomOrAddress: isIbcTransfer
           ? decodedMessage.stargate.value.token.denom
           : isNative
-          ? decodedMessage.bank.send.amount[0].denom
-          : // isCw20
-            decodedMessage.wasm.execute.contract_addr,
+            ? decodedMessage.bank.send.amount[0].denom
+            : // isCw20
+              decodedMessage.wasm.execute.contract_addr,
       })
     )
 

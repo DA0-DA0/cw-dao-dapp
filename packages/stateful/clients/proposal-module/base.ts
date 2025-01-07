@@ -22,7 +22,7 @@ export abstract class ProposalModuleBase<
   VoteResponse = any,
   VoteInfo = any,
   Vote = any,
-  Config = any
+  Config = any,
 > implements
     IProposalModuleBase<
       Dao,

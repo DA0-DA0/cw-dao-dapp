@@ -87,12 +87,12 @@ export const TokenAmountDisplay = ({
     _amount instanceof HugeDecimal
       ? _amount
       : typeof _amount === 'number'
-      ? HugeDecimal.fromHumanReadable(_amount, decimals)
-      : _amount
-      ? _amount.data instanceof HugeDecimal
-        ? _amount.data
-        : HugeDecimal.fromHumanReadable(_amount.data, decimals)
-      : HugeDecimal.zero
+        ? HugeDecimal.fromHumanReadable(_amount, decimals)
+        : _amount
+          ? _amount.data instanceof HugeDecimal
+            ? _amount.data
+            : HugeDecimal.fromHumanReadable(_amount.data, decimals)
+          : HugeDecimal.zero
 
   // If amount too small and nonzero, set to min and add `< ` to prefix.
   const amountBelowMin =

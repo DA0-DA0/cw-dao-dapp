@@ -426,8 +426,8 @@ export const GovernanceConfigurationInput = ({
             tooltip: config.tokenCreationUnderDevelopment
               ? t('info.tokenCreationUnderDevelopment')
               : config.noTokenFactory
-              ? t('info.tokenCreationNoTokenFactory')
-              : undefined,
+                ? t('info.tokenCreationNoTokenFactory')
+                : undefined,
           },
           {
             label: t('button.useExistingToken'),

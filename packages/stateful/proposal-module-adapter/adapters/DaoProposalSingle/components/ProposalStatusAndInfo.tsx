@@ -205,8 +205,8 @@ const InnerProposalStatusAndInfo = ({
       statusKey === ProposalStatusEnum.Open
         ? timestampInfo.expirationDate
         : statusKey === 'veto_timelock'
-        ? vetoTimelockExpiration
-        : undefined,
+          ? vetoTimelockExpiration
+          : undefined,
   })
 
   const { vetoEnabled, canBeVetoed, vetoOrEarlyExecute, vetoInfoItems } =
@@ -257,16 +257,16 @@ const InnerProposalStatusAndInfo = ({
           },
         ] as ProposalStatusAndInfoProps['info'])
       : approver
-      ? ([
-          {
-            Icon: ThumbUpOutlined,
-            label: t('title.approver'),
-            Value: (props) => (
-              <EntityDisplay {...props} address={approver} noCopy />
-            ),
-          },
-        ] as ProposalStatusAndInfoProps['info'])
-      : []),
+        ? ([
+            {
+              Icon: ThumbUpOutlined,
+              label: t('title.approver'),
+              Value: (props) => (
+                <EntityDisplay {...props} address={approver} noCopy />
+              ),
+            },
+          ] as ProposalStatusAndInfoProps['info'])
+        : []),
     ...vetoInfoItems,
     {
       Icon: RotateRightOutlined,
@@ -407,26 +407,26 @@ const InnerProposalStatusAndInfo = ({
           statusKey === ProposalStatusEnum.Passed
             ? 'passed'
             : statusKey === ProposalStatusEnum.Executed
-            ? 'executed'
-            : statusKey === ProposalStatusEnum.ExecutionFailed
-            ? 'executionFailed'
-            : statusKey === ProposalStatusEnum.Rejected
-            ? 'rejected'
-            : statusKey === ProposalStatusEnum.Closed
-            ? 'closed'
-            : statusKey === ProposalStatusEnum.Vetoed
-            ? thresholdReached && (!quorum || quorumReached)
-              ? 'vetoedPassed'
-              : 'vetoedNotPassed'
-            : statusKey === 'veto_timelock'
-            ? 'vetoTimelock'
-            : statusKey === ProposalStatusEnum.NeutronOverruled
-            ? thresholdReached && (!quorum || quorumReached)
-              ? 'overruledPassed'
-              : 'overruledNotPassed'
-            : statusKey === ProposalStatusEnum.NeutronTimelocked
-            ? 'overruleTimelock'
-            : undefined,
+              ? 'executed'
+              : statusKey === ProposalStatusEnum.ExecutionFailed
+                ? 'executionFailed'
+                : statusKey === ProposalStatusEnum.Rejected
+                  ? 'rejected'
+                  : statusKey === ProposalStatusEnum.Closed
+                    ? 'closed'
+                    : statusKey === ProposalStatusEnum.Vetoed
+                      ? thresholdReached && (!quorum || quorumReached)
+                        ? 'vetoedPassed'
+                        : 'vetoedNotPassed'
+                      : statusKey === 'veto_timelock'
+                        ? 'vetoTimelock'
+                        : statusKey === ProposalStatusEnum.NeutronOverruled
+                          ? thresholdReached && (!quorum || quorumReached)
+                            ? 'overruledPassed'
+                            : 'overruledNotPassed'
+                          : statusKey === ProposalStatusEnum.NeutronTimelocked
+                            ? 'overruleTimelock'
+                            : undefined,
         turnoutPercent: formatPercentOf100(turnoutPercent),
         turnoutYesPercent: formatPercentOf100(turnoutYesPercent),
       })

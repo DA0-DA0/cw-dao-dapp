@@ -50,15 +50,15 @@ export const CommunityPoolDepositComponent: ActionComponent<
     !isCreating || tokens.loading || !spendDenom
       ? undefined
       : !selectedToken
-      ? t('error.unknownDenom', { denom: spendDenom })
-      : selectedBalance.toHumanReadable(selectedDecimals).lt(spendAmount)
-      ? t('error.insufficientFundsWarning', {
-          amount: selectedBalance.toInternationalizedHumanReadableString({
-            decimals: selectedDecimals,
-          }),
-          tokenSymbol: symbol,
-        })
-      : undefined
+        ? t('error.unknownDenom', { denom: spendDenom })
+        : selectedBalance.toHumanReadable(selectedDecimals).lt(spendAmount)
+          ? t('error.insufficientFundsWarning', {
+              amount: selectedBalance.toInternationalizedHumanReadableString({
+                decimals: selectedDecimals,
+              }),
+              tokenSymbol: symbol,
+            })
+          : undefined
 
   return (
     <>

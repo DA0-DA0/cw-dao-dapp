@@ -106,20 +106,20 @@ export const useGovernanceCollectionInfo = ({
       !fetchWalletBalance || loadingWalletBalance.errored
         ? undefined
         : loadingWalletBalance.loading
-        ? { loading: true }
-        : {
-            loading: false,
-            data: HugeDecimal.from(loadingWalletBalance.data),
-          },
+          ? { loading: true }
+          : {
+              loading: false,
+              data: HugeDecimal.from(loadingWalletBalance.data),
+            },
     // Treasury balance
     loadingTreasuryBalance:
       !fetchTreasuryBalance || loadingTreasuryBalance.errored
         ? undefined
         : loadingTreasuryBalance.loading
-        ? { loading: true }
-        : {
-            loading: false,
-            data: HugeDecimal.from(loadingTreasuryBalance.data),
-          },
+          ? { loading: true }
+          : {
+              loading: false,
+              data: HugeDecimal.from(loadingTreasuryBalance.data),
+            },
   }
 }

@@ -479,7 +479,7 @@ export const secretDaoVotingTokenStakedQueries = {
 }
 export interface SecretDaoVotingTokenStakedReactQuery<
   TResponse,
-  TData = TResponse
+  TData = TResponse,
 > {
   chainId: string
   contractAddress: string

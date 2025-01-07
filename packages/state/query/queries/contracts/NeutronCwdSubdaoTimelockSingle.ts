@@ -250,7 +250,7 @@ export const neutronCwdSubdaoTimelockSingleQueries = {
 }
 export interface NeutronCwdSubdaoTimelockSingleReactQuery<
   TResponse,
-  TData = TResponse
+  TData = TResponse,
 > {
   chainId: string
   contractAddress: string
@@ -262,7 +262,7 @@ export interface NeutronCwdSubdaoTimelockSingleReactQuery<
   }
 }
 export interface NeutronCwdSubdaoTimelockSingleProposalExecutionErrorQuery<
-  TData
+  TData,
 > extends NeutronCwdSubdaoTimelockSingleReactQuery<NullableString, TData> {
   args: {
     proposalId: number

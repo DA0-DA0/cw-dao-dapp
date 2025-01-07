@@ -36,10 +36,10 @@ export const makeProps = (
           (status === UnstakingTaskStatus.ReadyToClaim
             ? -7
             : // Random date in past 3 months.
-            status === UnstakingTaskStatus.Claimed
-            ? -3 * 30
-            : // Random date in next 14 days.
-              14) *
+              status === UnstakingTaskStatus.Claimed
+              ? -3 * 30
+              : // Random date in next 14 days.
+                14) *
           // 1 day in milliseconds
           24 *
           60 *

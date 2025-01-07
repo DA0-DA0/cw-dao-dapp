@@ -107,8 +107,8 @@ export const Dropdown = <T extends unknown>({
             {selectedOptions.length === 0
               ? placeholder
               : selectedOptions.length === 1
-              ? selectedOptions[0].label
-              : t('info.numSelected', { count: selectedOptions.length })}
+                ? selectedOptions[0].label
+                : t('info.numSelected', { count: selectedOptions.length })}
           </p>
 
           <ArrowDropDown className={clsx('!h-5 !w-5', iconClassName)} />

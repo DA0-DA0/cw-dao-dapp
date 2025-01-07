@@ -105,12 +105,12 @@ export const MembersTab = ({
     members.loading || members.errored
       ? []
       : members.data.some((member) => member.votingPowerPercent.loading)
-      ? []
-      : members.data.sort(
-          (a, b) =>
-            (b.votingPowerPercent.loading ? 0 : b.votingPowerPercent.data) -
-            (a.votingPowerPercent.loading ? 0 : a.votingPowerPercent.data)
-        )
+        ? []
+        : members.data.sort(
+            (a, b) =>
+              (b.votingPowerPercent.loading ? 0 : b.votingPowerPercent.data) -
+              (a.votingPowerPercent.loading ? 0 : a.votingPowerPercent.data)
+          )
 
   // Get members that hold the top voting power.
   const topMemberUpperIndex =

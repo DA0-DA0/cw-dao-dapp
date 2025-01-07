@@ -221,59 +221,59 @@ export const useProposalRelayState = ({
                       status: CrossChainPacketInfoStatus.Pending,
                     }
                   : result.state === 'hasValue'
-                  ? objectMatchesStructure(result.contents, {
-                      callback: {
-                        result: {
-                          execute: {
-                            Ok: {},
-                          },
-                        },
-                      },
-                    })
-                    ? {
-                        packet,
-                        status: CrossChainPacketInfoStatus.Relayed,
-                        msgResponses: (
-                          (result.contents as any)!.callback.result.execute
-                            .Ok as ExecutionResponse
-                        ).result.map(({ events }) => ({ events })),
-                      }
-                    : objectMatchesStructure(result.contents, {
+                    ? objectMatchesStructure(result.contents, {
                         callback: {
                           result: {
                             execute: {
-                              Err: {},
+                              Ok: {},
                             },
                           },
                         },
                       })
-                    ? (result.contents?.callback.result as any).execute.Err ===
-                      'timeout'
                       ? {
                           packet,
-                          status: CrossChainPacketInfoStatus.TimedOut,
+                          status: CrossChainPacketInfoStatus.Relayed,
+                          msgResponses: (
+                            (result.contents as any)!.callback.result.execute
+                              .Ok as ExecutionResponse
+                          ).result.map(({ events }) => ({ events })),
                         }
-                      : {
-                          packet,
-                          status: CrossChainPacketInfoStatus.Errored,
-                          error: (result.contents as any).callback.result
-                            .execute.Err,
-                        }
-                    : objectMatchesStructure(result.contents, {
-                        callback: {
-                          result: {
-                            fatal_error: {},
-                          },
-                        },
-                      })
-                    ? {
-                        packet,
-                        status: CrossChainPacketInfoStatus.Errored,
-                        error: (result.contents as any).callback.result
-                          .fatal_error,
-                      }
+                      : objectMatchesStructure(result.contents, {
+                            callback: {
+                              result: {
+                                execute: {
+                                  Err: {},
+                                },
+                              },
+                            },
+                          })
+                        ? (result.contents?.callback.result as any).execute
+                            .Err === 'timeout'
+                          ? {
+                              packet,
+                              status: CrossChainPacketInfoStatus.TimedOut,
+                            }
+                          : {
+                              packet,
+                              status: CrossChainPacketInfoStatus.Errored,
+                              error: (result.contents as any).callback.result
+                                .execute.Err,
+                            }
+                        : objectMatchesStructure(result.contents, {
+                              callback: {
+                                result: {
+                                  fatal_error: {},
+                                },
+                              },
+                            })
+                          ? {
+                              packet,
+                              status: CrossChainPacketInfoStatus.Errored,
+                              error: (result.contents as any).callback.result
+                                .fatal_error,
+                            }
+                          : []
                     : []
-                  : []
               }
 
               if (packet.type === 'ica') {
@@ -294,27 +294,27 @@ export const useProposalRelayState = ({
                       msgResponses: [],
                     }
                   : unreceivedPackets.data[index]?.length &&
-                    unreceivedPackets.data[index].some(Boolean)
-                  ? Date.now() > Number(latestPacketTimeout) / 1e6
-                    ? {
-                        packet,
-                        status: CrossChainPacketInfoStatus.TimedOut,
-                      }
-                    : {
-                        packet,
-                        status: CrossChainPacketInfoStatus.Pending,
-                      }
-                  : unreceivedAcks.data[index]?.length &&
-                    unreceivedAcks.data[index].some(Boolean)
-                  ? {
-                      packet,
-                      status: CrossChainPacketInfoStatus.Pending,
-                    }
-                  : // If could not find ack or packet, assume pending.
-                    {
-                      packet,
-                      status: CrossChainPacketInfoStatus.Pending,
-                    }
+                      unreceivedPackets.data[index].some(Boolean)
+                    ? Date.now() > Number(latestPacketTimeout) / 1e6
+                      ? {
+                          packet,
+                          status: CrossChainPacketInfoStatus.TimedOut,
+                        }
+                      : {
+                          packet,
+                          status: CrossChainPacketInfoStatus.Pending,
+                        }
+                    : unreceivedAcks.data[index]?.length &&
+                        unreceivedAcks.data[index].some(Boolean)
+                      ? {
+                          packet,
+                          status: CrossChainPacketInfoStatus.Pending,
+                        }
+                      : // If could not find ack or packet, assume pending.
+                        {
+                          packet,
+                          status: CrossChainPacketInfoStatus.Pending,
+                        }
               }
 
               return []

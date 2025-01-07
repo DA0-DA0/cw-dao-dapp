@@ -385,11 +385,11 @@ export const ManageStakingComponent: ActionComponent<
               {type === StakingActionType.Delegate
                 ? t('title.balance')
                 : type === StakingActionType.WithdrawDelegatorReward
-                ? executed
-                  ? t('info.claimedRewards')
-                  : t('info.pendingRewards')
-                : // type === StakingActionType.Undelegate || type === StakingActionType.Redelegate
-                  t('title.staked')}
+                  ? executed
+                    ? t('info.claimedRewards')
+                    : t('info.pendingRewards')
+                  : // type === StakingActionType.Undelegate || type === StakingActionType.Redelegate
+                    t('title.staked')}
               :
             </p>
 
@@ -397,7 +397,7 @@ export const ManageStakingComponent: ActionComponent<
               amount={
                 type === StakingActionType.WithdrawDelegatorReward
                   ? executed
-                    ? claimedRewards ?? HugeDecimal.zero
+                    ? (claimedRewards ?? HugeDecimal.zero)
                     : sourceValidatorPendingRewards
                   : maxAmount
               }

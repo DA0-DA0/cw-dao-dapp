@@ -73,8 +73,8 @@ export const Info = ({
             canDownload.errored
               ? t('error.failedToLoadMembershipRefreshPage')
               : !canDownload.loading && !canDownload.data
-              ? t('error.cantDownloadRetroactiveSurveyCsv')
-              : undefined
+                ? t('error.cantDownloadRetroactiveSurveyCsv')
+                : undefined
           }
         >
           <Button

@@ -59,9 +59,10 @@ const main = async () => {
           }
 
           await retry(5, async () => {
-            const { contracts } = await client[
-              'forceGetQueryClient'
-            ]().wasm.listContractsByCodeId(codeId)
+            const { contracts } =
+              await client['forceGetQueryClient']().wasm.listContractsByCodeId(
+                codeId
+              )
             if (contracts.length === 0) {
               successes[id] = 1
               console.log(

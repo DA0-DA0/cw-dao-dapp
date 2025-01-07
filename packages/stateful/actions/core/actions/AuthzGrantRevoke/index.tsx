@@ -318,15 +318,15 @@ export class AuthzGrantRevokeAction extends ActionBase<AuthzGrantRevokeData> {
           ? grantAuthorizationTypeUrl === SendAuthorization.typeUrl
             ? (grant.authorization as SendAuthorization).spendLimit
             : grantAuthorizationTypeUrl ===
-                ContractExecutionAuthorization.typeUrl ||
-              grantAuthorizationTypeUrl ===
-                ContractMigrationAuthorization.typeUrl
-            ? (
-                grant.authorization as
-                  | ContractExecutionAuthorization
-                  | ContractMigrationAuthorization
-              ).grants[0]?.limit?.amounts
-            : undefined
+                  ContractExecutionAuthorization.typeUrl ||
+                grantAuthorizationTypeUrl ===
+                  ContractMigrationAuthorization.typeUrl
+              ? (
+                  grant.authorization as
+                    | ContractExecutionAuthorization
+                    | ContractMigrationAuthorization
+                ).grants[0]?.limit?.amounts
+              : undefined
           : undefined
 
       const tokens = await Promise.all(
@@ -435,8 +435,8 @@ export class AuthzGrantRevokeAction extends ActionBase<AuthzGrantRevokeData> {
               filterMsgs.length === 0
                 ? {}
                 : filterMsgs.length === 1
-                ? filterMsgs[0]
-                : filterMsgs,
+                  ? filterMsgs[0]
+                  : filterMsgs,
               null,
               2
             ),
@@ -445,8 +445,8 @@ export class AuthzGrantRevokeAction extends ActionBase<AuthzGrantRevokeData> {
               limit.$typeUrl === MaxCallsLimit.typeUrl
                 ? Number(limit.remaining)
                 : limit.$typeUrl === CombinedLimit.typeUrl
-                ? Number(limit.callsRemaining)
-                : 0,
+                  ? Number(limit.callsRemaining)
+                  : 0,
           }
         }
 

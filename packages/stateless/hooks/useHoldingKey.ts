@@ -26,12 +26,12 @@ export const useHoldingKey = ({ key }: UseHoldingKeyOptions): boolean => {
         key === 'alt'
           ? event.altKey
           : key === 'shift'
-          ? event.shiftKey
-          : key === 'ctrl'
-          ? event.ctrlKey
-          : key === 'meta'
-          ? event.metaKey
-          : false
+            ? event.shiftKey
+            : key === 'ctrl'
+              ? event.ctrlKey
+              : key === 'meta'
+                ? event.metaKey
+                : false
 
       setHolding(holding)
 

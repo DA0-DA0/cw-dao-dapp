@@ -58,8 +58,8 @@ export const SubDaosTab = ({
                   feature: t('title.subDaos'),
                 })
               : !isMember
-              ? t('error.mustBeMemberToCreateSubDao')
-              : undefined
+                ? t('error.mustBeMemberToCreateSubDao')
+                : undefined
           }
         >
           <ButtonLink

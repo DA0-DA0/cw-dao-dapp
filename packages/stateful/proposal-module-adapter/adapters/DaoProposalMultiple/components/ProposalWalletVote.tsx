@@ -17,8 +17,8 @@ export const ProposalWalletVote = ({
   const label = proposal.loading
     ? '...'
     : vote === undefined
-    ? t(`proposalVoteTitle.${fallback === 'hasNoVote' ? 'none' : fallback}`)
-    : proposal.data.choices[vote.option_id].title
+      ? t(`proposalVoteTitle.${fallback === 'hasNoVote' ? 'none' : fallback}`)
+      : proposal.data.choices[vote.option_id].title
 
   const className = getProposalWalletVoteClassName(vote?.option_id, fallback)
 
@@ -38,6 +38,6 @@ export const getProposalWalletVoteClassName = (
   optionId !== undefined
     ? 'text-text-body ring-2 ring-inset ring-component-badge-primary'
     : fallback === 'pending'
-    ? 'text-text-body ring-2 ring-inset ring-component-badge-brand'
-    : // fallback === 'hasNoVote'
-      'text-text-tertiary ring-2 ring-inset ring-border-secondary'
+      ? 'text-text-body ring-2 ring-inset ring-component-badge-brand'
+      : // fallback === 'hasNoVote'
+        'text-text-tertiary ring-2 ring-inset ring-border-secondary'

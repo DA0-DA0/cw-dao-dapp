@@ -143,38 +143,38 @@ export const Home: NextPage<StatefulHomeProps> = ({
     searchQuery.isPending
       ? { loading: true, errored: false }
       : searchQuery.isError
-      ? { loading: false, errored: true, error: searchQuery.error }
-      : {
-          loading: false,
-          errored: false,
-          updating: searchQuery.isRefetching,
-          data:
-            searchQuery.data?.pages.flatMap((page) =>
-              page && typeof page === 'object'
-                ? page.hits
-                    .filter(({ value }) => !!value?.config)
-                    .flatMap(
-                      ({
-                        chainId,
-                        id,
-                        value: {
-                          config,
-                          version: { version },
-                        },
-                      }): LazyDaoCardProps => ({
-                        info: {
+        ? { loading: false, errored: true, error: searchQuery.error }
+        : {
+            loading: false,
+            errored: false,
+            updating: searchQuery.isRefetching,
+            data:
+              searchQuery.data?.pages.flatMap((page) =>
+                page && typeof page === 'object'
+                  ? page.hits
+                      .filter(({ value }) => !!value?.config)
+                      .flatMap(
+                        ({
                           chainId,
-                          coreAddress: id,
-                          coreVersion: parseContractVersion(version),
-                          name: config.name,
-                          description: config.description,
-                          imageUrl: config.image_url || getFallbackImage(id),
-                        },
-                      })
-                    )
-                : []
-            ) ?? [],
-        }
+                          id,
+                          value: {
+                            config,
+                            version: { version },
+                          },
+                        }): LazyDaoCardProps => ({
+                          info: {
+                            chainId,
+                            coreAddress: id,
+                            coreVersion: parseContractVersion(version),
+                            name: config.name,
+                            description: config.description,
+                            imageUrl: config.image_url || getFallbackImage(id),
+                          },
+                        })
+                      )
+                  : []
+              ) ?? [],
+          }
 
   const selectedChain = chainId ? getSupportedChainConfig(chainId) : undefined
   const selectedChainHasSubDaos = !!selectedChain?.subDaos?.length
@@ -201,15 +201,15 @@ export const Home: NextPage<StatefulHomeProps> = ({
           loading: true,
         }
       : _chainGovDaos?.length ||
-        (selectedChainHasSubDaos && !chainSubDaos.loading)
-      ? {
-          loading: false,
-          data: [
-            ...(_chainGovDaos || []),
-            ...(!chainSubDaos.loading ? chainSubDaos.data : []),
-          ].map((info): StatefulDaoCardProps => ({ info })),
-        }
-      : undefined
+          (selectedChainHasSubDaos && !chainSubDaos.loading)
+        ? {
+            loading: false,
+            data: [
+              ...(_chainGovDaos || []),
+              ...(!chainSubDaos.loading ? chainSubDaos.data : []),
+            ].map((info): StatefulDaoCardProps => ({ info })),
+          }
+        : undefined
 
   const featuredDaosLoading = useLoadingFeaturedDaoCards(chainId)
   const featuredDaos: LoadingData<StatefulDaoCardProps[]> =
@@ -217,30 +217,30 @@ export const Home: NextPage<StatefulHomeProps> = ({
       ? // If not on a chain-specific page, show all featured DAOs.
         featuredDaosLoading
       : featuredDaosLoading.loading || chainGovDaos.loading
-      ? {
-          loading: true,
-        }
-      : {
-          loading: false,
-          updating: featuredDaosLoading.updating,
-          // On a chain-specific page, remove featured DAOs that show
-          // up in the chain governance section.
-          data: featuredDaosLoading.data.filter(
-            (featured) =>
-              !chainGovDaos.data.some(
-                (chain) =>
-                  featured.info.coreAddress === chain.info.coreAddress ||
-                  // If the chain itself uses a real DAO for its
-                  // governance, such as Neutron, hide it from
-                  // featured as well since it shows up above. This is
-                  // needed because the DAO in the featured list uses
-                  // the DAO's real address, while the DAO in the
-                  // chain x/gov list is the name of the chain.
-                  featured.info.coreAddress ===
-                    selectedChain?.govContractAddress
-              )
-          ),
-        }
+        ? {
+            loading: true,
+          }
+        : {
+            loading: false,
+            updating: featuredDaosLoading.updating,
+            // On a chain-specific page, remove featured DAOs that show
+            // up in the chain governance section.
+            data: featuredDaosLoading.data.filter(
+              (featured) =>
+                !chainGovDaos.data.some(
+                  (chain) =>
+                    featured.info.coreAddress === chain.info.coreAddress ||
+                    // If the chain itself uses a real DAO for its
+                    // governance, such as Neutron, hide it from
+                    // featured as well since it shows up above. This is
+                    // needed because the DAO in the featured list uses
+                    // the DAO's real address, while the DAO in the
+                    // chain x/gov list is the name of the chain.
+                    featured.info.coreAddress ===
+                      selectedChain?.govContractAddress
+                )
+            ),
+          }
 
   const queryClient = useQueryClient()
   const freshStats = useQueryLoadingDataWithError(

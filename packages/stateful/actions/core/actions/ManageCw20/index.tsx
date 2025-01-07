@@ -111,9 +111,9 @@ const Component: ActionComponent = (props) => {
         tokenInfoErrored
           ? t('error.notCw20Address')
           : noTokensWhenRemoving
-          ? t('error.noCw20Tokens')
-          : // Should never happen.
-            t('error.unexpectedError')
+            ? t('error.noCw20Tokens')
+            : // Should never happen.
+              t('error.unexpectedError')
       )
     }
   }, [

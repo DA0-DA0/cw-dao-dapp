@@ -11,12 +11,15 @@ export const querySnapper = async <T = any>({
 }: QuerySnapperOptions): Promise<T | undefined> => {
   // Filter out undefined args.
   if (parameters) {
-    parameters = Object.entries(parameters).reduce((acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = value
-      }
-      return acc
-    }, {} as Record<string, any>)
+    parameters = Object.entries(parameters).reduce(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = value
+        }
+        return acc
+      },
+      {} as Record<string, any>
+    )
   }
 
   const params = new URLSearchParams(parameters)

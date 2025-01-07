@@ -96,19 +96,19 @@ export const useGovernanceCollectionInfo = ({
     loadingWalletBalance: loadingWalletBalance.loading
       ? { loading: true }
       : !loadingWalletBalance.data
-      ? undefined
-      : {
-          loading: false,
-          data: HugeDecimal.from(loadingWalletBalance.data.length),
-        },
+        ? undefined
+        : {
+            loading: false,
+            data: HugeDecimal.from(loadingWalletBalance.data.length),
+          },
     // Treasury balance
     loadingTreasuryBalance: loadingTreasuryBalance.loading
       ? { loading: true }
       : !loadingTreasuryBalance.data
-      ? undefined
-      : {
-          loading: false,
-          data: HugeDecimal.from(loadingTreasuryBalance.data.length),
-        },
+        ? undefined
+        : {
+            loading: false,
+            data: HugeDecimal.from(loadingTreasuryBalance.data.length),
+          },
   }
 }

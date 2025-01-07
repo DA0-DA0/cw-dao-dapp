@@ -58,8 +58,8 @@ export const useQuerySyncedRecoilState = <T = string | number>({
         (typeof value === 'string'
           ? initialValue
           : typeof value === 'number'
-          ? Number(initialValue)
-          : initialValue) as any
+            ? Number(initialValue)
+            : initialValue) as any
       )
     }
   }, [param, router.isReady, router.query, setValue, value])

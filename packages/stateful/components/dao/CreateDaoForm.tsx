@@ -376,18 +376,18 @@ export const InnerCreateDaoForm = ({
     pageIndex < CreateDaoPages.length - 2
       ? CreateDaoSubmitValue.Continue
       : // Second to last links to the Review page.
-      pageIndex === CreateDaoPages.length - 2
-      ? CreateDaoSubmitValue.Review
-      : // Last page creates the DAO.
-        CreateDaoSubmitValue.Create
+        pageIndex === CreateDaoPages.length - 2
+        ? CreateDaoSubmitValue.Review
+        : // Last page creates the DAO.
+          CreateDaoSubmitValue.Create
   const submitLabel =
     // Override with continue button if necessary.
     submitValue === CreateDaoSubmitValue.Create && createViaGovernance
       ? t('button.continue')
       : // Override with SubDAO button if necessary.
-      submitValue === CreateDaoSubmitValue.Create && makingSubDao
-      ? t('button.createSubDao')
-      : t(submitValue)
+        submitValue === CreateDaoSubmitValue.Create && makingSubDao
+        ? t('button.createSubDao')
+        : t(submitValue)
 
   //! Adapters and message generators
 
@@ -851,26 +851,26 @@ export const InnerCreateDaoForm = ({
                           NEW_DAO_TOKEN_DECIMALS
                         )
                       : // If using existing token but no token info loaded (should
-                      // be impossible), just display 0.
-                      !daoVotingTokenBasedCreatorData.existingToken ||
-                        daoVotingTokenBasedCreatorData.existingTokenSupply ===
-                          undefined
-                      ? HugeDecimal.zero
-                      : HugeDecimal.from(
-                          daoVotingTokenBasedCreatorData.existingTokenSupply
-                        ),
+                        // be impossible), just display 0.
+                        !daoVotingTokenBasedCreatorData.existingToken ||
+                          daoVotingTokenBasedCreatorData.existingTokenSupply ===
+                            undefined
+                        ? HugeDecimal.zero
+                        : HugeDecimal.from(
+                            daoVotingTokenBasedCreatorData.existingTokenSupply
+                          ),
                   tokenSymbol:
                     daoVotingTokenBasedCreatorData.govTokenType ===
                     GovernanceTokenType.New
                       ? daoVotingTokenBasedCreatorData.newInfo.symbol
                       : // If using existing token but no token info loaded (should
-                      // be impossible), the tokenBalance above will be set to
-                      // 0, so use the native token here so this value is
-                      // accurate.
-                      !daoVotingTokenBasedCreatorData.existingToken
-                      ? nativeToken.symbol
-                      : daoVotingTokenBasedCreatorData.existingToken.symbol ||
-                        t('info.token').toLocaleUpperCase(),
+                        // be impossible), the tokenBalance above will be set to
+                        // 0, so use the native token here so this value is
+                        // accurate.
+                        !daoVotingTokenBasedCreatorData.existingToken
+                        ? nativeToken.symbol
+                        : daoVotingTokenBasedCreatorData.existingToken.symbol ||
+                          t('info.token').toLocaleUpperCase(),
                   tokenDecimals:
                     daoVotingTokenBasedCreatorData.govTokenType ===
                       GovernanceTokenType.Existing &&

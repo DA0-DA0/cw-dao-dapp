@@ -38,14 +38,16 @@ export const OpenProposals: FeedSource<OpenProposalsProposalLineProps> = {
       uniquePublicKeys.loading || chains.loading
         ? undefined
         : uniquePublicKeys.data.length > 0
-        ? feedOpenProposalsSelector({
-            publicKeys: uniquePublicKeys.data.map(({ publicKey }) => publicKey),
-            profileAddresses: chains.data.map(({ chainId, address }) => ({
-              chainId,
-              address,
-            })),
-          })
-        : constSelector([])
+          ? feedOpenProposalsSelector({
+              publicKeys: uniquePublicKeys.data.map(
+                ({ publicKey }) => publicKey
+              ),
+              profileAddresses: chains.data.map(({ chainId, address }) => ({
+                chainId,
+                address,
+              })),
+            })
+          : constSelector([])
     )
 
     const followingDaosLoadable = useCachedLoadingWithError(

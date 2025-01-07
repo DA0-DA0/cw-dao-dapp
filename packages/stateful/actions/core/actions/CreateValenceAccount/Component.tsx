@@ -174,17 +174,17 @@ export const CreateValenceAccountComponent: ActionComponent<
                   fee: serviceFee.loading
                     ? '...'
                     : serviceFee.errored
-                    ? '<error>'
-                    : serviceFee.data
-                    ? t('format.token', {
-                        amount: HugeDecimal.from(
-                          serviceFee.data.balance
-                        ).toInternationalizedHumanReadableString({
-                          decimals: serviceFee.data.token.decimals,
-                        }),
-                        symbol: serviceFee.data.token.symbol,
-                      })
-                    : '',
+                      ? '<error>'
+                      : serviceFee.data
+                        ? t('format.token', {
+                            amount: HugeDecimal.from(
+                              serviceFee.data.balance
+                            ).toInternationalizedHumanReadableString({
+                              decimals: serviceFee.data.token.decimals,
+                            }),
+                            symbol: serviceFee.data.token.symbol,
+                          })
+                        : '',
                   context:
                     serviceFee.loading || serviceFee.errored || serviceFee.data
                       ? undefined

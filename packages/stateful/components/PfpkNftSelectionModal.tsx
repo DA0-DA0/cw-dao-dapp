@@ -350,8 +350,8 @@ export const InnerPfpkNftSelectionModal = ({
                     ? selectedNft
                       ? nftCardInfosForKey[selectedNft.key]?.imageUrl
                       : profile.loading
-                      ? undefined
-                      : profile.data.backupImageUrl
+                        ? undefined
+                        : profile.data.backupImageUrl
                     : undefined
                 }
                 loading={

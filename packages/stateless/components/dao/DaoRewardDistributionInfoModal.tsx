@@ -148,11 +148,11 @@ export const DaoRewardDistributionInfoModal = ({
               {'paused' in distribution.active_epoch.emission_rate
                 ? t('title.paused')
                 : !remaining.loading &&
-                  !remaining.errored &&
-                  !remaining.updating &&
-                  remaining.data.isZero()
-                ? t('title.completed')
-                : t('title.live')}
+                    !remaining.errored &&
+                    !remaining.updating &&
+                    remaining.data.isZero()
+                  ? t('title.completed')
+                  : t('title.live')}
             </p>
 
             {!('paused' in distribution.active_epoch.emission_rate) && (

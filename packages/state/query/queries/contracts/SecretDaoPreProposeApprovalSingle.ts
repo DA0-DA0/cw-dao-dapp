@@ -257,7 +257,7 @@ export const secretDaoPreProposeApprovalSingleQueries = {
 }
 export interface SecretDaoPreProposeApprovalSingleReactQuery<
   TResponse,
-  TData = TResponse
+  TData = TResponse,
 > {
   chainId: string
   contractAddress: string
@@ -275,7 +275,7 @@ export interface SecretDaoPreProposeApprovalSingleQueryExtensionQuery<TData>
   }
 }
 export interface SecretDaoPreProposeApprovalSingleProposalSubmittedHooksQuery<
-  TData
+  TData,
 > extends SecretDaoPreProposeApprovalSingleReactQuery<HooksResponse, TData> {}
 export interface SecretDaoPreProposeApprovalSingleDepositInfoQuery<TData>
   extends SecretDaoPreProposeApprovalSingleReactQuery<

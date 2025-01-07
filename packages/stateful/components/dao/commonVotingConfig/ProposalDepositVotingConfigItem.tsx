@@ -93,16 +93,16 @@ const ProposalDepositInput = ({
           denomOrAddress,
         })
       : type === 'native'
-      ? genericTokenSelector({
-          chainId,
-          type: TokenType.Native,
-          denomOrAddress,
-        })
-      : type === 'voting_module_token'
-      ? governanceTokenLoadable.state === 'hasValue'
-        ? constSelector(governanceTokenLoadable.contents)
-        : constSelector(undefined)
-      : constSelector(undefined)
+        ? genericTokenSelector({
+            chainId,
+            type: TokenType.Native,
+            denomOrAddress,
+          })
+        : type === 'voting_module_token'
+          ? governanceTokenLoadable.state === 'hasValue'
+            ? constSelector(governanceTokenLoadable.contents)
+            : constSelector(undefined)
+          : constSelector(undefined)
   )
   const tokenLoaded =
     tokenLoadable.state === 'hasValue' ? tokenLoadable.contents : undefined

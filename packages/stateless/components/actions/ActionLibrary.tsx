@@ -187,12 +187,12 @@ export const ActionLibrary = ({
     a.metadata.listOrder !== undefined && b.metadata.listOrder !== undefined
       ? a.metadata.listOrder - b.metadata.listOrder
       : // Prioritize the action with an order set.
-      a.metadata.listOrder
-      ? -1
-      : b.metadata.listOrder
-      ? 1
-      : // Leave them sorted by the original order in the category definition.
-        0
+        a.metadata.listOrder
+        ? -1
+        : b.metadata.listOrder
+          ? 1
+          : // Leave them sorted by the original order in the category definition.
+            0
   )
 
   // Ensure selected item is scrolled into view.

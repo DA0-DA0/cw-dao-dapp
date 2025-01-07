@@ -303,8 +303,8 @@ export const useWallet = ({
         hexPublicKey: hexPublicKeyData
           ? { loading: false, data: hexPublicKeyData }
           : !hexPublicKeyFromChain.loading && hexPublicKeyFromChain.data
-          ? { loading: false, data: hexPublicKeyFromChain.data }
-          : { loading: true },
+            ? { loading: false, data: hexPublicKeyFromChain.data }
+            : { loading: true },
         getSecretSigningCosmWasmClient,
         getSigningClient,
         getSecretUtils,

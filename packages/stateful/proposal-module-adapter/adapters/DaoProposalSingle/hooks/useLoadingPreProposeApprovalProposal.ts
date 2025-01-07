@@ -82,13 +82,13 @@ export const useLoadingPreProposeApprovalProposal =
             content: formatDate(createdDate),
           }
         : completedDate
-        ? {
-            label:
-              'rejected' in status ? t('title.denied') : t('title.accepted'),
-            tooltip: formatDateTimeTz(completedDate),
-            content: formatDate(completedDate),
-          }
-        : undefined
+          ? {
+              label:
+                'rejected' in status ? t('title.denied') : t('title.accepted'),
+              tooltip: formatDateTimeTz(completedDate),
+              content: formatDate(completedDate),
+            }
+          : undefined
 
     return {
       loading: false,

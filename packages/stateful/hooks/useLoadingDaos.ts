@@ -51,13 +51,13 @@ export const useLoadingFeaturedDaoCards = (
     featuredDaos.loading
       ? { loading: true }
       : !featuredDaos.data
-      ? { loading: false, data: [] }
-      : {
-          loading: false,
-          data: featuredDaos.data.filter(
-            (featured) => !chainId || featured.chainId === chainId
-          ),
-        }
+        ? { loading: false, data: [] }
+        : {
+            loading: false,
+            data: featuredDaos.data.filter(
+              (featured) => !chainId || featured.chainId === chainId
+            ),
+          }
   )
 
   return daos.loading
@@ -96,13 +96,13 @@ export const useLoadingFollowingDaos = (
     followingDaosLoading.state === 'loading'
       ? { loading: true }
       : followingDaosLoading.state === 'hasError'
-      ? { loading: false, data: [] }
-      : {
-          loading: false,
-          data: followingDaosLoading.contents.flatMap((following) =>
-            following.filter((f) => !chainId || f.chainId === chainId)
-          ),
-        },
+        ? { loading: false, data: [] }
+        : {
+            loading: false,
+            data: followingDaosLoading.contents.flatMap((following) =>
+              following.filter((f) => !chainId || f.chainId === chainId)
+            ),
+          },
     // Alphabetize.
     true
   )

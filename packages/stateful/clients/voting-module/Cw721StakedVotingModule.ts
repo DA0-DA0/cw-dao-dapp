@@ -98,40 +98,40 @@ export class Cw721StakedVotingModule extends VotingModuleBase<CwDao> {
                 },
               }
             : 'new' in config.nft
-            ? {
-                new: {
-                  // Type-checked above.
-                  code_id: codeIds.Cw721Base!,
-                  initial_nfts: config.nft.new.initialNfts.map(
-                    ({ recipient, tokenId, tokenUri }) =>
-                      encodeJsonToBase64({
-                        mint: {
-                          owner: recipient,
-                          token_id: tokenId,
-                          token_uri: tokenUri,
-                        },
-                      } as Cw721BaseExecuteMsg)
-                  ),
-                  label: config.nft.new.name,
-                  msg: encodeJsonToBase64({
-                    // Will be set to the DAO automatically.
-                    minter: '',
-                    name: config.nft.new.name,
-                    symbol: config.nft.new.symbol,
-                  } as Cw721BaseInstantiateMsg),
+              ? {
+                  new: {
+                    // Type-checked above.
+                    code_id: codeIds.Cw721Base!,
+                    initial_nfts: config.nft.new.initialNfts.map(
+                      ({ recipient, tokenId, tokenUri }) =>
+                        encodeJsonToBase64({
+                          mint: {
+                            owner: recipient,
+                            token_id: tokenId,
+                            token_uri: tokenUri,
+                          },
+                        } as Cw721BaseExecuteMsg)
+                    ),
+                    label: config.nft.new.name,
+                    msg: encodeJsonToBase64({
+                      // Will be set to the DAO automatically.
+                      minter: '',
+                      name: config.nft.new.name,
+                      symbol: config.nft.new.symbol,
+                    } as Cw721BaseInstantiateMsg),
+                  },
+                }
+              : {
+                  factory: encodeJsonToBase64({
+                    wasm: {
+                      execute: {
+                        contract_addr: config.nft.factory.address,
+                        funds: config.nft.factory.funds || [],
+                        msg: encodeJsonToBase64(config.nft.factory.message),
+                      },
+                    } as WasmMsg,
+                  }),
                 },
-              }
-            : {
-                factory: encodeJsonToBase64({
-                  wasm: {
-                    execute: {
-                      contract_addr: config.nft.factory.address,
-                      funds: config.nft.factory.funds || [],
-                      msg: encodeJsonToBase64(config.nft.factory.message),
-                    },
-                  } as WasmMsg,
-                }),
-              },
         unstaking_duration: config.unstakingDuration,
       } as InstantiateMsg),
       funds: ('factory' in config.nft && config.nft.factory.funds) || [],

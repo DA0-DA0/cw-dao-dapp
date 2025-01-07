@@ -444,7 +444,7 @@ export interface CwPayrollFactoryCodeIdQuery<TData>
 export interface CwPayrollFactoryOwnershipQuery<TData>
   extends CwPayrollFactoryReactQuery<OwnershipForAddr, TData> {}
 export interface CwPayrollFactoryListVestingContractsByRecipientReverseQuery<
-  TData
+  TData,
 > extends CwPayrollFactoryReactQuery<ArrayOfVestingContract, TData> {
   args: {
     limit?: number
@@ -461,7 +461,7 @@ export interface CwPayrollFactoryListVestingContractsByRecipientQuery<TData>
   }
 }
 export interface CwPayrollFactoryListVestingContractsByInstantiatorReverseQuery<
-  TData
+  TData,
 > extends CwPayrollFactoryReactQuery<ArrayOfVestingContract, TData> {
   args: {
     instantiator: string

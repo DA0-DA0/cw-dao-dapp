@@ -193,36 +193,36 @@ export class TransferNftAction extends ActionBase<TransferNftData> {
             smartContractMsg: '{}',
           }
         : objectMatchesStructure(decodedMessage, {
-            wasm: {
-              execute: {
-                contract_addr: {},
-                funds: {},
-                msg: {
-                  send_nft: {
-                    contract: {},
-                    msg: {},
-                    token_id: {},
+              wasm: {
+                execute: {
+                  contract_addr: {},
+                  funds: {},
+                  msg: {
+                    send_nft: {
+                      contract: {},
+                      msg: {},
+                      token_id: {},
+                    },
                   },
                 },
               },
-            },
-          })
-        ? {
-            chainId,
-            collection: decodedMessage.wasm.execute.contract_addr,
-            tokenId: decodedMessage.wasm.execute.msg.send_nft.token_id,
-            recipient: decodedMessage.wasm.execute.msg.send_nft.contract,
-            executeSmartContract: true,
-            smartContractMsg: JSON.stringify(
-              decodeJsonFromBase64(
-                decodedMessage.wasm.execute.msg.send_nft.msg,
-                true
+            })
+          ? {
+              chainId,
+              collection: decodedMessage.wasm.execute.contract_addr,
+              tokenId: decodedMessage.wasm.execute.msg.send_nft.token_id,
+              recipient: decodedMessage.wasm.execute.msg.send_nft.contract,
+              executeSmartContract: true,
+              smartContractMsg: JSON.stringify(
+                decodeJsonFromBase64(
+                  decodedMessage.wasm.execute.msg.send_nft.msg,
+                  true
+                ),
+                null,
+                2
               ),
-              null,
-              2
-            ),
-          }
-        : null
+            }
+          : null
     )
 
     // If the first is not a transfer, match none.

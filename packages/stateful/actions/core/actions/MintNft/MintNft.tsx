@@ -89,8 +89,8 @@ export const MintNft: ActionComponent = (props) => {
           chainId,
         }
     : nftInfoLoading.loading || nftInfoLoading.errored
-    ? undefined
-    : nftInfoLoading.data
+      ? undefined
+      : nftInfoLoading.data
 
   // Get all collections in DAO.
   const daoCollections = useRecoilValueLoadable(

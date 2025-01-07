@@ -14,7 +14,7 @@ export interface IProposalModuleBase<
   VoteResponse = any,
   VoteInfo = any,
   Vote = any,
-  Config = any
+  Config = any,
 > {
   /**
    * DAO this module belongs to.

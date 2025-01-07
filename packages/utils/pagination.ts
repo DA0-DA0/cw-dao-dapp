@@ -7,7 +7,7 @@ export const getAllRpcResponse = async <
   P extends { pagination?: PageRequest; [key: string]: any },
   R extends { pagination?: PageResponse; [key: string]: any },
   K extends keyof R,
-  V = R[K] extends any[] ? R[K] : R[K][]
+  V = R[K] extends any[] ? R[K] : R[K][],
 >(
   queryFn: (params: P, useInterfaces?: boolean) => Promise<R>,
   params: P,

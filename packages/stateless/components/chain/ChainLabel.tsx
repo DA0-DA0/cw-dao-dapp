@@ -50,8 +50,8 @@ export const ChainLabel = ({
         header
           ? 'title-text xs:header-text'
           : title
-          ? 'title-text'
-          : 'primary-text'
+            ? 'title-text'
+            : 'primary-text'
       )}
     >
       {getDisplayNameForChainId(chainId)}

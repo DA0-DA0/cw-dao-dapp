@@ -27,7 +27,10 @@ export class DeletePostAction extends ActionBase<DeletePostData> {
   private burnNftAction: BurnNftAction
   private pressChainId: string
 
-  constructor(options: ActionOptions, private pressData: PressData) {
+  constructor(
+    options: ActionOptions,
+    private pressData: PressData
+  ) {
     super(options, {
       Icon: TrashEmoji,
       label: options.t('title.deletePost'),

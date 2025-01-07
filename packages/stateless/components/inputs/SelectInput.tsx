@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 
 export interface SelectInputProps<
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 > extends Omit<ComponentPropsWithoutRef<'select'>, 'required' | 'onChange'> {
   fieldName?: FieldName
   register?: UseFormRegister<FV>
@@ -27,7 +27,7 @@ export interface SelectInputProps<
 
 export const SelectInput = <
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 >({
   fieldName,
   register,

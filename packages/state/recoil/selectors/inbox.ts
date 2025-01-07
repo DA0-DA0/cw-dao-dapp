@@ -69,7 +69,7 @@ export const inboxItemsSelector = selectorFamily<
                 type: item.id.split('/')[0] as InboxItemType,
                 ...item,
                 chainId: item.chainId || fallbackChainId,
-              } as InboxLoadedItemWithData)
+              }) as InboxLoadedItemWithData
           )
           .flatMap((item) => {
             const { network_type } =

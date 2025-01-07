@@ -289,33 +289,33 @@ export const useProposalActionState = ({
             ) : undefined,
           }
         : statusKey === ProposalStatusEnum.Rejected &&
-          // Don't show for Neutron overrule proposals.
-          !(
-            dao.chainId === ChainId.NeutronMainnet &&
-            dao.coreAddress === NEUTRON_GOVERNANCE_DAO &&
-            proposalModule.prePropose?.type ===
-              PreProposeModuleType.NeutronOverruleSingle
-          )
-        ? {
-            label: t('button.close'),
-            Icon: CancelOutlined,
-            loading: actionLoading,
-            doAction: onClose,
-          }
-        : // If executed and has polytone messages that need relaying...
-        statusKey === ProposalStatusEnum.Executed &&
-          !relayState.loading &&
-          relayState.data.needsSelfRelay &&
-          !loadingExecutionTxHash.loading &&
-          loadingExecutionTxHash.data
-        ? {
-            label: t('button.relay'),
-            Icon: Send,
-            loading: actionLoading,
-            doAction: relayState.data.openSelfRelay,
-            description: t('error.polytoneExecutedNoRelay'),
-          }
-        : undefined,
+            // Don't show for Neutron overrule proposals.
+            !(
+              dao.chainId === ChainId.NeutronMainnet &&
+              dao.coreAddress === NEUTRON_GOVERNANCE_DAO &&
+              proposalModule.prePropose?.type ===
+                PreProposeModuleType.NeutronOverruleSingle
+            )
+          ? {
+              label: t('button.close'),
+              Icon: CancelOutlined,
+              loading: actionLoading,
+              doAction: onClose,
+            }
+          : // If executed and has polytone messages that need relaying...
+            statusKey === ProposalStatusEnum.Executed &&
+              !relayState.loading &&
+              relayState.data.needsSelfRelay &&
+              !loadingExecutionTxHash.loading &&
+              loadingExecutionTxHash.data
+            ? {
+                label: t('button.relay'),
+                Icon: Send,
+                loading: actionLoading,
+                doAction: relayState.data.openSelfRelay,
+                description: t('error.polytoneExecutedNoRelay'),
+              }
+            : undefined,
     footer: (showRelayStatus || isWalletConnected) && (
       <div className="flex flex-col gap-6">
         {showRelayStatus && (

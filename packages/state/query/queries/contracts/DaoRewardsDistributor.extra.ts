@@ -630,42 +630,42 @@ export const fetchV250DistributionRecoveryInfo = async (
         ),
       }
     : data.length > 0
-    ? {
-        step: 2 as const,
-        needsUpgrade: distributors,
-        needsForceWithdraw: data.flatMap(({ tokens }) =>
-          tokens.flatMap((t) => (t.missed.isPositive() ? t : []))
-        ),
-        canBeResumed: data.flatMap(({ distributions }) =>
-          distributions.flatMap((d) => {
-            const savedEmissionRate = JSON.parse(
-              daoItems[
-                getRewardDistributorSavedEmissionRateStorageItemKey(
-                  d.distributor.address,
-                  d.distribution.id
-                )
-              ] || '{}'
-            )
+      ? {
+          step: 2 as const,
+          needsUpgrade: distributors,
+          needsForceWithdraw: data.flatMap(({ tokens }) =>
+            tokens.flatMap((t) => (t.missed.isPositive() ? t : []))
+          ),
+          canBeResumed: data.flatMap(({ distributions }) =>
+            distributions.flatMap((d) => {
+              const savedEmissionRate = JSON.parse(
+                daoItems[
+                  getRewardDistributorSavedEmissionRateStorageItemKey(
+                    d.distributor.address,
+                    d.distribution.id
+                  )
+                ] || '{}'
+              )
 
-            return 'paused' in d.distribution.active_epoch.emission_rate &&
-              objectMatchesStructure(savedEmissionRate, {
-                linear: {
-                  amount: {},
-                  continuous: {},
-                  duration: {},
-                },
-              })
-              ? {
-                  ...d,
-                  savedEmissionRate,
-                }
-              : []
-          })
-        ),
-      }
-    : {
-        step: 'done' as const,
-      }
+              return 'paused' in d.distribution.active_epoch.emission_rate &&
+                objectMatchesStructure(savedEmissionRate, {
+                  linear: {
+                    amount: {},
+                    continuous: {},
+                    duration: {},
+                  },
+                })
+                ? {
+                    ...d,
+                    savedEmissionRate,
+                  }
+                : []
+            })
+          ),
+        }
+      : {
+          step: 'done' as const,
+        }
 
   return {
     data,

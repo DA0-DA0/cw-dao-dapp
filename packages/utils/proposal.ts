@@ -78,10 +78,10 @@ export const getProposalStatusKey = (
   typeof status === 'string'
     ? status
     : typeof status === 'object' && status
-    ? (Object.keys(status)[0] as any)
-    : (() => {
-        throw new Error('Invalid proposal status.')
-      })()
+      ? (Object.keys(status)[0] as any)
+      : (() => {
+          throw new Error('Invalid proposal status.')
+        })()
 
 /**
  * Convert veto config into the veto object expected by proposal modules.
@@ -97,8 +97,8 @@ export const convertVetoConfigToCosmos = (
           veto.addresses.length > 1
             ? veto.cw1WhitelistAddress || ''
             : veto.addresses.length === 1
-            ? veto.addresses[0].address
-            : '',
+              ? veto.addresses[0].address
+              : '',
         timelock_duration: convertDurationWithUnitsToDuration(
           veto.timelockDuration
         ),
@@ -187,23 +187,25 @@ export const checkProposalSubmissionPolicy = ({
         ? t('error.notAllowedToCreateProposal')
         : undefined
       : // Cannot create proposal if on denylist.
-      address &&
-        prePropose.submissionPolicy.specific.denylist?.includes(address)
-      ? t('error.notAllowedToCreateProposal')
-      : // Cannot create proposal if not a member.
-      (!prePropose.submissionPolicy.specific.dao_members || !isMember) &&
-        (!address ||
-          !prePropose.submissionPolicy.specific.allowlist?.includes(address))
-      ? // If members can propose and current wallet is not a member, prioritize that as the reason...
-        prePropose.submissionPolicy.specific.dao_members && !isMember
-        ? t('error.mustBeMemberToCreateProposal')
-        : // ...otherwise their membership doesn't matter and they aren't on the allowlist.
-          t('error.notAllowedToCreateProposal')
-      : undefined
+        address &&
+          prePropose.submissionPolicy.specific.denylist?.includes(address)
+        ? t('error.notAllowedToCreateProposal')
+        : // Cannot create proposal if not a member.
+          (!prePropose.submissionPolicy.specific.dao_members || !isMember) &&
+            (!address ||
+              !prePropose.submissionPolicy.specific.allowlist?.includes(
+                address
+              ))
+          ? // If members can propose and current wallet is not a member, prioritize that as the reason...
+            prePropose.submissionPolicy.specific.dao_members && !isMember
+            ? t('error.mustBeMemberToCreateProposal')
+            : // ...otherwise their membership doesn't matter and they aren't on the allowlist.
+              t('error.notAllowedToCreateProposal')
+          : undefined
     : // If no pre-propose module in use, only DAO members can propose.
-    isMember
-    ? undefined
-    : t('error.mustBeMemberToCreateProposal')
+      isMember
+      ? undefined
+      : t('error.mustBeMemberToCreateProposal')
 
 /**
  * Add additional metadata to the end of a proposal description as necessary.

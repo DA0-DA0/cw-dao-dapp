@@ -21,7 +21,7 @@ export type TokenInputOption = Omit<GenericToken, 'type'> & {
 export type TokenInputProps<
   T extends TokenInputOption,
   FV extends FieldValues = FieldValues,
-  FieldName extends Path<FV> = Path<FV>
+  FieldName extends Path<FV> = Path<FV>,
 > = {
   /**
    * The fields that control the amount input.

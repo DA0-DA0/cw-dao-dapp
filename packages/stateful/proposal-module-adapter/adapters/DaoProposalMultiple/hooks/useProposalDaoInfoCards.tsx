@@ -44,18 +44,18 @@ export const useProposalDaoInfoCards = (): DaoInfoCard[] => {
     depositInfo.loading
       ? undefined
       : !depositInfo.errored && depositInfo.data
-      ? genericTokenSelector({
-          chainId: proposalModule.chainId,
-          type:
-            'native' in depositInfo.data.denom
-              ? TokenType.Native
-              : TokenType.Cw20,
-          denomOrAddress:
-            'native' in depositInfo.data.denom
-              ? depositInfo.data.denom.native
-              : depositInfo.data.denom.cw20,
-        })
-      : constSelector(undefined)
+        ? genericTokenSelector({
+            chainId: proposalModule.chainId,
+            type:
+              'native' in depositInfo.data.denom
+                ? TokenType.Native
+                : TokenType.Cw20,
+            denomOrAddress:
+              'native' in depositInfo.data.denom
+                ? depositInfo.data.denom.native
+                : depositInfo.data.denom.cw20,
+          })
+        : constSelector(undefined)
   )
 
   const processQ = useProcessQ()
@@ -71,11 +71,11 @@ export const useProposalDaoInfoCards = (): DaoInfoCard[] => {
     config.loading
       ? undefined
       : config.errored || !('veto' in config.data) || !config.data.veto
-      ? constSelector(undefined)
-      : Cw1WhitelistSelectors.adminsIfCw1Whitelist({
-          chainId: proposalModule.chainId,
-          contractAddress: config.data.veto.vetoer,
-        })
+        ? constSelector(undefined)
+        : Cw1WhitelistSelectors.adminsIfCw1Whitelist({
+            chainId: proposalModule.chainId,
+            contractAddress: config.data.veto.vetoer,
+          })
   )
 
   // If a vetoer is a cw1-whitelist contract, replace it with its admins and
@@ -87,10 +87,10 @@ export const useProposalDaoInfoCards = (): DaoInfoCard[] => {
     vetoerCw1WhitelistAdmins.errored
       ? undefined
       : vetoerCw1WhitelistAdmins.data?.length
-      ? vetoerCw1WhitelistAdmins.data
-      : 'veto' in config.data && config.data.veto
-      ? [config.data.veto.vetoer]
-      : undefined
+        ? vetoerCw1WhitelistAdmins.data
+        : 'veto' in config.data && config.data.veto
+          ? [config.data.veto.vetoer]
+          : undefined
 
   return [
     {
@@ -102,10 +102,10 @@ export const useProposalDaoInfoCards = (): DaoInfoCard[] => {
       value: config.loading
         ? undefined
         : !processedQ
-        ? '<error>'
-        : processedQ.quorum
-        ? processedQ.quorum.display
-        : t('info.disabled'),
+          ? '<error>'
+          : processedQ.quorum
+            ? processedQ.quorum.display
+            : t('info.disabled'),
     },
     {
       label: t('form.votingDurationTitle'),
@@ -115,18 +115,18 @@ export const useProposalDaoInfoCards = (): DaoInfoCard[] => {
             context: config.errored
               ? undefined
               : config.data.allow_revoting
-              ? 'revoting'
-              : 'noRevoting',
+                ? 'revoting'
+                : 'noRevoting',
           }),
       loading: config.loading,
       value: config.loading
         ? undefined
         : config.errored
-        ? '<error>'
-        : convertDurationToHumanReadableString(
-            t,
-            config.data.max_voting_period
-          ),
+          ? '<error>'
+          : convertDurationToHumanReadableString(
+              t,
+              config.data.max_voting_period
+            ),
     },
     {
       label: t('title.revoting'),
@@ -135,10 +135,10 @@ export const useProposalDaoInfoCards = (): DaoInfoCard[] => {
       value: config.loading
         ? undefined
         : config.errored
-        ? '<error>'
-        : config.data.allow_revoting
-        ? t('info.enabled')
-        : t('info.disabled'),
+          ? '<error>'
+          : config.data.allow_revoting
+            ? t('info.enabled')
+            : t('info.disabled'),
     },
     {
       label: t('form.proposalDepositTitle'),
@@ -168,10 +168,10 @@ export const useProposalDaoInfoCards = (): DaoInfoCard[] => {
       value: depositInfo.loading
         ? undefined
         : depositInfo.errored
-        ? '<error>'
-        : depositInfo.data
-        ? t(`depositRefundPolicy.${depositInfo.data.refund_policy}`)
-        : t('info.na'),
+          ? '<error>'
+          : depositInfo.data
+            ? t(`depositRefundPolicy.${depositInfo.data.refund_policy}`)
+            : t('info.na'),
     },
     {
       label: t('title.creationPolicy'),
@@ -180,8 +180,8 @@ export const useProposalDaoInfoCards = (): DaoInfoCard[] => {
         ? 'anyone' in proposalModule.prePropose.submissionPolicy
           ? t('info.anyone')
           : proposalModule.prePropose.submissionPolicy.specific.dao_members
-          ? t('info.onlyMembers')
-          : t('info.allowlist')
+            ? t('info.onlyMembers')
+            : t('info.allowlist')
         : // If no pre-propose module, only members can create proposals.
           t('info.onlyMembers'),
     },
@@ -194,23 +194,23 @@ export const useProposalDaoInfoCards = (): DaoInfoCard[] => {
           value: <EntityDisplay address={vetoer} />,
         }))
       : proposalModule.version &&
-        isFeatureSupportedByVersion(Feature.Veto, proposalModule.version)
-      ? [
-          {
-            label: t('title.vetoer'),
-            tooltip: t('info.daoVetoerExplanation'),
-            loading: config.loading || vetoerCw1WhitelistAdmins.loading,
-            value:
-              config.loading || vetoerCw1WhitelistAdmins.loading
-                ? undefined
-                : config.errored || vetoerCw1WhitelistAdmins.errored
-                ? '<error>'
-                : // We know here that if both loadables are done loading and
-                  // did not error, there was no vetoer.
-                  t('info.none'),
-          },
-        ]
-      : []),
+          isFeatureSupportedByVersion(Feature.Veto, proposalModule.version)
+        ? [
+            {
+              label: t('title.vetoer'),
+              tooltip: t('info.daoVetoerExplanation'),
+              loading: config.loading || vetoerCw1WhitelistAdmins.loading,
+              value:
+                config.loading || vetoerCw1WhitelistAdmins.loading
+                  ? undefined
+                  : config.errored || vetoerCw1WhitelistAdmins.errored
+                    ? '<error>'
+                    : // We know here that if both loadables are done loading and
+                      // did not error, there was no vetoer.
+                      t('info.none'),
+            },
+          ]
+        : []),
     ...(proposalModule.prePropose?.type === PreProposeModuleType.Approval
       ? [
           {

@@ -149,7 +149,7 @@ export const ActionsRenderer = ({
 }
 
 export type ActionRendererProps<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > = ({
   action: Action<Data>
 } & (
@@ -166,7 +166,7 @@ export type ActionRendererProps<
 
 // Renders an action.
 export const ActionRenderer = <
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 >({
   action,
   ...props
@@ -205,7 +205,7 @@ export const ActionRenderer = <
 }
 
 type InnerActionRendererProps<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > = {
   action: Action<Data>
   data: Data
@@ -215,7 +215,7 @@ type InnerActionRendererProps<
 }
 
 const InnerActionRenderer = <
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 >({
   action,
   data,

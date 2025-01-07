@@ -14,7 +14,7 @@ import { Loader } from '../logo/Loader'
 
 export const AddressInput = <
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 >({
   fieldName,
   register,

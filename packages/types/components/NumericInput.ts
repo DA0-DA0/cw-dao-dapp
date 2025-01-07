@@ -9,7 +9,7 @@ import {
 
 export type NumericInputProps<
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 > = Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'required' | 'onInput'> & {
   /**
    * The field name for the form.

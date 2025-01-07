@@ -47,14 +47,14 @@ export const ProposalRenderer = ({
     item.type === InboxItemType.PendingProposalCreated
       ? t('title.created')
       : item.type === InboxItemType.ProposalExecuted
-      ? item.data.failed
-        ? t('proposalStatusTitle.execution_failed')
-        : t('proposalStatusTitle.executed')
-      : item.type === InboxItemType.ProposalClosed
-      ? t('proposalStatusTitle.closed')
-      : item.type === InboxItemType.PendingProposalRejected
-      ? t('proposalStatusTitle.rejected')
-      : undefined
+        ? item.data.failed
+          ? t('proposalStatusTitle.execution_failed')
+          : t('proposalStatusTitle.executed')
+        : item.type === InboxItemType.ProposalClosed
+          ? t('proposalStatusTitle.closed')
+          : item.type === InboxItemType.PendingProposalRejected
+            ? t('proposalStatusTitle.rejected')
+            : undefined
 
   return (
     <ButtonLink

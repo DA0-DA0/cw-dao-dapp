@@ -108,7 +108,7 @@ export type IProposalModuleAdapter<Vote extends unknown = any> = {
 export type ProposalModuleAdapter<
   DaoCreationExtraVotingConfig extends FieldValues = any,
   Vote extends unknown = any,
-  FormData extends FieldValues = any
+  FormData extends FieldValues = any,
 > = {
   id: string
   contractNames: string[]
@@ -302,7 +302,7 @@ export type BasePreProposeProposalStatusAndInfoProps = Pick<
 >
 
 export type BaseProposalInnerContentDisplayProps<
-  FormData extends FieldValues = any
+  FormData extends FieldValues = any,
 > = {
   // Once proposal messages are loaded, the inner component is responsible for
   // setting the duplicate form data for the duplicate button in the header.

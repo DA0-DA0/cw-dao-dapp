@@ -372,9 +372,9 @@ export const ProfileCardMemberInfo = ({
           {votingPowerPercent.loading
             ? '...'
             : votingPowerPercent.errored
-            ? // eslint-disable-next-line i18next/no-literal-string
-              '<error>'
-            : formatPercentOf100(votingPowerPercent.data)}
+              ? // eslint-disable-next-line i18next/no-literal-string
+                '<error>'
+              : formatPercentOf100(votingPowerPercent.data)}
         </p>
       </div>
 

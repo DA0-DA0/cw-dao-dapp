@@ -23,10 +23,10 @@ export const fetchPrePropose: FetchPreProposeFunction = async (
     'Module' in creationPolicy && creationPolicy.Module.addr
       ? creationPolicy.Module.addr
       : creationPolicy &&
-        'module' in creationPolicy &&
-        creationPolicy.module.addr
-      ? creationPolicy.module.addr
-      : null
+          'module' in creationPolicy &&
+          creationPolicy.module.addr
+        ? creationPolicy.module.addr
+        : null
 
   if (!preProposeAddress) {
     return null

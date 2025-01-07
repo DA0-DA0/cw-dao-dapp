@@ -33,15 +33,15 @@ export const ProfileWallet = ({ address }: StatefulProfileWalletProps = {}) => {
     chains.loading
       ? undefined
       : chains.data.length > 0
-      ? waitForAny(
-          chains.data.map(({ chainId, address }) =>
-            accountsSelector({
-              chainId,
-              address,
-            })
+        ? waitForAny(
+            chains.data.map(({ chainId, address }) =>
+              accountsSelector({
+                chainId,
+                address,
+              })
+            )
           )
-        )
-      : constSelector([]),
+        : constSelector([]),
     (chainLoadables) => chainLoadables.flatMap((l) => l.valueMaybe() || [])
   )
 
@@ -49,15 +49,15 @@ export const ProfileWallet = ({ address }: StatefulProfileWalletProps = {}) => {
     chains.loading
       ? undefined
       : chains.data.length > 0
-      ? waitForAny(
-          chains.data.map(({ chainId, address }) =>
-            walletTokenCardInfosSelector({
-              chainId,
-              walletAddress: address,
-            })
+        ? waitForAny(
+            chains.data.map(({ chainId, address }) =>
+              walletTokenCardInfosSelector({
+                chainId,
+                walletAddress: address,
+              })
+            )
           )
-        )
-      : constSelector([]),
+        : constSelector([]),
     (chainLoadables) => chainLoadables.flatMap((l) => l.valueMaybe() || [])
   )
 
@@ -65,12 +65,12 @@ export const ProfileWallet = ({ address }: StatefulProfileWalletProps = {}) => {
     uniquePublicKeys.loading
       ? undefined
       : uniquePublicKeys.data.length > 0
-      ? waitForAny(
-          uniquePublicKeys.data.map(({ publicKey }) =>
-            hiddenBalancesSelector(publicKey)
+        ? waitForAny(
+            uniquePublicKeys.data.map(({ publicKey }) =>
+              hiddenBalancesSelector(publicKey)
+            )
           )
-        )
-      : constSelector([]),
+        : constSelector([]),
     (chainLoadables) => chainLoadables.flatMap((l) => l.valueMaybe() || [])
   )
 

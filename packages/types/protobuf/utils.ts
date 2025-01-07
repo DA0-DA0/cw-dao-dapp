@@ -851,19 +851,19 @@ export const prepareProtobufJson = (msg: any): any =>
   msg instanceof Uint8Array
     ? msg
     : Array.isArray(msg)
-    ? msg.map(prepareProtobufJson)
-    : // Rule (1)
-    typeof msg === 'string' && msg.startsWith('DATE:')
-    ? new Date(msg.replace('DATE:', ''))
-    : typeof msg !== 'object' || msg === null || msg.constructor !== Object
-    ? msg
-    : Object.entries(msg).reduce(
-        (acc, [key, value]) => ({
-          ...acc,
-          [key]: prepareProtobufJson(value),
-        }),
-        {} as Record<string, any>
-      )
+      ? msg.map(prepareProtobufJson)
+      : // Rule (1)
+        typeof msg === 'string' && msg.startsWith('DATE:')
+        ? new Date(msg.replace('DATE:', ''))
+        : typeof msg !== 'object' || msg === null || msg.constructor !== Object
+          ? msg
+          : Object.entries(msg).reduce(
+              (acc, [key, value]) => ({
+                ...acc,
+                [key]: prepareProtobufJson(value),
+              }),
+              {} as Record<string, any>
+            )
 
 export const cwVoteOptionToGovVoteOption = (
   cwVote: CwVoteOption
@@ -871,12 +871,12 @@ export const cwVoteOptionToGovVoteOption = (
   cwVote === 'yes'
     ? GovVoteOption.VOTE_OPTION_YES
     : cwVote === 'no'
-    ? GovVoteOption.VOTE_OPTION_NO
-    : cwVote === 'abstain'
-    ? GovVoteOption.VOTE_OPTION_ABSTAIN
-    : cwVote === 'no_with_veto'
-    ? GovVoteOption.VOTE_OPTION_NO_WITH_VETO
-    : GovVoteOption.VOTE_OPTION_UNSPECIFIED
+      ? GovVoteOption.VOTE_OPTION_NO
+      : cwVote === 'abstain'
+        ? GovVoteOption.VOTE_OPTION_ABSTAIN
+        : cwVote === 'no_with_veto'
+          ? GovVoteOption.VOTE_OPTION_NO_WITH_VETO
+          : GovVoteOption.VOTE_OPTION_UNSPECIFIED
 
 export const govVoteOptionToCwVoteOption = (
   govVote: GovVoteOption
@@ -885,12 +885,12 @@ export const govVoteOptionToCwVoteOption = (
     govVote === GovVoteOption.VOTE_OPTION_YES
       ? 'yes'
       : govVote === GovVoteOption.VOTE_OPTION_NO
-      ? 'no'
-      : govVote === GovVoteOption.VOTE_OPTION_ABSTAIN
-      ? 'abstain'
-      : govVote === GovVoteOption.VOTE_OPTION_NO_WITH_VETO
-      ? 'no_with_veto'
-      : undefined
+        ? 'no'
+        : govVote === GovVoteOption.VOTE_OPTION_ABSTAIN
+          ? 'abstain'
+          : govVote === GovVoteOption.VOTE_OPTION_NO_WITH_VETO
+            ? 'no_with_veto'
+            : undefined
   if (!cwVote) {
     throw new Error('Invalid vote option')
   }

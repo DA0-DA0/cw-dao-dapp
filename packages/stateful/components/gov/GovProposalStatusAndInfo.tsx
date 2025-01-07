@@ -201,16 +201,16 @@ const InnerGovProposalStatusAndInfo = ({
     status === ProposalStatus.PROPOSAL_STATUS_DEPOSIT_PERIOD
       ? t('info.proposalStatus.depositPeriod')
       : status === ProposalStatus.PROPOSAL_STATUS_VOTING_PERIOD
-      ? !quorumReached
-        ? t('info.proposalStatus.willFailBadQuorum')
-        : vetoReached
-        ? t('info.proposalStatus.willVeto')
-        : thresholdReached
-        ? t('info.proposalStatus.willPass')
-        : t('info.proposalStatus.willFailBadThreshold')
-      : t('info.proposalStatus.govNotOpen', {
-          turnoutYesPercent: formatPercentOf100(turnoutYesPercent),
-        })
+        ? !quorumReached
+          ? t('info.proposalStatus.willFailBadQuorum')
+          : vetoReached
+            ? t('info.proposalStatus.willVeto')
+            : thresholdReached
+              ? t('info.proposalStatus.willPass')
+              : t('info.proposalStatus.willFailBadThreshold')
+        : t('info.proposalStatus.govNotOpen', {
+            turnoutYesPercent: formatPercentOf100(turnoutYesPercent),
+          })
 
   const refreshProposal = useRefreshGovProposals()
 

@@ -315,8 +315,8 @@ export const ProfileCardMemberInfoTokens = ({
               ? t('button.stakeTokenSymbol', { tokenSymbol: onlyTokenSymbol })
               : t('button.stakeTokens')
             : onlyOneToken
-            ? t('button.manageStake', { tokenSymbol: onlyTokenSymbol })
-            : t('button.manageYourStake')}
+              ? t('button.manageStake', { tokenSymbol: onlyTokenSymbol })
+              : t('button.manageYourStake')}
         </Button>
       </div>
 

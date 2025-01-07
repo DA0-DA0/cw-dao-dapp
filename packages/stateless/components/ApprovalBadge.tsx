@@ -60,8 +60,8 @@ export const ApprovalBadge = ({
           ? context.status === 'pending'
             ? t('title.needsApproval')
             : context.status === 'approved'
-            ? t('title.accepted')
-            : t('title.denied')
+              ? t('title.accepted')
+              : t('title.denied')
           : t('title.approval')}
       </p>
     </Tooltip>

@@ -158,15 +158,15 @@ const Component: ActionComponent<undefined, ConfigureRebalancerData> = (
     newValenceAccount.creating
       ? nativeBalances
       : // Otherwise use current Valence account balances.
-      valenceBalances.loading
-      ? valenceBalances
-      : {
-          loading: false,
-          updating: valenceBalances.updating,
-          data: valenceBalances.data.filter(
-            ({ token }) => token.chainId === chainId
-          ),
-        }
+        valenceBalances.loading
+        ? valenceBalances
+        : {
+            loading: false,
+            updating: valenceBalances.updating,
+            data: valenceBalances.data.filter(
+              ({ token }) => token.chainId === chainId
+            ),
+          }
 
   const prices = useCachedLoadingWithError(
     whitelists.loading || whitelists.errored
@@ -412,16 +412,16 @@ export class ConfigureRebalancerAction extends ActionBase<ConfigureRebalancerDat
     const valenceAccountAddress = this.existingValenceAccount
       ? this.existingValenceAccount.address
       : newValenceAccount.creating
-      ? // Compute predicted valence account address if we're creating it.
-        await this.options.queryClient.fetchQuery(
-          contractQueries.instantiate2Address(this.options.queryClient, {
-            chainId,
-            creator: sender,
-            codeId: ValenceAccount,
-            salt: VALENCE_INSTANTIATE2_SALT,
-          })
-        )
-      : undefined
+        ? // Compute predicted valence account address if we're creating it.
+          await this.options.queryClient.fetchQuery(
+            contractQueries.instantiate2Address(this.options.queryClient, {
+              chainId,
+              creator: sender,
+              codeId: ValenceAccount,
+              salt: VALENCE_INSTANTIATE2_SALT,
+            })
+          )
+        : undefined
     if (!valenceAccountAddress) {
       throw new Error('Missing valence account address.')
     }
@@ -636,8 +636,8 @@ export class ConfigureRebalancerAction extends ActionBase<ConfigureRebalancerDat
         'register_to_service' in decodedMessage.wasm.execute.msg
           ? decodedMessage.wasm.execute.msg.register_to_service
           : 'update_service' in decodedMessage.wasm.execute.msg
-          ? decodedMessage.wasm.execute.msg.update_service
-          : undefined
+            ? decodedMessage.wasm.execute.msg.update_service
+            : undefined
       if (
         objectMatchesStructure(serviceData, {
           service_name: {},
@@ -699,8 +699,8 @@ export class ConfigureRebalancerAction extends ActionBase<ConfigureRebalancerDat
         'register_to_service' in decodedMessage.wasm.execute.msg
           ? decodedMessage.wasm.execute.msg.register_to_service
           : 'update_service' in decodedMessage.wasm.execute.msg
-          ? decodedMessage.wasm.execute.msg.update_service
-          : undefined
+            ? decodedMessage.wasm.execute.msg.update_service
+            : undefined
       if (
         objectMatchesStructure(serviceData, {
           service_name: {},
@@ -791,11 +791,11 @@ export class ConfigureRebalancerAction extends ActionBase<ConfigureRebalancerDat
             ? undefined
             : data.trustee
           : 'update_service' in decodedMessage.wasm.execute.msg &&
-            typeof data.trustee === 'object' &&
-            data.trustee &&
-            'set' in data.trustee
-          ? data.trustee.set
-          : undefined,
+              typeof data.trustee === 'object' &&
+              data.trustee &&
+              'set' in data.trustee
+            ? data.trustee.set
+            : undefined,
       baseDenom: data.base_denom || whitelists.baseDenoms[0].denomOrAddress,
       tokens: data.targets.map(({ denom, bps }) => ({
         denom,

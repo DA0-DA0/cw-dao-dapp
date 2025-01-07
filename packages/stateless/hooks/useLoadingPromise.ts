@@ -88,16 +88,16 @@ export const useLoadingPromise = <T>({
             data: state.value as T,
           }
         : state.status === 'error' || state.was === 'error'
-        ? {
-            loading: false,
-            errored: true,
-            updating: state.status === 'loading',
-            error: state.error as Error,
-          }
-        : {
-            loading: true,
-            errored: false,
-          },
+          ? {
+              loading: false,
+              errored: true,
+              updating: state.status === 'loading',
+              error: state.error as Error,
+            }
+          : {
+              loading: true,
+              errored: false,
+            },
     [state]
   )
 }

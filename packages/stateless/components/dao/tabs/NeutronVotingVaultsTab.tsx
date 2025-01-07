@@ -52,8 +52,8 @@ export const NeutronVotingVaultsTab = ({
                 a.info.real === b.info.real
                   ? 0
                   : a.info.real && !b.info.real
-                  ? -1
-                  : 1
+                    ? -1
+                    : 1
               )
               .map((vault) => (
                 <DaoVotingVaultCard

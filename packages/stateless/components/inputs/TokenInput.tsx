@@ -37,7 +37,7 @@ import { TextInput } from './TextInput'
 export const TokenInput = <
   T extends TokenInputOption,
   FV extends FieldValues = FieldValues,
-  FieldName extends Path<FV> = Path<FV>
+  FieldName extends Path<FV> = Path<FV>,
 >({
   amount: amountField,
   tokens,
@@ -115,7 +115,7 @@ export const TokenInput = <
           </p>
         </div>
       ) : (
-        tokenFallback ?? (
+        (tokenFallback ?? (
           <p className="text-text-secondary">
             {readOnly
               ? t('info.token', {
@@ -123,10 +123,10 @@ export const TokenInput = <
                   count: amount.eq(1) ? 1 : 2,
                 })
               : disabled
-              ? t('info.noTokenSelected')
-              : t('button.selectToken')}
+                ? t('info.noTokenSelected')
+                : t('button.selectToken')}
           </p>
-        )
+        ))
       ),
     [
       amount,

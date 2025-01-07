@@ -272,9 +272,9 @@ export const BeginVesting: ActionComponent<BeginVestingOptions> = ({
   const vestingManagerVersion = widgetData.factories
     ? widgetData.factories[chainId]?.version
     : // Old single-chain factory support.
-    chainId === nativeChainId && !!widgetData.factory
-    ? widgetData.version
-    : undefined
+      chainId === nativeChainId && !!widgetData.factory
+      ? widgetData.version
+      : undefined
 
   const crossChainAccountActionExists = allActionsWithData.some(
     (action) => action.actionKey === ActionKey.ConfigureVestingPayments

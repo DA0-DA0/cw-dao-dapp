@@ -31,10 +31,12 @@ export const VetoableProposals: FeedSource<
       uniquePublicKeys.loading
         ? undefined
         : uniquePublicKeys.data.length > 0
-        ? feedVetoableProposalsSelector({
-            publicKeys: uniquePublicKeys.data.map(({ publicKey }) => publicKey),
-          })
-        : constSelector([]),
+          ? feedVetoableProposalsSelector({
+              publicKeys: uniquePublicKeys.data.map(
+                ({ publicKey }) => publicKey
+              ),
+            })
+          : constSelector([]),
       (data) =>
         data.map((d) => ({
           ...d,

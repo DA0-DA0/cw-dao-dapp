@@ -87,7 +87,7 @@ const fetchChainModuleAddress = async ({
     throw new Error(`Failed to find ${name} module address.`)
   }
 
-  return 'baseAccount' in account ? account.baseAccount?.address ?? '' : ''
+  return 'baseAccount' in account ? (account.baseAccount?.address ?? '') : ''
 }
 
 /**

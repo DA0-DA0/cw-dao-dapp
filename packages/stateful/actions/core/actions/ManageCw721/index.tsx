@@ -134,9 +134,9 @@ const Component: ActionComponent = (props) => {
         tokenInfoErrored
           ? t('error.notCw721Address')
           : noTokensWhenRemoving
-          ? t('error.noNftCollections')
-          : // Should never happen.
-            t('error.unexpectedError')
+            ? t('error.noNftCollections')
+            : // Should never happen.
+              t('error.unexpectedError')
       )
     }
   }, [

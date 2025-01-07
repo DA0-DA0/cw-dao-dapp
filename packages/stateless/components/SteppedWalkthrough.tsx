@@ -71,8 +71,8 @@ export const SteppedWalkthrough = ({
           const status = past
             ? StepStatus.Past
             : current
-            ? StepStatus.Current
-            : StepStatus.Future
+              ? StepStatus.Current
+              : StepStatus.Future
 
           const stepContent = (
             step.overrideShowStepContentStatuses ?? showStepContentStatuses

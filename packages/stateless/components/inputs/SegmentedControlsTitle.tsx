@@ -8,7 +8,7 @@ import { SegmentedControls } from './SegmentedControls'
 export type SegmentedControlsTitleProps<
   T extends unknown,
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 > = Omit<SegmentedControlsProps<T>, 'selected' | 'onSelect'> & {
   editable: boolean
   fieldName: FieldName
@@ -18,7 +18,7 @@ export type SegmentedControlsTitleProps<
 export const SegmentedControlsTitle = <
   T extends unknown,
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 >({
   editable,
   fieldName,

@@ -15,8 +15,8 @@ export const useVotingModuleRelevantAddresses =
         address: loadingInfo.loading
           ? '...'
           : loadingInfo.errored
-          ? '<error>'
-          : loadingInfo.data.cw4GroupAddress,
+            ? '<error>'
+            : loadingInfo.data.cw4GroupAddress,
       },
     ]
   }

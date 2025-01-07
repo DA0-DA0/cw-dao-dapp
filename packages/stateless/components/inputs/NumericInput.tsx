@@ -30,7 +30,7 @@ import { IconButton } from '../icon_buttons'
  */
 export const NumericInput = <
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 >({
   fieldName,
   register,

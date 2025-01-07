@@ -253,10 +253,10 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(function Tab(
                 ? // Dim text a lot when disabled.
                   '!text-text-interactive-disabled'
                 : selectedIndex === index || hoveringIndex === index
-                ? // Brighten text when selected or hovering over this tab.
-                  '!text-text-body'
-                : // Dim text when not selected and not hovering over this tab.
-                  '!text-text-secondary',
+                  ? // Brighten text when selected or hovering over this tab.
+                    '!text-text-body'
+                  : // Dim text when not selected and not hovering over this tab.
+                    '!text-text-secondary',
               noWrap && 'whitespace-nowrap',
               buttonClassName
             )}

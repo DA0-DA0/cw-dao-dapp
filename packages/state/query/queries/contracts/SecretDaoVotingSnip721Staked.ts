@@ -409,7 +409,7 @@ export const secretDaoVotingSnip721StakedQueries = {
 }
 export interface SecretDaoVotingSnip721StakedReactQuery<
   TResponse,
-  TData = TResponse
+  TData = TResponse,
 > {
   chainId: string
   contractAddress: string

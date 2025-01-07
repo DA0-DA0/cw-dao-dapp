@@ -181,45 +181,49 @@ export const decodeRawDataForDisplay = (msg: any): any =>
   typeof msg === 'string' && msg.length > 5000
     ? msg.slice(0, 100) + `...<${msg.length - 200} more>...` + msg.slice(-100)
     : typeof msg !== 'object' || msg === null
-    ? msg
-    : msg instanceof Uint8Array
-    ? toBase64(msg)
-    : Array.isArray(msg)
-    ? msg.map(decodeRawDataForDisplay)
-    : Long.isLong(msg)
-    ? msg.toString()
-    : msg instanceof Date
-    ? msg.toISOString()
-    : // `Any` protobuf
-    objectMatchesStructure(msg, {
-        typeUrl: {},
-        value: {},
-      }) &&
-      typeof (msg as Any).typeUrl === 'string' &&
-      (msg as Any).value instanceof Uint8Array
-    ? (() => {
-        try {
-          return decodeRawDataForDisplay(decodeRawProtobufMsg(msg as Any))
-        } catch {
-          return msg
-        }
-      })()
-    : // Stargate message
-    isCosmWasmStargateMsg(msg)
-    ? (() => {
-        try {
-          return decodeRawDataForDisplay(decodeStargateMessage(msg))
-        } catch {
-          return msg
-        }
-      })()
-    : Object.entries(msg).reduce(
-        (acc, [key, value]) => ({
-          ...acc,
-          [key]:
-            key === 'wasmByteCode'
-              ? '[TOO LARGE TO SHOW]'
-              : decodeRawDataForDisplay(value),
-        }),
-        {} as Record<string, any>
-      )
+      ? msg
+      : msg instanceof Uint8Array
+        ? toBase64(msg)
+        : Array.isArray(msg)
+          ? msg.map(decodeRawDataForDisplay)
+          : Long.isLong(msg)
+            ? msg.toString()
+            : msg instanceof Date
+              ? msg.toISOString()
+              : // `Any` protobuf
+                objectMatchesStructure(msg, {
+                    typeUrl: {},
+                    value: {},
+                  }) &&
+                  typeof (msg as Any).typeUrl === 'string' &&
+                  (msg as Any).value instanceof Uint8Array
+                ? (() => {
+                    try {
+                      return decodeRawDataForDisplay(
+                        decodeRawProtobufMsg(msg as Any)
+                      )
+                    } catch {
+                      return msg
+                    }
+                  })()
+                : // Stargate message
+                  isCosmWasmStargateMsg(msg)
+                  ? (() => {
+                      try {
+                        return decodeRawDataForDisplay(
+                          decodeStargateMessage(msg)
+                        )
+                      } catch {
+                        return msg
+                      }
+                    })()
+                  : Object.entries(msg).reduce(
+                      (acc, [key, value]) => ({
+                        ...acc,
+                        [key]:
+                          key === 'wasmByteCode'
+                            ? '[TOO LARGE TO SHOW]'
+                            : decodeRawDataForDisplay(value),
+                      }),
+                      {} as Record<string, any>
+                    )

@@ -39,12 +39,12 @@ export const useDaoClient = ({
           currentDao.coreAddress === daoSource.coreAddress))
         ? currentDao
         : daoSource
-        ? getDao({
-            queryClient,
-            chainId: daoSource.chainId,
-            coreAddress: daoSource.coreAddress,
-          })
-        : undefined,
+          ? getDao({
+              queryClient,
+              chainId: daoSource.chainId,
+              coreAddress: daoSource.coreAddress,
+            })
+          : undefined,
     [currentDao, daoSource, queryClient]
   )
 

@@ -21,15 +21,15 @@ export const useLoadingProposalExecutionTxHash = () => {
       ? // Returns loading when undefined passed to indicate we are still loading.
         undefined
       : loadingProposal.data.status === ProposalStatusEnum.Executed ||
-        loadingProposal.data.status === ProposalStatusEnum.ExecutionFailed
-      ? // If in an execute state, load the execution TX hash.
-        proposalExecutionTXHashSelector({
-          chainId,
-          contractAddress: proposalModuleAddress,
-          proposalId: proposalNumber,
-        })
-      : // Returns not loading with undefined value when undefined selector passed, indicating there is no data available.
-        constSelector(undefined),
+          loadingProposal.data.status === ProposalStatusEnum.ExecutionFailed
+        ? // If in an execute state, load the execution TX hash.
+          proposalExecutionTXHashSelector({
+            chainId,
+            contractAddress: proposalModuleAddress,
+            proposalId: proposalNumber,
+          })
+        : // Returns not loading with undefined value when undefined selector passed, indicating there is no data available.
+          constSelector(undefined),
     undefined
   )
 }

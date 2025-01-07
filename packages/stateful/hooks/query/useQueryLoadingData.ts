@@ -11,7 +11,7 @@ import { LoadingData } from '@dao-dao/types'
  */
 export const useQueryLoadingData = <
   TQueryFnData extends unknown,
-  TTransformedData extends unknown = TQueryFnData
+  TTransformedData extends unknown = TQueryFnData,
 >(
   /**
    * Query options to passthrough to useQuery.

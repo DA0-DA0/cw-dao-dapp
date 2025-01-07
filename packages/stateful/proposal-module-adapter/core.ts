@@ -92,12 +92,12 @@ export const matchAndLoadAdapter = (
   const proposalModule = proposalPrefix
     ? dao.proposalModules.find((p) => p.info.prefix === proposalPrefix)
     : // If no proposalPrefix (i.e. proposalId is just a number), and there is
-    // only one proposal module, return it. This should handle backwards
-    // compatibility when there were no prefixes and every DAO used a single
-    // choice proposal module.
-    dao.proposalModules.length === 1
-    ? dao.proposalModules[0]
-    : undefined
+      // only one proposal module, return it. This should handle backwards
+      // compatibility when there were no prefixes and every DAO used a single
+      // choice proposal module.
+      dao.proposalModules.length === 1
+      ? dao.proposalModules[0]
+      : undefined
   if (!proposalModule) {
     throw new ProposalModuleAdapterError(
       `Failed to find proposal module for prefix "${proposalPrefix}".`

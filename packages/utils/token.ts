@@ -159,12 +159,12 @@ export const sortTokensValueDescending: SortFn<
   return aPrice && bPrice && aPrice.eq(bPrice)
     ? symbolComparison
     : !aPrice && bPrice?.isPositive()
-    ? 1
-    : !bPrice && aPrice?.isPositive()
-    ? -1
-    : aPrice && bPrice
-    ? compareHugeDecimalDescending(aPrice, bPrice) || symbolComparison
-    : compareHugeDecimalDescending(aBalance, bBalance) || symbolComparison
+      ? 1
+      : !bPrice && aPrice?.isPositive()
+        ? -1
+        : aPrice && bPrice
+          ? compareHugeDecimalDescending(aPrice, bPrice) || symbolComparison
+          : compareHugeDecimalDescending(aBalance, bBalance) || symbolComparison
 }
 
 /**
@@ -201,19 +201,21 @@ export const sortTokensValueAscending: SortFn<
   return aPrice && bPrice && aPrice.eq(bPrice)
     ? symbolComparison
     : !aPrice && bPrice?.isPositive()
-    ? 1
-    : !bPrice && aPrice?.isPositive()
-    ? -1
-    : aPrice && bPrice
-    ? compareHugeDecimalAscending(aPrice, bPrice) || symbolComparison
-    : compareHugeDecimalAscending(aBalance, bBalance) || symbolComparison
+      ? 1
+      : !bPrice && aPrice?.isPositive()
+        ? -1
+        : aPrice && bPrice
+          ? compareHugeDecimalAscending(aPrice, bPrice) || symbolComparison
+          : compareHugeDecimalAscending(aBalance, bBalance) || symbolComparison
 }
 
 const compareHugeDecimalAscending = (a: HugeDecimal, b: HugeDecimal): number =>
   a.eq(b) ? 0 : a.gt(b) ? 1 : -1
 
-const compareHugeDecimalDescending = (a: HugeDecimal, b: HugeDecimal): number =>
-  a.eq(b) ? 0 : a.gt(b) ? -1 : 1
+const compareHugeDecimalDescending = (
+  a: HugeDecimal,
+  b: HugeDecimal
+): number => (a.eq(b) ? 0 : a.gt(b) ? -1 : 1)
 
 /**
  * Convert GenericToken into UncheckedDenom for contract calls.

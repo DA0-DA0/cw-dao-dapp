@@ -110,8 +110,8 @@ export const DockItem = ({
               brand
                 ? 'text-icon-brand'
                 : selected
-                ? 'text-icon-primary'
-                : 'text-icon-secondary'
+                  ? 'text-icon-primary'
+                  : 'text-icon-secondary'
             )}
           />
 
@@ -126,8 +126,8 @@ export const DockItem = ({
             brand
               ? 'text-text-brand'
               : selected
-              ? 'text-text-primary'
-              : 'text-text-secondary'
+                ? 'text-text-primary'
+                : 'text-text-secondary'
           )}
         >
           {t(labelI18nKey)}

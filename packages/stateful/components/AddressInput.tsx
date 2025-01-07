@@ -24,7 +24,7 @@ import { EntityDisplay } from './EntityDisplay'
 
 export const AddressInput = <
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 >(
   props: AddressInputProps<FV, FieldName>
 ) => {

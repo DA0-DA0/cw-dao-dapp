@@ -46,12 +46,15 @@ export const queryIndexer = async <T = any>({
 
   // Filter out undefined args.
   if (args) {
-    args = Object.entries(args).reduce((acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = value
-      }
-      return acc
-    }, {} as Record<string, any>)
+    args = Object.entries(args).reduce(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = value
+        }
+        return acc
+      },
+      {} as Record<string, any>
+    )
   }
 
   const params = new URLSearchParams({

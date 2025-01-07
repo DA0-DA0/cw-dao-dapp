@@ -109,8 +109,8 @@ export const fetchProposalModule = async ({
     adapter?.id === DaoProposalSingleAdapterId
       ? ProposalModuleType.Single
       : adapter?.id === DaoProposalMultipleAdapterId
-      ? ProposalModuleType.Multiple
-      : ProposalModuleType.Other
+        ? ProposalModuleType.Multiple
+        : ProposalModuleType.Other
 
   const [prePropose, veto] = await Promise.allSettled([
     // Get pre-propose address if exists.

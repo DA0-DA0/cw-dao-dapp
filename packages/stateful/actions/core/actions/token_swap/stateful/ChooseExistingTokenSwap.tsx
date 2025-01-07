@@ -104,8 +104,8 @@ export const ChooseExistingTokenSwap: ActionComponent<
             status.counterparty_one.address === address
               ? status.counterparty_one
               : status.counterparty_two.address === address
-              ? status.counterparty_two
-              : undefined
+                ? status.counterparty_two
+                : undefined
           if (!selfParty) {
             throw new Error(
               t('error.notPartyInTokenSwap', {

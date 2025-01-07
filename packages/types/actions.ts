@@ -119,7 +119,7 @@ export enum ActionKey {
 }
 
 export type ActionAndData<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > = {
   action: Action<Data>
   data: Data
@@ -185,7 +185,7 @@ export type ActionComponent<O = undefined, D = any> = ComponentType<
 export type ActionMatch = boolean | number
 
 export interface Action<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > {
   /**
    * The unique key identifying the action.
@@ -333,7 +333,7 @@ export interface Action<
  * and this is the type of a class that implements it.
  */
 export type ImplementedAction<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > = {
   new (options: ActionOptions): Action<Data>
 }
@@ -442,7 +442,7 @@ export type ActionOptions<ExtraOptions extends {} = {}> = ExtraOptions & {
 
 export type ActionMaker<
   Data extends Record<string, any> = Record<string, any>,
-  ExtraOptions extends {} = {}
+  ExtraOptions extends {} = {},
 > = (options: ActionOptions<ExtraOptions>) => Action<Data> | null
 
 /**
@@ -538,7 +538,7 @@ export type GovActionsProviderProps = ActionsProviderProps & {
  * Action decoder for a single action and set of matched messages.
  */
 export interface IActionDecoder<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > {
   /**
    * The action that matched the messages.

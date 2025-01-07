@@ -161,8 +161,8 @@ export const NftSelectionModal = ({
         nfts.errored
           ? 'items-center justify-center gap-4'
           : nfts.loading || nfts.data.length > 0
-          ? 'no-scrollbar grid grid-flow-row auto-rows-max grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3'
-          : undefined
+            ? 'no-scrollbar grid grid-flow-row auto-rows-max grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3'
+            : undefined
       }
       footerContent={
         <div
@@ -253,8 +253,8 @@ export const NftSelectionModal = ({
                         nfts.loading
                           ? undefined
                           : nfts.data.length === selectedKeys.length
-                          ? onDeselectAll
-                          : onSelectAll
+                            ? onDeselectAll
+                            : onSelectAll
                       }
                       variant="underline"
                     >

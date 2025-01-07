@@ -202,28 +202,28 @@ export const genericTokenBalancesSelector = selectorFamily<
                         ),
                       ]
                     : // Get polytone cw20s if they exist.
-                    chainId !== mainChainId
+                      chainId !== mainChainId
+                      ? [
+                          DaoDaoCoreSelectors.polytoneCw20TokensWithBalancesSelector(
+                            {
+                              chainId: mainChainId,
+                              contractAddress: mainAddress,
+                              polytoneChainId: chainId,
+                            }
+                          ),
+                        ]
+                      : []
+                  : isValidWalletAddress(
+                        address,
+                        getChainForChainId(chainId).bech32Prefix
+                      )
                     ? [
-                        DaoDaoCoreSelectors.polytoneCw20TokensWithBalancesSelector(
-                          {
-                            chainId: mainChainId,
-                            contractAddress: mainAddress,
-                            polytoneChainId: chainId,
-                          }
-                        ),
+                        walletCw20BalancesSelector({
+                          walletAddress: address,
+                          chainId,
+                        }),
                       ]
                     : []
-                  : isValidWalletAddress(
-                      address,
-                      getChainForChainId(chainId).bech32Prefix
-                    )
-                  ? [
-                      walletCw20BalancesSelector({
-                        walletAddress: address,
-                        chainId,
-                      }),
-                    ]
-                  : []
               )
             )
           : []

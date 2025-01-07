@@ -57,7 +57,7 @@ export const RadioInputNoForm = <Value extends unknown = any>({
 
 export type RadioInputProps<
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 > = Omit<
   RadioInputNoFormProps<UnpackNestedValue<PathValue<FV, FieldName>>>,
   'selected' | 'onChange'

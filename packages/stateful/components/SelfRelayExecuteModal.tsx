@@ -677,25 +677,28 @@ export const SelfRelayExecuteModal = ({
         const connections = (
           await Promise.all(
             srcConnections
-              .reduce((acc, { channel, connection }) => {
-                let existing = acc.find((a) => a.src === connection)
-                if (!existing) {
-                  existing = {
-                    src: connection,
-                    packets: [],
+              .reduce(
+                (acc, { channel, connection }) => {
+                  let existing = acc.find((a) => a.src === connection)
+                  if (!existing) {
+                    existing = {
+                      src: connection,
+                      packets: [],
+                    }
+                    acc.push(existing)
                   }
-                  acc.push(existing)
-                }
 
-                // Find packets coming from the same channel.
-                existing.packets.push(
-                  ...chainPackets.filter(
-                    ({ packet }) => packet.sourceChannel === channel
+                  // Find packets coming from the same channel.
+                  existing.packets.push(
+                    ...chainPackets.filter(
+                      ({ packet }) => packet.sourceChannel === channel
+                    )
                   )
-                )
 
-                return acc
-              }, [] as { src: string; packets: PacketWithMetadata[] }[])
+                  return acc
+                },
+                [] as { src: string; packets: PacketWithMetadata[] }[]
+              )
               .map(async (data) => ({
                 ...data,
                 dst: (
@@ -1090,14 +1093,14 @@ export const SelfRelayExecuteModal = ({
           status === RelayStatus.Initializing
             ? 0
             : status === RelayStatus.Funding || status === RelayStatus.Executing
-            ? 1
-            : status === RelayStatus.Relaying ||
-              status === RelayStatus.RelayErrored
-            ? 2
-            : status === RelayStatus.Refunding ||
-              status === RelayStatus.RefundingErrored
-            ? 3
-            : 4
+              ? 1
+              : status === RelayStatus.Relaying ||
+                  status === RelayStatus.RelayErrored
+                ? 2
+                : status === RelayStatus.Refunding ||
+                    status === RelayStatus.RefundingErrored
+                  ? 3
+                  : 4
         }
         steps={[
           {
@@ -1170,7 +1173,7 @@ export const SelfRelayExecuteModal = ({
                       !relayerFunds.loading && !relayerFunds.errored
                         ? HugeDecimal.from(relayerFunds.data[index])
                         : // Use the previously funded amount if the step is past.
-                          fundedAmount[chainId] ?? HugeDecimal.zero
+                          (fundedAmount[chainId] ?? HugeDecimal.zero)
                     const empty = funds.isZero()
 
                     const funded = funds.gte(
@@ -1216,10 +1219,10 @@ export const SelfRelayExecuteModal = ({
                                       fundTokenWithBalance.token.symbol,
                                   })
                                 : cannotExecuteUntilFunded
-                                ? `Fund the other relayer${
-                                    chains.length > 2 ? 's' : ''
-                                  } before executing.`
-                                : undefined
+                                  ? `Fund the other relayer${
+                                      chains.length > 2 ? 's' : ''
+                                    } before executing.`
+                                  : undefined
                             }
                           >
                             <Button
@@ -1241,11 +1244,11 @@ export const SelfRelayExecuteModal = ({
                                     ? t('button.execute')
                                     : t('button.relay')
                                   : transaction.type === 'execute'
-                                  ? t('button.fundAndExecute')
-                                  : t('button.fundAndRelay')
+                                    ? t('button.fundAndExecute')
+                                    : t('button.fundAndRelay')
                                 : empty
-                                ? t('button.fund')
-                                : t('button.topUp')}
+                                  ? t('button.fund')
+                                  : t('button.topUp')}
                             </Button>
                           </Tooltip>
                         ) : (

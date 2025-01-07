@@ -29,7 +29,7 @@ if (typeof window !== 'undefined' && typeof window.navigator !== 'undefined') {
 
 export interface CodeMirrorInputProps<
   T extends FieldValues,
-  U extends Path<T>
+  U extends Path<T>,
 > {
   fieldName: U
   control?: Control<T>

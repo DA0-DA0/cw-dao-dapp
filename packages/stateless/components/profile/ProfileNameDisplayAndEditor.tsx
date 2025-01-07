@@ -102,8 +102,8 @@ export const ProfileNameDisplayAndEditor = ({
               event.key === 'Escape'
                 ? setEditingName(undefined)
                 : event.key === 'Enter'
-                ? doUpdateName()
-                : undefined
+                  ? doUpdateName()
+                  : undefined
             }
             size={1}
             value={editingName}
@@ -145,7 +145,9 @@ export const ProfileNameDisplayAndEditor = ({
               // Prefill name editor with current name from PFPK. If name from
               // other name service, allow overriding name, but default to
               // empty.
-              profile.data.nameSource === 'pfpk' ? profile.data.name ?? '' : ''
+              profile.data.nameSource === 'pfpk'
+                ? (profile.data.name ?? '')
+                : ''
             )
           }
           variant="none"
@@ -171,10 +173,10 @@ export const ProfileNameDisplayAndEditor = ({
             {profile.loading
               ? '...'
               : noNameSet
-              ? canEdit
-                ? t('button.setDisplayName')
-                : t('info.noDisplayName')
-              : profile.data.name}
+                ? canEdit
+                  ? t('button.setDisplayName')
+                  : t('info.noDisplayName')
+                : profile.data.name}
           </p>
 
           {!canEdit && !profile.loading && noNameSet && !hideNoNameTooltip && (

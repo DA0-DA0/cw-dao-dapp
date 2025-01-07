@@ -275,10 +275,10 @@ export const NewProposal = ({
         choices.length < 2
           ? t('error.tooFewChoices')
           : choices.length > MAX_NUM_PROPOSAL_CHOICES
-          ? t('error.tooManyChoices', {
-              count: MAX_NUM_PROPOSAL_CHOICES,
-            })
-          : undefined
+            ? t('error.tooManyChoices', {
+                count: MAX_NUM_PROPOSAL_CHOICES,
+              })
+            : undefined
       }
       cannotProposeReason={cannotProposeReason}
       connected={isWalletConnected}

@@ -36,7 +36,7 @@ export type FilterableItem = {
 }
 
 export type FilterableItemPopupProps<
-  T extends FilterableItem = FilterableItem
+  T extends FilterableItem = FilterableItem,
 > = {
   trigger: PopupTrigger
   items: T[]

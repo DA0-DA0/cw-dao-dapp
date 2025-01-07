@@ -299,16 +299,16 @@ export const fetchPreProposeModule = async (
             },
           }
       : // >= v2.5.0
-      'submission_policy' in moduleConfig && moduleConfig.submission_policy
-      ? moduleConfig.submission_policy
-      : // If unknown config shape, assume only members can propose.
-        {
-          specific: {
-            dao_members: true,
-            allowlist: [],
-            denylist: [],
-          },
-        }
+        'submission_policy' in moduleConfig && moduleConfig.submission_policy
+        ? moduleConfig.submission_policy
+        : // If unknown config shape, assume only members can propose.
+          {
+            specific: {
+              dao_members: true,
+              allowlist: [],
+              denylist: [],
+            },
+          }
     : // If no config loaded, assume only members can propose.
       {
         specific: {

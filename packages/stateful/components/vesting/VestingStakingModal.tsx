@@ -263,11 +263,11 @@ export const VestingStakingModal = ({
           mode === StakingMode.Stake
             ? t('success.staked')
             : mode === StakingMode.Restake
-            ? t('success.restaked')
-            : mode === StakingMode.Unstake
-            ? t('success.unstaked')
-            : // Should never happen.
-              t('error.loadingData')
+              ? t('success.restaked')
+              : mode === StakingMode.Unstake
+                ? t('success.unstaked')
+                : // Should never happen.
+                  t('error.loadingData')
         )
       }
 

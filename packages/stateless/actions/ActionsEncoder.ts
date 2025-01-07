@@ -14,11 +14,17 @@ export class ActionsEncoder implements IActionsEncoder {
   private _error?: Error
   private _messages?: UnifiedCosmosMsg[]
 
-  constructor(private encodeContext: ActionEncodeContext, actions: Action[]) {
-    this.actionMap = actions.reduce((acc, action) => {
-      acc[action.key] = action
-      return acc
-    }, {} as Record<ActionKey, Action>)
+  constructor(
+    private encodeContext: ActionEncodeContext,
+    actions: Action[]
+  ) {
+    this.actionMap = actions.reduce(
+      (acc, action) => {
+        acc[action.key] = action
+        return acc
+      },
+      {} as Record<ActionKey, Action>
+    )
   }
 
   get status() {

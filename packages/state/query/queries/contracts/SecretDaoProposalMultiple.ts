@@ -516,7 +516,7 @@ export const secretDaoProposalMultipleQueries = {
 }
 export interface SecretDaoProposalMultipleReactQuery<
   TResponse,
-  TData = TResponse
+  TData = TResponse,
 > {
   chainId: string
   contractAddress: string

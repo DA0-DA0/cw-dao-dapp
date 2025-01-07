@@ -113,8 +113,8 @@ export const Complete = ({
               attribute === null
                 ? null
                 : maxPerAttribute[i] === 0
-                ? 0
-                : (attribute / maxPerAttribute[i]) * 100
+                  ? 0
+                  : (attribute / maxPerAttribute[i]) * 100
             ),
           }))
         }),
