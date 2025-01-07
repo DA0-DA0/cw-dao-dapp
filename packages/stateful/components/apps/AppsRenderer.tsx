@@ -92,7 +92,13 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const { chainId: contextChainId } = useChain()
-  const { address: walletAddress, chainWallet } = useWallet()
+  const {
+    address: walletAddress,
+    chainWallet,
+    account,
+  } = useWallet({
+    loadAccount: true,
+  })
   const [finalMessages, setFinalMessages] = useState<UnifiedCosmosMsg[]>()
   const close = useCallback(() => setFinalMessages(undefined), [])
 
@@ -409,17 +415,31 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
             }
           }
 
-          const pubkey =
-            (appEntity.data.address === walletAddress &&
-              (await chainWallet?.client.getAccount?.(chainId))?.pubkey) ||
-            fromHex(
-              await queryClient.fetchQuery(
-                chainQueries.walletHexPublicKey({
-                  chainId,
-                  address: appEntity.data.address,
-                })
-              )
+          if (appEntity.data.address === walletAddress && account) {
+            return {
+              type: 'success',
+              value: {
+                address: account.address,
+                algo: account.algo,
+                pubkey: account.pubkey,
+                username:
+                  appEntity.data.name ||
+                  account.username ||
+                  appEntity.data.address,
+                isNanoLedger: false,
+                isSmartContract: false,
+              } satisfies WalletAccount,
+            }
+          }
+
+          const pubkey = fromHex(
+            await queryClient.fetchQuery(
+              chainQueries.walletHexPublicKey({
+                chainId,
+                address: appEntity.data.address,
+              })
             )
+          )
 
           if (!pubkey) {
             return {
@@ -435,7 +455,9 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
               algo: 'secp256k1',
               pubkey,
               username: appEntity.data.name || appEntity.data.address,
-            } as WalletAccount,
+              isNanoLedger: false,
+              isSmartContract: false,
+            } satisfies WalletAccount,
           }
         } else if (appEntity.data.type === EntityType.Dao) {
           return {
@@ -444,8 +466,10 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
               address: getDaoAddressForChainId(appEntity.data.daoInfo, chainId),
               algo: 'secp256k1',
               pubkey: EMPTY_PUB_KEY,
-              username: appEntity.data.name,
-            } as WalletAccount,
+              username: appEntity.data.name || appEntity.data.address,
+              isNanoLedger: false,
+              isSmartContract: false,
+            } satisfies WalletAccount,
           }
         }
 
@@ -477,7 +501,7 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
               chainId,
               address: appEntity.data.address,
               username: appEntity.data.name || appEntity.data.address,
-            } as SimpleAccount,
+            } satisfies SimpleAccount,
           }
         } else if (appEntity.data.type === EntityType.Dao) {
           return {
@@ -486,8 +510,8 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
               namespace: 'cosmos',
               chainId,
               address: getDaoAddressForChainId(appEntity.data.daoInfo, chainId),
-              username: appEntity.data.name,
-            } as SimpleAccount,
+              username: appEntity.data.name || appEntity.data.address,
+            } satisfies SimpleAccount,
           }
         }
 
@@ -513,17 +537,34 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
             }
           }
 
-          const pubkey =
-            (appEntity.data.address === walletAddress &&
-              (await chainWallet?.client.getAccount?.(chainId))?.pubkey) ||
-            fromHex(
-              await queryClient.fetchQuery(
-                chainQueries.walletHexPublicKey({
-                  chainId,
-                  address: appEntity.data.address,
-                })
-              )
+          if (appEntity.data.address === walletAddress && account) {
+            return {
+              type: 'success',
+              value: {
+                name:
+                  appEntity.data.name ||
+                  account.username ||
+                  appEntity.data.address,
+                algo: 'secp256k1',
+                pubkey: account.pubkey,
+                pubKey: account.pubkey,
+                address: fromBech32(appEntity.data.address).data,
+                bech32Address: appEntity.data.address,
+                isNanoLedger: false,
+                isSmartContract: false,
+                isKeystone: false,
+              },
+            }
+          }
+
+          const pubkey = fromHex(
+            await queryClient.fetchQuery(
+              chainQueries.walletHexPublicKey({
+                chainId,
+                address: appEntity.data.address,
+              })
             )
+          )
 
           if (!pubkey) {
             return {
@@ -538,9 +579,11 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
               name: appEntity.data.name || appEntity.data.address,
               algo: 'secp256k1',
               pubkey,
+              pubKey: pubkey,
               address: fromBech32(appEntity.data.address).data,
               bech32Address: appEntity.data.address,
               isNanoLedger: false,
+              isSmartContract: false,
               isKeystone: false,
             },
           }
@@ -560,9 +603,11 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
               name: appEntity.data.name,
               algo: 'secp256k1',
               pubkey: EMPTY_PUB_KEY,
+              pubKey: EMPTY_PUB_KEY,
               address: fromBech32(bech32Address).data,
               bech32Address,
               isNanoLedger: false,
+              isSmartContract: false,
               isKeystone: false,
             },
           }
@@ -600,18 +645,27 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
         }
 
         if (appEntity.data.type === EntityType.Wallet) {
-          const pubkey =
-            (appEntity.data.address === walletAddress &&
-              (await chainWallet?.client.getAccount?.(appEntity.data.chainId))
-                ?.pubkey) ||
-            fromHex(
-              await queryClient.fetchQuery(
-                chainQueries.walletHexPublicKey({
-                  chainId: appEntity.data.chainId,
-                  address: appEntity.data.address,
-                })
-              )
+          if (appEntity.data.address === walletAddress && account) {
+            return {
+              type: 'success',
+              value: [
+                {
+                  address: account.address,
+                  algo: account.algo,
+                  pubkey: account.pubkey,
+                } satisfies AccountData,
+              ],
+            }
+          }
+
+          const pubkey = fromHex(
+            await queryClient.fetchQuery(
+              chainQueries.walletHexPublicKey({
+                chainId: appEntity.data.chainId,
+                address: appEntity.data.address,
+              })
             )
+          )
 
           if (!pubkey) {
             return {
@@ -627,8 +681,8 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
                 address: appEntity.data.address,
                 algo: 'secp256k1',
                 pubkey,
-              },
-            ] as AccountData[],
+              } satisfies AccountData,
+            ],
           }
         } else {
           return {
@@ -638,8 +692,8 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
                 address: appEntity.data.address,
                 algo: 'secp256k1',
                 pubkey: EMPTY_PUB_KEY,
-              },
-            ] as AccountData[],
+              } satisfies AccountData,
+            ],
           }
         }
       },
