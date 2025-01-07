@@ -23,6 +23,7 @@ import { chainQueries } from '@dao-dao/state/query'
 import {
   ActionMatcherProvider,
   AppsRendererExecutionType,
+  ChainProvider,
   DaoSupportedChainPickerInput,
   AppsRenderer as StatelessAppsRenderer,
   useActionForKey,
@@ -683,28 +684,30 @@ export const AppsRenderer = ({ mode, ...props }: AppsRendererProps) => {
 
   return (
     <>
-      <StatelessAppsRenderer
-        AddressInput={AddressInput}
-        chainPicker={
-          mode === 'dao' ? (
-            <DaoSupportedChainPickerInput
-              accountTypes={[AccountType.Polytone, AccountType.Ica]}
-              hideFormLabel
-              onChange={setOtherChainId}
-              selected={otherChainId}
-            />
-          ) : (
-            <WalletChainSwitcher type="configured" />
-          )
-        }
-        executionType={executionType}
-        fullScreen={fullScreen}
-        iframeRef={myIframeRef}
-        otherAddress={otherAddress}
-        setExecutionType={setExecutionType}
-        setFullScreen={setFullScreen}
-        setOtherAddress={setOtherAddress}
-      />
+      <ChainProvider chainId={appChainId}>
+        <StatelessAppsRenderer
+          AddressInput={AddressInput}
+          chainPicker={
+            mode === 'dao' ? (
+              <DaoSupportedChainPickerInput
+                accountTypes={[AccountType.Polytone, AccountType.Ica]}
+                hideFormLabel
+                onChange={setOtherChainId}
+                selected={otherChainId}
+              />
+            ) : (
+              <WalletChainSwitcher type="configured" />
+            )
+          }
+          executionType={executionType}
+          fullScreen={fullScreen}
+          iframeRef={myIframeRef}
+          otherAddress={otherAddress}
+          setExecutionType={setExecutionType}
+          setFullScreen={setFullScreen}
+          setOtherAddress={setOtherAddress}
+        />
+      </ChainProvider>
 
       {finalMessages && (
         <ActionMatcherProvider messages={finalMessages}>
