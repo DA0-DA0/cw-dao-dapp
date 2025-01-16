@@ -31,10 +31,13 @@ describe('delegations', () => {
   it('should create a token-based DAO with delegations', async () => {
     const chainConfig = mustGetSupportedChainConfig(suite.chainId)
 
+    const creator = await suite.makeSigner()
+    const creatorSigningClient = await creator.getSigningClient()
+
     const members = await suite.makeSigners(100)
 
-    // Ensure first member has enough funds to create the DAO.
-    await members[0].tapFaucet()
+    // Ensure creator has enough funds to create the DAO.
+    await creator.tapFaucet()
 
     const totalSupply = 1_000_000
     const initialBalance = 100
@@ -51,10 +54,12 @@ describe('delegations', () => {
             symbol: 'TEST',
             decimals: 6,
             name: 'Test Token',
-            initialBalances: members.map(({ address }) => ({
-              address,
-              amount: initialBalance.toString(),
-            })),
+            initialBalances: [
+              {
+                address: creator.address,
+                amount: BigInt(members.length * initialBalance).toString(),
+              },
+            ],
             initialDaoBalance: initialDaoBalance.toString(),
             funds: factoryTokenDenomCreationFee,
           },
@@ -87,8 +92,8 @@ describe('delegations', () => {
     )
 
     const adminFactory = new CwAdminFactoryClient(
-      await members[0].getSigningClient(),
-      members[0].address,
+      creatorSigningClient,
+      creator.address,
       chainConfig.factoryContractAddress
     )
 
@@ -154,6 +159,28 @@ describe('delegations', () => {
     ).power
     expect(totalVotingPower).toBe('0')
 
+    // Send tokens to each member in batches of 100.
+    await batch({
+      list: members,
+      batchSize: 100,
+      grouped: true,
+      task: (recipients) =>
+        creatorSigningClient.signAndBroadcast(
+          creator.address,
+          recipients.map(({ address }) => ({
+            typeUrl: MsgSend.typeUrl,
+            value: MsgSend.fromPartial({
+              fromAddress: creator.address,
+              toAddress: address,
+              amount: coins(initialBalance, govToken.denomOrAddress),
+            }),
+          })),
+          CHAIN_GAS_MULTIPLIER
+        ),
+      tries: 3,
+      delayMs: 1_000,
+    })
+
     // Stake 50 tokens for each member.
     await Promise.all(
       members.map((member) =>
@@ -182,8 +209,8 @@ describe('delegations', () => {
     // they are delegated more.
     const vpCapPercent = 0.1
     const delegationAddress = await instantiateSmartContract(
-      members[0].getSigningClient,
-      members[0].address,
+      creatorSigningClient,
+      creator.address,
       chainConfig.codeIds.DaoVoteDelegation,
       `DAO DAO Vote Delegation (${Date.now()})`,
       {
@@ -609,8 +636,8 @@ describe('delegations', () => {
       msgs
     )
 
-    // Register first 300 members as delegates.
-    const numDelegates = 300
+    // Register first 100 members as delegates.
+    const numDelegates = 100
     const delegateMembers = members.slice(0, numDelegates)
     const delegatorMembers = members.slice(numDelegates)
     const delegator = delegatorMembers[0]

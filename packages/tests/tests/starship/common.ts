@@ -7,6 +7,6 @@ import { StarshipSuite } from './suite'
 export let suite: StarshipSuite
 
 beforeAll(async () => {
-  suite = await StarshipSuite.init('juno', ContractVersion.V270Alpha2)
+  suite = await StarshipSuite.init('neutron', ContractVersion.V270Alpha2)
   await suite.ensureChainSetUp()
 })

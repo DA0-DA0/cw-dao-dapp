@@ -297,8 +297,8 @@ export class StarshipSuite {
         await faucetSigner.tapFaucet()
       }
 
-      // Send tokens to each signer, batched by 1,000.
-      const batchSize = 1_000
+      // Send tokens to each signer, batched by 200.
+      const batchSize = 200
       const batches = Math.ceil(signers.length / batchSize)
       const getMessagesForBatch = (batch: number) =>
         signers

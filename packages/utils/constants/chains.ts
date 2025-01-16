@@ -609,19 +609,8 @@ const convertConfiguredChainToSupportedChain = (
       )
     : ALL_CODE_IDS
 
-  // Type-check to ensure chain code IDs are present in JSON.
-  const allCodeIds = allCodeIdsToUse[chain.chainId as ChainId]
-  if (!allCodeIds) {
-    throw new Error(`No code IDs found for chain ${chain.chainId}`)
-  }
-
-  // Type-check to ensure correct version of code IDs are present in JSON.
-  const codeIds = allCodeIds[chain.latestVersion]
-  if (!codeIds) {
-    throw new Error(
-      `Version ${chain.latestVersion} code IDs not found for chain ${chain.chainId}`
-    )
-  }
+  const allCodeIds = allCodeIdsToUse[chain.chainId as ChainId] || {}
+  const codeIds = allCodeIds[chain.latestVersion] || {}
 
   return {
     ...chain,

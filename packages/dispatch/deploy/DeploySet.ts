@@ -155,11 +155,7 @@ export const deploySets: DeploySet[] = [
 
   // the v1 to v2 migrator contract to deploy every time
   new DeploySet('migrator', 'always', [new DeploySetContract('dao_migrator')], {
-    chainIds: [
-      ChainId.JunoMainnet,
-      ChainId.JunoTestnet,
-      ChainId.StarshipJunoTesting,
-    ],
+    chainIds: [ChainId.JunoMainnet, ChainId.JunoTestnet],
   }),
 
   // cw-vesting with staking, which all chains but Neutron support
@@ -168,7 +164,11 @@ export const deploySets: DeploySet[] = [
     'always',
     [new DeploySetContract('cw_vesting')],
     {
-      skipChainIds: [ChainId.NeutronMainnet, ChainId.NeutronTestnet],
+      skipChainIds: [
+        ChainId.NeutronMainnet,
+        ChainId.NeutronTestnet,
+        ChainId.StarshipTestChain,
+      ],
     }
   ),
 
@@ -178,7 +178,11 @@ export const deploySets: DeploySet[] = [
     'always',
     [new DeploySetContract('cw_vesting-no_staking', 'cw_vesting')],
     {
-      chainIds: [ChainId.NeutronMainnet, ChainId.NeutronTestnet],
+      chainIds: [
+        ChainId.NeutronMainnet,
+        ChainId.NeutronTestnet,
+        ChainId.StarshipTestChain,
+      ],
     }
   ),
 
@@ -187,7 +191,6 @@ export const deploySets: DeploySet[] = [
     chainIds: [
       ChainId.JunoMainnet,
       ChainId.JunoTestnet,
-      ChainId.StarshipJunoTesting,
 
       'layer',
 
@@ -210,7 +213,6 @@ export const deploySets: DeploySet[] = [
       chainIds: [
         ChainId.JunoMainnet,
         ChainId.JunoTestnet,
-        ChainId.StarshipJunoTesting,
 
         'layer',
 
@@ -227,7 +229,6 @@ export const deploySets: DeploySet[] = [
     chainIds: [
       ChainId.JunoMainnet,
       ChainId.JunoTestnet,
-      ChainId.StarshipJunoTesting,
 
       ChainId.KujiraMainnet,
       ChainId.KujiraTestnet,
@@ -239,6 +240,7 @@ export const deploySets: DeploySet[] = [
 
       ChainId.NeutronMainnet,
       ChainId.NeutronTestnet,
+      ChainId.StarshipTestChain,
 
       ChainId.OraichainMainnet,
 
@@ -262,7 +264,6 @@ export const deploySets: DeploySet[] = [
 
         ChainId.JunoMainnet,
         ChainId.JunoTestnet,
-        ChainId.StarshipJunoTesting,
 
         ChainId.KujiraMainnet,
         ChainId.KujiraTestnet,
@@ -274,6 +275,7 @@ export const deploySets: DeploySet[] = [
 
         ChainId.NeutronMainnet,
         ChainId.NeutronTestnet,
+        ChainId.StarshipTestChain,
 
         ChainId.OraichainMainnet,
 
@@ -298,7 +300,6 @@ export const deploySets: DeploySet[] = [
       chainIds: [
         ChainId.JunoMainnet,
         ChainId.JunoTestnet,
-        ChainId.StarshipJunoTesting,
 
         'layer',
 
@@ -307,6 +308,7 @@ export const deploySets: DeploySet[] = [
 
         ChainId.NeutronMainnet,
         ChainId.NeutronTestnet,
+        ChainId.StarshipTestChain,
 
         ChainId.OmniflixHubMainnet,
         ChainId.OmniflixHubTestnet,
@@ -354,7 +356,6 @@ export const deploySets: DeploySet[] = [
 
         ChainId.JunoMainnet,
         ChainId.JunoTestnet,
-        ChainId.StarshipJunoTesting,
 
         ChainId.KujiraMainnet,
         ChainId.KujiraTestnet,
@@ -366,6 +367,7 @@ export const deploySets: DeploySet[] = [
 
         ChainId.NeutronMainnet,
         ChainId.NeutronTestnet,
+        ChainId.StarshipTestChain,
 
         ChainId.OmniflixHubMainnet,
         ChainId.OmniflixHubTestnet,

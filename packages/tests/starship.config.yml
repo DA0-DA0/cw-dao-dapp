@@ -2,9 +2,13 @@ name: dao-dao-tests
 version: v0.2.19
 
 chains:
-  - id: starship-juno
-    name: juno
+  - id: starship-chain
+    name: neutron
     numValidators: 1
+    genesis:
+      consensus_params:
+        block:
+          max_gas: '30000000'
     ports:
       rest: 23450
       rpc: 23451

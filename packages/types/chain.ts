@@ -102,7 +102,7 @@ export enum ChainId {
   SecretTestnet = 'pulsar-3',
 
   // Local testing chain powered by Starship.
-  StarshipJunoTesting = 'starship-juno',
+  StarshipTestChain = 'starship-chain',
 }
 
 export type BaseChainConfig = {
