@@ -175,20 +175,20 @@ export const useStakingInfo = ({
     loadingTotalStakedValue: loadingTotalStakedValue.loading
       ? { loading: true }
       : loadingTotalStakedValue.errored
-      ? undefined
-      : {
-          loading: false,
-          data: HugeDecimal.from(loadingTotalStakedValue.data.power),
-        },
+        ? undefined
+        : {
+            loading: false,
+            data: HugeDecimal.from(loadingTotalStakedValue.data.power),
+          },
     // Wallet staked value
     loadingWalletStakedValue: loadingWalletStakedNfts.loading
       ? { loading: true }
       : loadingWalletStakedNfts.errored
-      ? undefined
-      : {
-          loading: false,
-          data: HugeDecimal.from(loadingWalletStakedNfts.data.length),
-        },
+        ? undefined
+        : {
+            loading: false,
+            data: HugeDecimal.from(loadingWalletStakedNfts.data.length),
+          },
     loadingWalletStakedNfts,
     loadingWalletUnstakedNfts,
   }

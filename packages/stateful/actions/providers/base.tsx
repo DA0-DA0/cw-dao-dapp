@@ -51,15 +51,15 @@ export const BaseActionsProvider = ({
           config: chainContext.config,
         }
       : chainContext.base
-      ? {
-          type: ActionChainContextType.Configured,
-          ...chainContext,
-          config: chainContext.base,
-        }
-      : {
-          type: ActionChainContextType.Any,
-          ...chainContext,
-        }
+        ? {
+            type: ActionChainContextType.Configured,
+            ...chainContext,
+            config: chainContext.base,
+          }
+        : {
+            type: ActionChainContextType.Any,
+            ...chainContext,
+          }
 
     const options: ActionOptions = {
       t,

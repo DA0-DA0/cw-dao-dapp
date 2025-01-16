@@ -71,14 +71,14 @@ export const Component: ActionComponent = (props) => {
           denomOrAddress: depositInfo.denomOrAddress,
         })
       : depositInfo.type === 'native'
-      ? genericTokenSelector({
-          chainId,
-          type: TokenType.Native,
-          denomOrAddress: depositInfo.denomOrAddress,
-        })
-      : depositInfo.type === 'voting_module_token'
-      ? constSelector(governanceToken)
-      : constSelector(undefined)
+        ? genericTokenSelector({
+            chainId,
+            type: TokenType.Native,
+            denomOrAddress: depositInfo.denomOrAddress,
+          })
+        : depositInfo.type === 'voting_module_token'
+          ? constSelector(governanceToken)
+          : constSelector(undefined)
   )
 
   // Update token and cw20 address error.
@@ -203,13 +203,13 @@ export class DaoProposalSingleUpdatePreProposeConfigAction extends ActionBase<Up
             type: isVotingModuleToken
               ? 'voting_module_token'
               : 'native' in config.deposit_info.denom
-              ? 'native'
-              : 'cw20',
+                ? 'native'
+                : 'cw20',
             denomOrAddress: isVotingModuleToken
               ? governanceToken.denomOrAddress
               : 'native' in config.deposit_info.denom
-              ? config.deposit_info.denom.native
-              : config.deposit_info.denom.cw20,
+                ? config.deposit_info.denom.native
+                : config.deposit_info.denom.cw20,
             token,
             refundPolicy: config.deposit_info.refund_policy,
           }
@@ -264,9 +264,9 @@ export class DaoProposalSingleUpdatePreProposeConfigAction extends ActionBase<Up
                           votingModuleTokenType === TokenType.Native
                             ? 'native'
                             : votingModuleTokenType === TokenType.Cw20
-                            ? 'cw20'
-                            : // Cause a chain error. Should never happen.
-                              ('invalid' as never),
+                              ? 'cw20'
+                              : // Cause a chain error. Should never happen.
+                                ('invalid' as never),
                       },
                     }
                   : {
@@ -386,9 +386,9 @@ export class DaoProposalSingleUpdatePreProposeConfigAction extends ActionBase<Up
       'open_proposal_submission' in config
         ? !!config.open_proposal_submission
         : // >= v2.5.0
-        'submission_policy' in config
-        ? 'anyone' in config.submission_policy
-        : undefined
+          'submission_policy' in config
+          ? 'anyone' in config.submission_policy
+          : undefined
 
     // anyoneCanPropose should be defined
     if (anyoneCanPropose === undefined) {
@@ -412,8 +412,8 @@ export class DaoProposalSingleUpdatePreProposeConfigAction extends ActionBase<Up
       'voting_module_token' in configDepositInfo.denom
         ? 'voting_module_token'
         : 'native' in configDepositInfo.denom.token.denom
-        ? 'native'
-        : 'cw20'
+          ? 'native'
+          : 'cw20'
 
     const depositInfo: UpdatePreProposeConfigData['depositInfo'] = {
       amount: HugeDecimal.from(configDepositInfo.amount).toHumanReadableString(

@@ -457,7 +457,7 @@ export const daoVotingSgCommunityNftQueries = {
 }
 export interface DaoVotingSgCommunityNftReactQuery<
   TResponse,
-  TData = TResponse
+  TData = TResponse,
 > {
   chainId: string
   contractAddress: string

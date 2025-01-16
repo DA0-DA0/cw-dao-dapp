@@ -25,8 +25,8 @@ export const useMainDaoInfoCards = (): DaoInfoCard[] => {
           value: loadingMembers.loading
             ? undefined
             : loadingMembers.errored
-            ? '<error>'
-            : loadingMembers.data.members?.length ?? '<error>',
+              ? '<error>'
+              : (loadingMembers.data.members?.length ?? '<error>'),
         },
       ]
 }

@@ -1,6 +1,6 @@
 import { Code, Wallet } from '@mui/icons-material'
 import clsx from 'clsx'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { FieldValues, Path, useFormContext } from 'react-hook-form'
 
@@ -14,7 +14,7 @@ import { Loader } from '../logo/Loader'
 
 export const AddressInput = <
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 >({
   fieldName,
   register,
@@ -48,16 +48,17 @@ export const AddressInput = <
   const formContext = useFormContext<FV>()
   const watch = _watch || formContext?.watch
   const setValue = _setValue || formContext?.setValue
-  const formValue = watch?.(fieldName)
+  const formValue = fieldName ? watch?.(fieldName) : rest.value
 
   const showEntity =
     !hideEntity &&
     EntityDisplay &&
     !!formValue &&
+    typeof formValue === 'string' &&
     isValidBech32Address(formValue, bech32Prefix)
 
   const inputRef = useRef<HTMLInputElement | null>(null)
-  const { ref: registerRef, ...inputRegistration } = register(fieldName, {
+  const inputRegistration = register?.((fieldName ?? '') as any, {
     required: required && 'Required',
     validate,
     onChange,
@@ -125,7 +126,7 @@ export const AddressInput = <
         return
       }
 
-      setValue?.(fieldName, address as any, {
+      setValue?.((fieldName ?? '') as any, address as any, {
         shouldValidate: true,
         shouldDirty: true,
         shouldTouch: true,
@@ -188,6 +189,7 @@ export const AddressInput = <
     top: (rect) => rect.bottom + 2,
     left: (rect) => rect.left - 2,
     width: (rect) => rect.width + 4,
+    padding: 12,
   })
 
   return (
@@ -223,6 +225,15 @@ export const AddressInput = <
               className
             )}
             disabled={disabled}
+            onInput={
+              inputRegistration
+                ? undefined
+                : (e: FormEvent<HTMLInputElement>) =>
+                    setValue?.(
+                      (fieldName ?? '') as any,
+                      e.currentTarget.value as any
+                    )
+            }
             placeholder={
               placeholder ||
               // If contract, use chain prefix.
@@ -237,7 +248,7 @@ export const AddressInput = <
             }
             onFocus={() => setInputFocused(true)}
             ref={(ref) => {
-              registerRef(ref)
+              inputRegistration?.ref(ref)
               inputRef.current = ref
             }}
           />
@@ -260,7 +271,7 @@ export const AddressInput = <
         createPortal(
           <div
             className={clsx(
-              'fixed z-10 overflow-hidden rounded-b-md border-2 border-t-0 border-border-primary bg-component-dropdown transition-opacity',
+              'fixed z-[39] overflow-hidden rounded-b-md border-2 border-t-0 border-border-primary bg-component-dropdown transition-opacity',
               showEntityAutoFill
                 ? 'opacity-100'
                 : 'pointer-events-none opacity-0'

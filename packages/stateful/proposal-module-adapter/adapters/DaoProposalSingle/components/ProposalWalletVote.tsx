@@ -33,8 +33,8 @@ export const ProposalWalletVote = ({
       key === 'hasNoVote'
         ? 'none'
         : isPreProposeApproverProposal
-        ? APPROVER_VOTE_MAP[key] ?? key
-        : key
+          ? (APPROVER_VOTE_MAP[key] ?? key)
+          : key
     }`
   )
 

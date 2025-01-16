@@ -55,7 +55,7 @@ export type DateTimePickerNoFormProps = {
 
 export type DateTimePickerProps<
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 > = Omit<DateTimePickerNoFormProps, 'value' | 'onChange' | 'name'> & {
   /**
    * The control value returned by `useForm`.
@@ -78,7 +78,7 @@ export type DateTimePickerProps<
 
 export const DateTimePicker = <
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 >({
   control,
   fieldName,

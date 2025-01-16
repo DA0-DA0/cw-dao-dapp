@@ -61,7 +61,7 @@ const removeUndefinedFromQueryKey = (value: unknown): unknown =>
         )
       )
     : Array.isArray(value)
-    ? value.flatMap((v) =>
-        v === undefined ? [] : [removeUndefinedFromQueryKey(v)]
-      )
-    : value
+      ? value.flatMap((v) =>
+          v === undefined ? [] : [removeUndefinedFromQueryKey(v)]
+        )
+      : value

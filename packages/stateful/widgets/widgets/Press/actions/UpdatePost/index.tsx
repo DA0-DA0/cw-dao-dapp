@@ -34,7 +34,10 @@ export class UpdatePostAction extends ActionBase<UpdatePostData> {
   private createPostAction: CreatePostAction
   private deletePostAction: DeletePostAction
 
-  constructor(options: ActionOptions, private pressData: PressData) {
+  constructor(
+    options: ActionOptions,
+    private pressData: PressData
+  ) {
     super(options, {
       Icon: PencilEmoji,
       label: options.t('title.updatePost'),

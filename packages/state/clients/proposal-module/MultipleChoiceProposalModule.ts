@@ -236,10 +236,10 @@ export class MultipleChoiceProposalModule extends ProposalModuleBase<
         ('Module' in creationPolicy && creationPolicy.Module.addr
           ? creationPolicy.Module.addr
           : creationPolicy &&
-            'module' in creationPolicy &&
-            creationPolicy.module.addr
-          ? creationPolicy.module.addr
-          : null)
+              'module' in creationPolicy &&
+              creationPolicy.module.addr
+            ? creationPolicy.module.addr
+            : null)
 
       if (preProposeAddress) {
         this._prePropose = await this.queryClient.fetchQuery(

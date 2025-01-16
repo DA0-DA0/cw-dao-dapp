@@ -52,10 +52,10 @@ export const getSlashedStakedUnstaking = (
           ? // Add stakes that occur before the slash was registered.
             acc + Number(event.amount)
           : (event.type === 'undelegate' && event.validator === validator) ||
-            (event.type === 'redelegate' && event.fromValidator === validator)
-          ? // Subtract unstakes that start before the slash was registered.
-            acc - Number(event.amount)
-          : acc
+              (event.type === 'redelegate' && event.fromValidator === validator)
+            ? // Subtract unstakes that start before the slash was registered.
+              acc - Number(event.amount)
+            : acc
         : acc
     }
   }, 0)

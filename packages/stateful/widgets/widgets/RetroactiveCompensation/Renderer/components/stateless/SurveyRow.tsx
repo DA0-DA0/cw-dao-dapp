@@ -62,21 +62,21 @@ export const SurveyRow = ({
           date: formatDateTimeTz(new Date(contributionsOpenAt)),
         })
       : status === SurveyStatus.AcceptingContributions
-      ? t('info.closesAtDate', {
-          date: formatDateTimeTz(new Date(contributionsCloseRatingsOpenAt)),
-        })
-      : isMember
-      ? // If member and no longer accepting contributions, use ratings close date instead of contributions close date since that's more relevant.
-        status === SurveyStatus.AcceptingRatings
         ? t('info.closesAtDate', {
-            date: formatDateTimeTz(new Date(ratingsCloseAt)),
+            date: formatDateTimeTz(new Date(contributionsCloseRatingsOpenAt)),
           })
-        : t('info.closedAtDate', {
-            date: formatDateTimeTz(new Date(ratingsCloseAt)),
-          })
-      : t('info.closedAtDate', {
-          date: formatDateTimeTz(new Date(contributionsCloseRatingsOpenAt)),
-        })
+        : isMember
+          ? // If member and no longer accepting contributions, use ratings close date instead of contributions close date since that's more relevant.
+            status === SurveyStatus.AcceptingRatings
+            ? t('info.closesAtDate', {
+                date: formatDateTimeTz(new Date(ratingsCloseAt)),
+              })
+            : t('info.closedAtDate', {
+                date: formatDateTimeTz(new Date(ratingsCloseAt)),
+              })
+          : t('info.closedAtDate', {
+              date: formatDateTimeTz(new Date(contributionsCloseRatingsOpenAt)),
+            })
 
   const submitted =
     connected &&
@@ -85,9 +85,9 @@ export const SurveyRow = ({
         (status === SurveyStatus.AcceptingContributions
           ? !!contribution
           : status === SurveyStatus.AcceptingRatings
-          ? rated
-          : // Always display pending/badge when awaiting completion.
-            false)))
+            ? rated
+            : // Always display pending/badge when awaiting completion.
+              false)))
   const canPerformAction =
     connected &&
     (status === SurveyStatus.AcceptingContributions ||
@@ -102,16 +102,16 @@ export const SurveyRow = ({
         submitted
           ? 'text-text-body ring-component-badge-valid'
           : canPerformAction
-          ? 'text-text-body ring-component-badge-brand'
-          : 'text-text-tertiary ring-border-secondary'
+            ? 'text-text-body ring-component-badge-brand'
+            : 'text-text-tertiary ring-border-secondary'
       )}
       label={
         submitted
           ? t('info.submitted')
           : canPerformAction
-          ? t('info.pending')
-          : // Did not submit when it was open.
-            t('info.noSubmission')
+            ? t('info.pending')
+            : // Did not submit when it was open.
+              t('info.noSubmission')
       }
       showBadge={
         // True when isMember and status is awaiting completion, since submitted
@@ -124,9 +124,9 @@ export const SurveyRow = ({
   const tooltip = isMember
     ? undefined
     : status === SurveyStatus.AcceptingRatings ||
-      status === SurveyStatus.AwaitingCompletion
-    ? t('info.submissionsBeingRated')
-    : undefined
+        status === SurveyStatus.AwaitingCompletion
+      ? t('info.submissionsBeingRated')
+      : undefined
 
   return (
     <Tooltip title={tooltip}>

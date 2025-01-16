@@ -37,16 +37,16 @@ export const StatusCard = ({
     style === 'info'
       ? InfoOutlined
       : style === 'success'
-      ? Check
-      : style === 'warning'
-      ? WarningRounded
-      : undefined
+        ? Check
+        : style === 'warning'
+          ? WarningRounded
+          : undefined
   const iconColor =
     style === 'info'
       ? 'text-icon-secondary'
       : style === 'warning'
-      ? 'text-icon-interactive-warning'
-      : undefined
+        ? 'text-icon-interactive-warning'
+        : undefined
   const textColor =
     style === 'warning' ? '!text-text-interactive-warning-body' : undefined
 
@@ -73,8 +73,8 @@ export const StatusCard = ({
               size === 'default'
                 ? '!h-10 !w-10'
                 : size === 'sm'
-                ? '!h-8 !w-8'
-                : '!h-6 !w-6',
+                  ? '!h-8 !w-8'
+                  : '!h-6 !w-6',
               iconClassName
             )}
           />

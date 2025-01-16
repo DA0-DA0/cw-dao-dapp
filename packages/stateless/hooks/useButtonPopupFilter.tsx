@@ -28,7 +28,7 @@ type UseButtonPopupFilterReturn<T, O> = {
 // passing to `ButtonPopup`) and memoized `filteredData`.
 export const useButtonPopupFilter = <
   T extends unknown,
-  O extends TypedOption<FilterFn<T>>
+  O extends TypedOption<FilterFn<T>>,
 >({
   data,
   options,

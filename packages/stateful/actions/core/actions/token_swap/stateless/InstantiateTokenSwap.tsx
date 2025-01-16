@@ -126,13 +126,13 @@ export const InstantiateTokenSwap: ActionComponent<
             !counterpartyAddressValid
               ? { loading: false, data: [] }
               : counterpartyTokenBalances.loading
-              ? { loading: true }
-              : {
-                  loading: false,
-                  data: counterpartyTokenBalances.data.map(
-                    ({ token }) => token
-                  ),
-                }
+                ? { loading: true }
+                : {
+                    loading: false,
+                    data: counterpartyTokenBalances.data.map(
+                      ({ token }) => token
+                    ),
+                  }
           }
         />
 

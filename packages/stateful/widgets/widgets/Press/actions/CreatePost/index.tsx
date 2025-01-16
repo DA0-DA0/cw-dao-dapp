@@ -59,7 +59,10 @@ export class CreatePostAction extends ActionBase<CreatePostData> {
 
   private mintNftAction: MintNftAction
 
-  constructor(options: ActionOptions, private pressData: PressData) {
+  constructor(
+    options: ActionOptions,
+    private pressData: PressData
+  ) {
     super(options, {
       Icon: MemoEmoji,
       label: options.t('title.createPost'),

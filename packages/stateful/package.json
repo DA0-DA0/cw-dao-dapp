@@ -22,7 +22,6 @@
     "@cosmos-kit/exodus": "^2.10.2",
     "@cosmos-kit/fin": "^2.11.2",
     "@cosmos-kit/frontier": "^2.10.2",
-    "@cosmos-kit/galaxy-station": "^2.10.2",
     "@cosmos-kit/keplr": "^2.12.2",
     "@cosmos-kit/leap": "^2.12.2",
     "@cosmos-kit/leap-metamask-cosmos-snap": "^0.12.2",
@@ -54,6 +53,7 @@
     "clsx": "^1.1.1",
     "file-saver": "^2.0.5",
     "fuse.js": "^6.6.2",
+    "graz": "^0.1.31",
     "i18next": "^21.8.10",
     "json5": "^2.2.0",
     "lodash.clonedeep": "^4.5.0",
@@ -75,7 +75,9 @@
     "recoil": "^0.7.2",
     "remove-markdown": "^0.5.0",
     "secretjs": "^1.12.5",
-    "use-deep-compare-effect": "^1.8.1"
+    "use-deep-compare-effect": "^1.8.1",
+    "viem": "^2.22.8",
+    "wagmi": "^2.14.7"
   },
   "devDependencies": {
     "@chain-registry/types": "0.45.86",
@@ -98,7 +100,7 @@
     "next-i18next": "^11.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "typescript": "5.3.3",
+    "typescript": "5.4.5",
     "vitest": "^2.1.8"
   },
   "peerDependencies": {

@@ -160,10 +160,10 @@ export class UpdateRewardDistributionAction extends ActionBase<UpdateRewardDistr
                 open_funding: true,
               }
             : distribution.token.type === TokenType.Native
-            ? {
-                open_funding: openFunding,
-              }
-            : {}),
+              ? {
+                  open_funding: openFunding,
+                }
+              : {}),
         },
       },
     })

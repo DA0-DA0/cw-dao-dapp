@@ -948,16 +948,19 @@ export const allCrossChainCw721CollectionsSelector = selectorFamily<
         })
       )
 
-      const collectionsByChain = polytoneCw721Keys.reduce((acc, [key]) => {
-        const [chainId, collectionAddress] = key.split(':')
+      const collectionsByChain = polytoneCw721Keys.reduce(
+        (acc, [key]) => {
+          const [chainId, collectionAddress] = key.split(':')
 
-        if (!acc[chainId]) {
-          acc[chainId] = []
-        }
-        acc[chainId].push(collectionAddress)
+          if (!acc[chainId]) {
+            acc[chainId] = []
+          }
+          acc[chainId].push(collectionAddress)
 
-        return acc
-      }, {} as Record<string, string[]>)
+          return acc
+        },
+        {} as Record<string, string[]>
+      )
 
       return collectionsByChain
     },

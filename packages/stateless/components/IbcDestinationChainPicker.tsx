@@ -33,19 +33,21 @@ export const IbcDestinationChainPicker = ({
   excludeChainIds,
   ...pickerProps
 }: IbcDestinationChainPickerProps) => {
-  const chainIds = useMemo(() => {
-    const allChainIds = [
-      // Source chain.
-      ...(includeSourceChain ? [sourceChainId] : []),
-      // IBC destination chains.
-      ...getIbcTransferChainIdsForChain(sourceChainId),
-    ].filter((chainId) => !excludeChainIds?.includes(chainId))
+  const chainIds = useMemo(
+    () => {
+      const allChainIds = [
+        // Source chain.
+        ...(includeSourceChain ? [sourceChainId] : []),
+        // IBC destination chains.
+        ...getIbcTransferChainIdsForChain(sourceChainId),
+      ].filter((chainId) => !excludeChainIds?.includes(chainId))
 
-    // Remove duplicates and sort.
-    return Array.from(new Set(allChainIds)).sort((a, b) => a.localeCompare(b))
-
+      // Remove duplicates and sort.
+      return Array.from(new Set(allChainIds)).sort((a, b) => a.localeCompare(b))
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, useDeepCompareMemoize([excludeChainIds, includeSourceChain, sourceChainId]))
+    useDeepCompareMemoize([excludeChainIds, includeSourceChain, sourceChainId])
+  )
 
   return (
     <ChainPickerPopup

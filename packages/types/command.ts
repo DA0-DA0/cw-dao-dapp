@@ -11,7 +11,7 @@ export type StatefulCommandModalProps = {
 }
 
 export type CommandModalContextSectionItem<
-  ExtraItemProperties extends {} = {}
+  ExtraItemProperties extends {} = {},
 > = ExtraItemProperties & {
   name: string
   tooltip?: string

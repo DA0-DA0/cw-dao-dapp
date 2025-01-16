@@ -123,19 +123,19 @@ export const useCachedLoadable = <T extends unknown>(
             contents: undefined,
           }
         : loadable.state === 'hasError'
-        ? {
-            state: 'hasError',
-            contents: !loadable.contents
-              ? new Error('Unknown error')
-              : loadable.contents instanceof Error
-              ? loadable.contents
-              : new Error(`${loadable.contents}`),
-          }
-        : {
-            state: 'hasValue',
-            contents: contents as T,
-            updating,
-          },
+          ? {
+              state: 'hasError',
+              contents: !loadable.contents
+                ? new Error('Unknown error')
+                : loadable.contents instanceof Error
+                  ? loadable.contents
+                  : new Error(`${loadable.contents}`),
+            }
+          : {
+              state: 'hasValue',
+              contents: contents as T,
+              updating,
+            },
     [
       contents,
       contentsHasValue,
@@ -158,7 +158,7 @@ export const useCachedLoadable = <T extends unknown>(
 // Convert to LoadingDataWithError for convenience, memoized.
 export const useCachedLoadingWithError = <
   T extends unknown,
-  U extends unknown = T
+  U extends unknown = T,
 >(
   recoilValue: RecoilValue<T> | undefined,
   /**

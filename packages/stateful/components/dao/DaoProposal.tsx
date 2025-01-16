@@ -278,8 +278,8 @@ const InnerDaoProposal = ({ proposalInfo }: InnerDaoProposalProps) => {
           isPreProposeApprovalProposal
             ? undefined
             : isSecretNetwork(dao.chainId)
-            ? ProposalVotesPrivate
-            : ProposalVotes
+              ? ProposalVotesPrivate
+              : ProposalVotes
         }
         contentDisplay={
           proposalModule.prePropose?.type === PreProposeModuleType.Approver ? (

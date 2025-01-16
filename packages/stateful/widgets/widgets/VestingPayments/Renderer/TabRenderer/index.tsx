@@ -47,14 +47,14 @@ export const TabRenderer = ({
             address,
           }))
         : factory
-        ? [
-            {
-              chainId: defaultChainId,
-              address: factory,
-            },
-          ]
-        : // Should never happen.
-          []
+          ? [
+              {
+                chainId: defaultChainId,
+                address: factory,
+              },
+            ]
+          : // Should never happen.
+            []
       ).map(({ chainId, address }) =>
         cwPayrollFactoryExtraQueries.listAllVestingContracts(queryClient, {
           chainId,

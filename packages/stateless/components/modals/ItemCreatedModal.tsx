@@ -19,7 +19,7 @@ export const ItemCreatedModal = <
     className?: string
     onMouseOver?: () => void
     onMouseLeave?: () => void
-  }
+  },
 >({
   modalProps: {
     containerClassName: modalContainerClassName,

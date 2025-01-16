@@ -9,11 +9,10 @@ import {
 import cloneDeep from 'lodash.clonedeep'
 import { ComponentType, useCallback, useState } from 'react'
 import {
-  FormProvider,
   SubmitErrorHandler,
   SubmitHandler,
-  UseFormReturn,
   useForm,
+  useFormContext,
 } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
@@ -26,11 +25,16 @@ import {
   UnifiedCosmosMsg,
   WalletChainSwitcherProps,
 } from '@dao-dao/types'
-import { encodeActions, processError, validateRequired } from '@dao-dao/utils'
+import {
+  convertActionKeysAndDataToActions,
+  encodeActions,
+  processError,
+  validateRequired,
+} from '@dao-dao/utils'
 
 import { useActionsContext, useChainContext } from '../../contexts'
 import { useHoldingKey } from '../../hooks'
-import { ActionsEditor, RawActionsRenderer } from '../actions'
+import { ActionsEditor, ActionsRenderer, RawActionsRenderer } from '../actions'
 import { Button, ButtonLink } from '../buttons'
 import { CopyToClipboard } from '../CopyToClipboard'
 import { IconButton } from '../icon_buttons'
@@ -44,7 +48,6 @@ enum SubmitValue {
 }
 
 export type ProfileActionsProps = {
-  formMethods: UseFormReturn<AccountTxForm, object>
   execute: (messages: UnifiedCosmosMsg[]) => Promise<void>
   SuspenseLoader: ComponentType<SuspenseLoaderProps>
   error?: string
@@ -56,10 +59,10 @@ export type ProfileActionsProps = {
   holdingAltForDirectSign: boolean
   WalletChainSwitcher: ComponentType<WalletChainSwitcherProps>
   actionEncodeContext: ActionEncodeContext
+  actionsReadOnlyMode?: boolean
 }
 
 export const ProfileActions = ({
-  formMethods,
   execute,
   SuspenseLoader,
   error,
@@ -71,6 +74,7 @@ export const ProfileActions = ({
   holdingAltForDirectSign,
   WalletChainSwitcher,
   actionEncodeContext,
+  actionsReadOnlyMode,
 }: ProfileActionsProps) => {
   const { t } = useTranslation()
   const { config } = useChainContext()
@@ -82,7 +86,7 @@ export const ProfileActions = ({
     formState: { errors },
     reset,
     getValues,
-  } = formMethods
+  } = useFormContext<AccountTxForm>()
 
   const actionData = watch('actions') || []
 
@@ -192,119 +196,124 @@ export const ProfileActions = ({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-row justify-between">
-        <p className="secondary-text">
-          {t('info.transactionBuilderDescription')}
-        </p>
+      {!actionsReadOnlyMode && (
+        <div className="flex flex-row justify-between">
+          <p className="secondary-text">
+            {t('info.transactionBuilderDescription')}
+          </p>
 
-        <WalletChainSwitcher headerMode type="configured" />
-      </div>
+          <WalletChainSwitcher headerMode type="configured" />
+        </div>
+      )}
 
-      <FormProvider {...formMethods}>
-        <form
-          className="flex flex-col gap-4"
-          noValidate={holdingShiftForForce}
-          onSubmit={handleSubmit(onSubmitForm, onSubmitError)}
-        >
+      <form
+        className="flex flex-col gap-4"
+        noValidate={holdingShiftForForce}
+        onSubmit={handleSubmit(onSubmitForm, onSubmitError)}
+      >
+        {actionsReadOnlyMode ? (
+          <ActionsRenderer
+            SuspenseLoader={SuspenseLoader}
+            actionData={convertActionKeysAndDataToActions(
+              actionMap,
+              actionData
+            )}
+          />
+        ) : (
           <ActionsEditor
             SuspenseLoader={SuspenseLoader}
             actionDataErrors={errors?.actions}
             actionDataFieldName="actions"
           />
+        )}
 
-          <div className="mt-4 flex flex-row items-center justify-between gap-6 border-y border-border-secondary py-6">
-            <p className="title-text text-text-body">
-              {t('info.reviewYourTransaction')}
-            </p>
+        <div className="mt-4 flex flex-row items-center justify-between gap-6 border-y border-border-secondary py-6">
+          <p className="title-text text-text-body">
+            {t('info.reviewYourTransaction')}
+          </p>
 
-            <div className="flex flex-row items-center justify-end gap-2">
-              <Button
-                disabled={loading || (actionData.length === 0 && !showPreview)}
-                type="submit"
-                value={SubmitValue.Preview}
-                variant="secondary"
-              >
-                {showPreview ? (
-                  <>
-                    {t('button.hidePreview')}
-                    <VisibilityOff className="!h-5 !w-5" />
-                  </>
-                ) : (
-                  <>
-                    {t('button.preview')}
-                    <Visibility className="!h-5 !w-5" />
-                  </>
-                )}
-              </Button>
-
-              <Tooltip
-                title={
-                  holdingShiftForForce
-                    ? t('info.forceExecuteTooltip')
-                    : undefined
-                }
-              >
-                <Button
-                  disabled={actionData.length === 0}
-                  loading={loading}
-                  type="submit"
-                  value={SubmitValue.Submit}
-                >
-                  {(holdingShiftForForce
-                    ? t('button.forceExecute')
-                    : t('button.execute')) +
-                    (holdingAltForDirectSign ? ` (${t('info.direct')})` : '')}
-                  <Key className="!h-5 !w-5" />
-                </Button>
-              </Tooltip>
-            </div>
-          </div>
-
-          {showSubmitErrorNote && (
-            <p className="secondary-text max-w-prose self-end text-right text-base text-text-interactive-error">
-              {t('error.correctErrorsAbove')}
-            </p>
-          )}
-
-          {!!submitError && (
-            <p className="secondary-text self-end text-right text-text-interactive-error">
-              {submitError}
-            </p>
-          )}
-
-          {error && (
-            <p className="secondary-text max-w-prose self-end text-right text-sm text-text-interactive-error">
-              {error}
-            </p>
-          )}
-
-          {txHash && (
-            <div className="flex flex-col items-end gap-2 self-end text-text-interactive-valid">
-              <CopyToClipboard takeAll value={txHash} />
-
-              {!!config?.explorerUrlTemplates?.tx && (
-                <ButtonLink
-                  href={config.explorerUrlTemplates.tx.replace(
-                    'REPLACE',
-                    txHash
-                  )}
-                  variant="ghost"
-                >
-                  {t('button.openInChainExplorer')}{' '}
-                  <ArrowOutwardRounded className="!h-4 !w-4" />
-                </ButtonLink>
+          <div className="flex flex-row items-center justify-end gap-2">
+            <Button
+              disabled={loading || (actionData.length === 0 && !showPreview)}
+              type="submit"
+              value={SubmitValue.Preview}
+              variant="secondary"
+            >
+              {showPreview ? (
+                <>
+                  {t('button.hidePreview')}
+                  <VisibilityOff className="!h-5 !w-5" />
+                </>
+              ) : (
+                <>
+                  {t('button.preview')}
+                  <Visibility className="!h-5 !w-5" />
+                </>
               )}
-            </div>
-          )}
+            </Button>
 
-          {showPreview && (
-            <RawActionsRenderer
-              actionKeysAndData={actionData}
-              encodeContext={actionEncodeContext}
-            />
-          )}
-        </form>
-      </FormProvider>
+            <Tooltip
+              title={
+                holdingShiftForForce ? t('info.forceExecuteTooltip') : undefined
+              }
+            >
+              <Button
+                disabled={actionData.length === 0}
+                loading={loading}
+                type="submit"
+                value={SubmitValue.Submit}
+              >
+                {(holdingShiftForForce
+                  ? t('button.forceExecute')
+                  : t('button.execute')) +
+                  (holdingAltForDirectSign ? ` (${t('info.direct')})` : '')}
+                <Key className="!h-5 !w-5" />
+              </Button>
+            </Tooltip>
+          </div>
+        </div>
+
+        {showSubmitErrorNote && (
+          <p className="secondary-text max-w-prose self-end text-right text-base text-text-interactive-error">
+            {t('error.correctErrorsAbove')}
+          </p>
+        )}
+
+        {!!submitError && (
+          <p className="secondary-text self-end text-right text-text-interactive-error">
+            {submitError}
+          </p>
+        )}
+
+        {error && (
+          <p className="secondary-text max-w-prose self-end text-right text-sm text-text-interactive-error">
+            {error}
+          </p>
+        )}
+
+        {txHash && (
+          <div className="flex flex-col items-end gap-2 self-end text-text-interactive-valid">
+            <CopyToClipboard takeAll value={txHash} />
+
+            {!!config?.explorerUrlTemplates?.tx && (
+              <ButtonLink
+                href={config.explorerUrlTemplates.tx.replace('REPLACE', txHash)}
+                variant="ghost"
+              >
+                {t('button.openInChainExplorer')}{' '}
+                <ArrowOutwardRounded className="!h-4 !w-4" />
+              </ButtonLink>
+            )}
+          </div>
+        )}
+
+        {showPreview && (
+          <RawActionsRenderer
+            actionKeysAndData={actionData}
+            encodeContext={actionEncodeContext}
+          />
+        )}
+      </form>
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">

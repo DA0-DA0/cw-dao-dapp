@@ -72,8 +72,8 @@ export const EditProfile = () => {
             profileMergeOptions.length === 0
               ? undefined
               : profileMergeOptions.length === 1
-              ? 'add'
-              : 'merge'
+                ? 'add'
+                : 'merge'
           }
           openMergeProfilesModal={() => setMergeProfilesVisible(true)}
           openProfileNftUpdate={() => setUpdateProfileNftVisible(true)}

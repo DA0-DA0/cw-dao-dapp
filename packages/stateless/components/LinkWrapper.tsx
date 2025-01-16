@@ -27,8 +27,8 @@ export const LinkWrapper = forwardRef<HTMLDivElement, LinkWrapperProps>(
     const href = !_href
       ? undefined
       : _href.startsWith('http') || _href.startsWith('/')
-      ? _href
-      : '#'
+        ? _href
+        : '#'
 
     const contentClassName = clsx(
       className,

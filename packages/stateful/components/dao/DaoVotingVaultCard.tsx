@@ -49,18 +49,18 @@ export const DaoVotingVaultCard = (props: StatefulDaoVotingVaultCardProps) => {
               data: undefined,
             }
           : loadingWalletVotingPower.loading || loadingWalletVotingPower.errored
-          ? {
-              loading: true,
-            }
-          : {
-              loading: false,
-              data: props.vault.totalPower.isZero()
-                ? 0
-                : HugeDecimal.from(loadingWalletVotingPower.data.power)
-                    .div(props.vault.totalPower)
-                    .times(100)
-                    .toNumber(),
-            }
+            ? {
+                loading: true,
+              }
+            : {
+                loading: false,
+                data: props.vault.totalPower.isZero()
+                  ? 0
+                  : HugeDecimal.from(loadingWalletVotingPower.data.power)
+                      .div(props.vault.totalPower)
+                      .times(100)
+                      .toNumber(),
+              }
       }
       {...props}
     />

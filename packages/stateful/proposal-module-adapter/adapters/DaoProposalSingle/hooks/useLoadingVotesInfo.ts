@@ -41,11 +41,11 @@ export const useLoadingVotesInfo = (): LoadingData<VotesInfo> => {
         yesVotes >
         ((quorum ? turnoutTotal : totalVotingPower) - abstainVotes) / 2
       : threshold.type === ProcessedTQType.Absolute
-      ? yesVotes >= threshold.value
-      : // Percent
-        yesVotes >=
-        ((quorum ? turnoutTotal : totalVotingPower) - abstainVotes) *
-          (threshold.value / 100))
+        ? yesVotes >= threshold.value
+        : // Percent
+          yesVotes >=
+          ((quorum ? turnoutTotal : totalVotingPower) - abstainVotes) *
+            (threshold.value / 100))
   const quorumReached =
     !!quorum &&
     (quorum.type === ProcessedTQType.Majority

@@ -17,5 +17,5 @@ export const humanReadableList = (arr: string[], join = 'or') =>
   arr.length <= 1
     ? arr.join('')
     : arr.length === 2
-    ? arr.join(` ${join} `)
-    : arr.slice(0, -1).join(', ') + `, ${join} ${arr.slice(-1)}`
+      ? arr.join(` ${join} `)
+      : arr.slice(0, -1).join(', ') + `, ${join} ${arr.slice(-1)}`

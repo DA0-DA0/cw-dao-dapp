@@ -254,7 +254,7 @@ export const secretDaoPreProposeSingleQueries = {
 }
 export interface SecretDaoPreProposeSingleReactQuery<
   TResponse,
-  TData = TResponse
+  TData = TResponse,
 > {
   chainId: string
   contractAddress: string

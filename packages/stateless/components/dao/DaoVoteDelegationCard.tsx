@@ -87,15 +87,15 @@ export const DaoVoteDelegationCard = ({
                     power: totalVotingPower.loading
                       ? '...'
                       : totalVotingPower.errored
-                      ? HugeDecimal.from(
-                          registration.data.power
-                        ).toFormattedString()
-                      : HugeDecimal.from(registration.data.power)
-                          .div(totalVotingPower.data)
-                          .times(100)
-                          .toFormattedString({
-                            maxNonZeroDecimals: 3,
-                          }) + '%',
+                        ? HugeDecimal.from(
+                            registration.data.power
+                          ).toFormattedString()
+                        : HugeDecimal.from(registration.data.power)
+                            .div(totalVotingPower.data)
+                            .times(100)
+                            .toFormattedString({
+                              maxNonZeroDecimals: 3,
+                            }) + '%',
                   }}
                 </span>{' '}
                 of the total voting power.

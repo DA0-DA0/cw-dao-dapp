@@ -1,12 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useFormContext } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 
-import { contractQueries, processMessage } from '@dao-dao/state'
+import { contractQueries } from '@dao-dao/state'
 import {
   ActionBase,
-  ActionsContext,
   ChainProvider,
   DaoSupportedChainPickerInput,
+  InputLabel,
+  Loader,
   LockWithKeyEmoji,
   useActionOptions,
   useChain,
@@ -29,6 +31,8 @@ import {
   getChainForChainId,
   isDecodedStargateMsg,
   isValidBech32Address,
+  makeEmptyUnifiedProfile,
+  makeValidateAddress,
   maybeMakePolytoneExecuteMessages,
 } from '@dao-dao/utils'
 
@@ -40,6 +44,7 @@ import {
 } from '../../../../components'
 import { useQueryLoadingData } from '../../../../hooks'
 import { useActionEncodeContext } from '../../../context'
+import { BaseActionsProvider } from '../../../providers/base'
 import { WalletActionsProvider } from '../../../providers/wallet'
 import {
   AuthzExecData,
@@ -49,37 +54,12 @@ import {
 
 type InnerOptions = Pick<AuthzExecOptions, 'msgPerSenderIndex'>
 
-const InnerComponentLoading: ActionComponent<InnerOptions> = (props) => (
-  <ActionsContext.Provider
-    value={{
-      // Just pass the same options down for now since they aren't used.
-      options: useActionOptions(),
-      actions: [],
-      actionMap: {} as any,
-      categories: [],
-      messageProcessor: processMessage,
-    }}
-  >
-    <StatelessAuthzExecComponent
-      {...props}
-      options={{
-        msgPerSenderIndex: props.options.msgPerSenderIndex,
-        encodeContext: useActionEncodeContext(),
-        AddressInput,
-        EntityDisplay,
-        SuspenseLoader,
-      }}
-    />
-  </ActionsContext.Provider>
-)
-
 const InnerComponent: ActionComponent<InnerOptions> = (props) => (
   <StatelessAuthzExecComponent
     {...props}
     options={{
       msgPerSenderIndex: props.options.msgPerSenderIndex,
       encodeContext: useActionEncodeContext(),
-      AddressInput,
       EntityDisplay,
       SuspenseLoader,
     }}
@@ -90,14 +70,17 @@ const InnerComponentWrapper: ActionComponent<
   InnerOptions & { address: string }
 > = (props) => {
   const {
+    isCreating,
     options: { address },
   } = props
   const { chainId, bech32Prefix } = useChain()
+  const queryClient = useQueryClient()
 
+  const validAddress = !!address && isValidBech32Address(address, bech32Prefix)
   const isDao = useQueryLoadingData(
     contractQueries.isDao(
-      useQueryClient(),
-      address && isValidBech32Address(address, bech32Prefix)
+      queryClient,
+      validAddress
         ? {
             chainId,
             address,
@@ -107,9 +90,16 @@ const InnerComponentWrapper: ActionComponent<
     false
   )
 
-  return isDao.loading || isDao.updating ? (
-    <InnerComponentLoading {...props} />
-  ) : isDao.data ? (
+  if (isCreating && !validAddress) {
+    return null
+  }
+
+  // Load until we know it's a DAO or not. If not creating and not a valid
+  // address, no need to show loading.
+  return (isCreating || validAddress) && (isDao.loading || isDao.updating) ? (
+    <Loader />
+  ) : // If a DAO, wrap in necessary DAO context.
+  !isDao.loading && !isDao.updating && isDao.data ? (
     <DaoProviders
       key={
         // Make sure to re-render (reset state inside the contexts) when the
@@ -118,27 +108,46 @@ const InnerComponentWrapper: ActionComponent<
       }
       chainId={chainId}
       coreAddress={address}
-      loaderFallback={<InnerComponentLoading {...props} />}
     >
       <InnerComponent {...props} />
     </DaoProviders>
-  ) : (
+  ) : // If not a DAO, and either we're creating OR we're not creating but the address is valid, wrap in necessary wallet context.
+  isCreating || validAddress ? (
     <WalletActionsProvider address={address}>
       <InnerComponent {...props} />
     </WalletActionsProvider>
+  ) : (
+    // !isCreating && !validAddress
+    //
+    // If no valid address is set and we're not creating, that means the
+    // component failed to detect the sender, likely due to not knowing how to
+    // decode the messages contained which would contain the sender. Use an
+    // empty profile and accounts so the component can still render.
+    <BaseActionsProvider
+      actionContext={{
+        type: ActionContextType.Wallet,
+        profile: makeEmptyUnifiedProfile(chainId, address),
+        accounts: [],
+      }}
+      address={address}
+    >
+      <InnerComponent {...props} />
+    </BaseActionsProvider>
   )
 }
 
 const Component: ActionComponent = (props) => {
+  const { t } = useTranslation()
   const { context } = useActionOptions()
 
   // Load DAO info for chosen DAO.
-  const { watch } = useFormContext<AuthzExecData>()
+  const { register, watch } = useFormContext<AuthzExecData>()
   const address = watch((props.fieldNamePrefix + 'address') as 'address') || ''
   const msgsPerSender =
     watch((props.fieldNamePrefix + '_msgs') as '_msgs') ?? []
 
   const chainId = watch((props.fieldNamePrefix + 'chainId') as 'chainId')
+  const { bech32Prefix } = getChainForChainId(chainId)
 
   // When creating, just show one form for the chosen address. When not
   // creating, render a form for each sender message group since the component
@@ -155,6 +164,21 @@ const Component: ActionComponent = (props) => {
 
       {/* Re-render when chain changes so hooks and state reset. */}
       <ChainProvider key={chainId} chainId={chainId}>
+        {/* When creating, show common address field for all messages. When not creating, msgs will be grouped by sender and displayed in order, which if created via this action, will look the same with one address at the top and many actions below it. */}
+        {props.isCreating && (
+          <>
+            <InputLabel className="-mb-3" name={t('title.account')} />
+
+            <AddressInput
+              autoFocus
+              error={props.errors?.address}
+              fieldName={(props.fieldNamePrefix + 'address') as 'address'}
+              register={register}
+              validation={[makeValidateAddress(bech32Prefix)]}
+            />
+          </>
+        )}
+
         {props.isCreating ? (
           <InnerComponentWrapper
             {...props}
@@ -208,9 +232,10 @@ export class AuthzExecAction extends ActionBase<AuthzExecData> {
         stargate: {
           typeUrl: MsgExec.typeUrl,
           value: {
-            grantee: getChainAddressForActionOptions(this.options, chainId),
+            grantee:
+              getChainAddressForActionOptions(this.options, chainId) ?? '',
             msgs: msgs.map((msg) => cwMsgToProtobuf(chainId, msg, address)),
-          } as MsgExec,
+          } satisfies MsgExec,
         },
       })
     )
@@ -257,8 +282,8 @@ export class AuthzExecAction extends ActionBase<AuthzExecData> {
       // Technically each message could have a different address. While we don't
       // support that on creation, we can still detect and render them correctly
       // in the component.
-      address: '',
-      msgs: [],
+      address: msgsPerSender.length === 1 ? msgsPerSender[0].sender : '',
+      msgs: msgsPerSender.length === 1 ? msgsPerSender[0].msgs : [],
       _msgs: msgsPerSender,
     }
   }

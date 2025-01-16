@@ -30,8 +30,8 @@ export const ChainStatus = ({ chainId, upStatus }: ChainStatusProps) => {
               upStatus.loading
                 ? 'bg-icon-interactive-active'
                 : !upStatus.errored && upStatus.data.caughtUp
-                ? 'bg-icon-interactive-valid'
-                : 'bg-icon-interactive-error'
+                  ? 'bg-icon-interactive-valid'
+                  : 'bg-icon-interactive-error'
             )}
           ></div>
 
@@ -39,10 +39,10 @@ export const ChainStatus = ({ chainId, upStatus }: ChainStatusProps) => {
             {upStatus.loading
               ? t('info.loading')
               : upStatus.errored
-              ? t('info.errored')
-              : upStatus.data.caughtUp
-              ? t('info.upToDate')
-              : t('info.catchingUp')}
+                ? t('info.errored')
+                : upStatus.data.caughtUp
+                  ? t('info.upToDate')
+                  : t('info.catchingUp')}
           </p>
         </div>
       </div>

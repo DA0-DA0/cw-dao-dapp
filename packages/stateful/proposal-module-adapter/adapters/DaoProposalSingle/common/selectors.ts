@@ -218,8 +218,8 @@ export const reversePreProposeCompletedProposalInfosSelector: (
             'pending' in status
               ? ProposalStatusEnum.Open
               : 'approved' in status
-              ? ProposalStatusEnum.Executed
-              : ProposalStatusEnum.Closed,
+                ? ProposalStatusEnum.Executed
+                : ProposalStatusEnum.Closed,
           // Hide approved proposals from the list since they show up as normal
           // proposals. No need to show duplicates. But we still want to show
           // rejected pre-propose proposals.

@@ -12,7 +12,7 @@ export type UseQuerySyncedStateOptions<T extends unknown> = {
 
 export type UseQuerySyncedStateReturn<T extends unknown> = [
   T,
-  Dispatch<SetStateAction<T>>
+  Dispatch<SetStateAction<T>>,
 ]
 
 /**
@@ -54,8 +54,8 @@ export const useQuerySyncedState = <T = string | number>({
         (typeof value === 'string'
           ? initialValue
           : typeof value === 'number'
-          ? Number(initialValue)
-          : initialValue) as any
+            ? Number(initialValue)
+            : initialValue) as any
       )
     }
   }, [param, router.query, value])

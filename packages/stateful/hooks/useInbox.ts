@@ -50,10 +50,10 @@ export const useInbox = (): InboxState => {
           a.timestamp && b.timestamp
             ? new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
             : a.timestamp
-            ? -1
-            : b.timestamp
-            ? 1
-            : 0
+              ? -1
+              : b.timestamp
+                ? 1
+                : 0
         )
   )
 

@@ -5,7 +5,6 @@ import { wallets as cosmosExtensionMetamaskWallets } from '@cosmos-kit/cosmos-ex
 import { wallets as cosmostationWallets } from '@cosmos-kit/cosmostation'
 import { wallets as exodusWallets } from '@cosmos-kit/exodus'
 import { wallets as frontierWallets } from '@cosmos-kit/frontier'
-import { wallets as galaxyStationWallets } from '@cosmos-kit/galaxy-station'
 import { wallets as keplrWallets } from '@cosmos-kit/keplr'
 import { wallets as keplrExtensionWallets } from '@cosmos-kit/keplr-extension'
 import { wallets as leapWallets } from '@cosmos-kit/leap'
@@ -147,7 +146,6 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
           ...keplrWallets,
           ...leapWallets.filter((w) => !leapMetamaskWallets.includes(w)),
           ...stationWallets,
-          ...galaxyStationWallets,
           ...vectisWallets,
           ...trustWallets,
           ...cosmostationWallets,
@@ -191,10 +189,10 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
         ),
       }}
       signerOptions={{
-        // Force ignore version type mismatch caused by dependencies.
-        signingStargate: getSigningOptions as any,
-        // Force ignore version type mismatch caused by dependencies.
-        signingCosmwasm: getSigningOptions as any,
+        // @ts-ignore
+        signingStargate: getSigningOptions,
+        // @ts-ignore
+        signingCosmwasm: getSigningOptions,
       }}
       walletConnectOptions={{
         signClient: {

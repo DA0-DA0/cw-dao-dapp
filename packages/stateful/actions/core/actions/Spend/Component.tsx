@@ -282,15 +282,15 @@ export const SpendComponent: ActionComponent<SpendOptions> = ({
     customToken || !isCreating || tokens.loading || !spendDenom
       ? undefined
       : !selectedToken
-      ? t('error.unknownDenom', { denom: spendDenom })
-      : balance.toHumanReadable(decimals).lt(spendAmount)
-      ? t('error.insufficientFundsWarning', {
-          amount: balance.toFormattedString({
-            decimals,
-          }),
-          tokenSymbol: symbol,
-        })
-      : undefined
+        ? t('error.unknownDenom', { denom: spendDenom })
+        : balance.toHumanReadable(decimals).lt(spendAmount)
+          ? t('error.insufficientFundsWarning', {
+              amount: balance.toFormattedString({
+                decimals,
+              }),
+              tokenSymbol: symbol,
+            })
+          : undefined
 
   const {
     containerRef: toContainerRef,
@@ -785,8 +785,8 @@ export const SpendComponent: ActionComponent<SpendOptions> = ({
                 context: !isCreating
                   ? 'created'
                   : proposalModuleMaxVotingPeriodInBlocks
-                  ? 'blocks'
-                  : undefined,
+                    ? 'blocks'
+                    : undefined,
               })}
             />
 

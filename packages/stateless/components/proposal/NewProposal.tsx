@@ -48,7 +48,7 @@ type BaseProps<FormData extends FieldValues = any> = Omit<
 
 export type NewProposalProps<
   FormData extends FieldValues = any,
-  ProposalData extends unknown = any
+  ProposalData extends unknown = any,
 > = BaseProps<FormData> & {
   content: {
     Header: ComponentType
@@ -78,7 +78,7 @@ export type NewProposalProps<
 
 export const NewProposal = <
   FormData extends FieldValues = any,
-  ProposalData extends unknown = any
+  ProposalData extends unknown = any,
 >({
   content: { Header, Main, Preview },
   getProposalDataFromFormData,
@@ -239,31 +239,35 @@ export const NewProposal = <
                 holdingAltForSimulation
                   ? undefined
                   : holdingShiftForForce
-                  ? t('info.forcePublishTooltip')
-                  : !connected
-                  ? t('error.logInToContinue')
-                  : depositUnsatisfied
-                  ? t('error.notEnoughForDeposit')
-                  : isPaused
-                  ? t('error.daoIsPaused')
-                  : !isActive && activeThreshold
-                  ? t('error.daoIsInactive', {
-                      context:
-                        'percentage' in activeThreshold
-                          ? 'percent'
-                          : 'absolute',
-                      percent:
-                        'percentage' in activeThreshold
-                          ? formatPercentOf100(
-                              Number(activeThreshold.percentage.percent) * 100
-                            )
-                          : undefined,
-                      count:
-                        'percentage' in activeThreshold
-                          ? undefined
-                          : Number(activeThreshold.absolute_count.count),
-                    })
-                  : additionalSubmitError
+                    ? t('info.forcePublishTooltip')
+                    : !connected
+                      ? t('error.logInToContinue')
+                      : depositUnsatisfied
+                        ? t('error.notEnoughForDeposit')
+                        : isPaused
+                          ? t('error.daoIsPaused')
+                          : !isActive && activeThreshold
+                            ? t('error.daoIsInactive', {
+                                context:
+                                  'percentage' in activeThreshold
+                                    ? 'percent'
+                                    : 'absolute',
+                                percent:
+                                  'percentage' in activeThreshold
+                                    ? formatPercentOf100(
+                                        Number(
+                                          activeThreshold.percentage.percent
+                                        ) * 100
+                                      )
+                                    : undefined,
+                                count:
+                                  'percentage' in activeThreshold
+                                    ? undefined
+                                    : Number(
+                                        activeThreshold.absolute_count.count
+                                      ),
+                              })
+                            : additionalSubmitError
               }
             >
               <Button

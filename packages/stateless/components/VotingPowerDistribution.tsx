@@ -46,8 +46,8 @@ export const VotingPowerDistribution = ({
               typeof votingPowerPercent === 'number'
                 ? votingPowerPercent
                 : votingPowerPercent.loading
-                ? 0
-                : votingPowerPercent.data
+                  ? 0
+                  : votingPowerPercent.data
 
             return (
               <Fragment key={(address || '') + index}>

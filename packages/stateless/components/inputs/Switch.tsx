@@ -129,7 +129,7 @@ export const SwitchCard = ({
 export type FormSwitchWrapperProps<
   Props,
   FV extends FieldValues,
-  BooleanFieldName extends BooleanFieldNames<FV>
+  BooleanFieldName extends BooleanFieldNames<FV>,
 > = Omit<Props, 'enabled' | 'onClick'> & {
   fieldName: BooleanFieldName
   setValue: UseFormSetValue<FV>
@@ -147,7 +147,7 @@ export type FormSwitchWrapperProps<
 
 export const FormSwitch = <
   FV extends FieldValues,
-  BooleanFieldName extends BooleanFieldNames<FV>
+  BooleanFieldName extends BooleanFieldNames<FV>,
 >({
   fieldName,
   value: _value,
@@ -173,7 +173,7 @@ export const FormSwitch = <
 
 export const FormSwitchCard = <
   FV extends FieldValues,
-  BooleanFieldName extends BooleanFieldNames<FV>
+  BooleanFieldName extends BooleanFieldNames<FV>,
 >({
   fieldName,
   value: _value,

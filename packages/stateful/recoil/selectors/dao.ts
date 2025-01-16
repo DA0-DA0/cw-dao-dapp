@@ -99,8 +99,7 @@ export const daoCoreProposalModulesSelector = selectorFamily<
   key: 'daoCoreProposalModules',
   get:
     (params) =>
-    ({ get }) =>
-      [...get(daoClientSelector(params)).proposalModules],
+    ({ get }) => [...get(daoClientSelector(params)).proposalModules],
 })
 
 // Gets CW20 governance token address if this DAO uses the cw20-staked voting

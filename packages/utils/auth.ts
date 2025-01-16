@@ -7,7 +7,7 @@ import {
 } from './chain'
 
 export type SignatureOptions<
-  Data extends Record<string, unknown> | undefined = Record<string, any>
+  Data extends Record<string, unknown> | undefined = Record<string, any>,
 > = {
   type: string
   nonce: number
@@ -36,7 +36,7 @@ export type Auth = {
 }
 
 export type SignedBody<
-  Data extends Record<string, unknown> | undefined = Record<string, any>
+  Data extends Record<string, unknown> | undefined = Record<string, any>,
 > = {
   data: {
     auth: Auth
@@ -49,7 +49,7 @@ export type SignedBody<
  * off-chain services.
  */
 export const signOffChainAuth = async <
-  Data extends Record<string, unknown> | undefined = Record<string, any>
+  Data extends Record<string, unknown> | undefined = Record<string, any>,
 >({
   type,
   nonce,

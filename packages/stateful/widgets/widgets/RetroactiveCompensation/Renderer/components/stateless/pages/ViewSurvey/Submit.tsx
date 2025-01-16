@@ -155,8 +155,8 @@ export const Submit = ({
                         ),
                       })
                     : !loadingEntity.data.name
-                    ? t('error.compensationCycleNeedsProfileName')
-                    : undefined
+                      ? t('error.compensationCycleNeedsProfileName')
+                      : undefined
                 }
               >
                 <Button

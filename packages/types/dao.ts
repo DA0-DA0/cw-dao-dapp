@@ -242,7 +242,7 @@ export interface CreateDaoContext<CreatorData extends FieldValues = any> {
 
 export interface NewDao<
   CreatorData extends FieldValues = any,
-  VotingConfig = any
+  VotingConfig = any,
 > {
   uuid: string
   chainId: string
@@ -291,7 +291,7 @@ export interface NewDaoTierMember {
 }
 
 export interface DaoCreationGovernanceConfigInputProps<
-  VotingModuleAdapterData extends FieldValues = any
+  VotingModuleAdapterData extends FieldValues = any,
 > {
   data: VotingModuleAdapterData
   // Used within a voting module adapter, so it's safe to apply the data
@@ -300,7 +300,7 @@ export interface DaoCreationGovernanceConfigInputProps<
 }
 
 export interface DaoCreationGovernanceConfigReviewProps<
-  VotingModuleAdapterData extends FieldValues = any
+  VotingModuleAdapterData extends FieldValues = any,
 > {
   // Used within a voting module adapter, so it's safe to apply the data
   // generic.
@@ -309,7 +309,7 @@ export interface DaoCreationGovernanceConfigReviewProps<
 }
 
 export interface DaoCreationVotingConfigItemInputProps<
-  ModuleData extends FieldValues = any
+  ModuleData extends FieldValues = any,
 > {
   // Used within voting and proposal module adapters, so the data generic passed
   // in may not necessarily be the voting module adapter data. Must use `any`.
@@ -329,7 +329,7 @@ export interface DaoCreationVotingConfigItemInputProps<
 }
 
 export interface DaoCreationVotingConfigItemReviewProps<
-  ModuleData extends FieldValues = any
+  ModuleData extends FieldValues = any,
 > {
   // Used within voting and proposal module adapters, so the data generic passed
   // in may not necessarily be the voting module adapter data. Must use `any`.
@@ -338,7 +338,7 @@ export interface DaoCreationVotingConfigItemReviewProps<
 }
 
 export interface DaoCreationVotingConfigItem<
-  ModuleData extends FieldValues = any
+  ModuleData extends FieldValues = any,
 > {
   // Used within voting and proposal module adapters, so the data generic passed
   // in may not necessarily be the voting module adapter data. Must use `any`.
@@ -358,7 +358,7 @@ export type DaoCreationCommonVotingConfigItems = {
 }
 
 export type DaoCreationGetInstantiateInfo<
-  ModuleData extends FieldValues = any
+  ModuleData extends FieldValues = any,
 > = (
   chainConfig: SupportedChainConfig,
   // Used within voting and proposal module adapters, so the data generic passed
@@ -501,7 +501,7 @@ export type DaoWebSocketChannelInfo = {
   coreAddress: string
 }
 
-export type DaoApp = {
+export type App = {
   /**
    * App name.
    */

@@ -49,29 +49,29 @@ export const useLoadingVotingModuleInfo = ({
             errored: false,
           }
         : cw4GroupAddress.errored || (fetchMembers && members.errored)
-        ? {
-            loading: false,
-            errored: true,
-            error: cw4GroupAddress.errored
-              ? cw4GroupAddress.error
-              : fetchMembers && members.errored
-              ? members.error
-              : new Error('Unknown error'),
-          }
-        : {
-            loading: false,
-            errored: false,
-            updating:
-              cw4GroupAddress.updating ||
-              (fetchMembers && !members.loading && members.updating),
-            data: {
-              cw4GroupAddress: cw4GroupAddress.data,
-              members:
-                fetchMembers && !members.loading && !members.errored
-                  ? members.data.members
-                  : undefined,
+          ? {
+              loading: false,
+              errored: true,
+              error: cw4GroupAddress.errored
+                ? cw4GroupAddress.error
+                : fetchMembers && members.errored
+                  ? members.error
+                  : new Error('Unknown error'),
+            }
+          : {
+              loading: false,
+              errored: false,
+              updating:
+                cw4GroupAddress.updating ||
+                (fetchMembers && !members.loading && members.updating),
+              data: {
+                cw4GroupAddress: cw4GroupAddress.data,
+                members:
+                  fetchMembers && !members.loading && !members.errored
+                    ? members.data.members
+                    : undefined,
+              },
             },
-          },
     [cw4GroupAddress, members, fetchMembers]
   )
 }

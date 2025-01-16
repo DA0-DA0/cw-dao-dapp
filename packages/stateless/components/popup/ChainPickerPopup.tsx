@@ -39,57 +39,70 @@ export const ChainPickerPopup = ({
 }: ChainPickerPopupProps) => {
   const { t } = useTranslation()
 
-  const chainOptions = useMemo(() => {
-    const chainIds =
-      chains.type === 'supported'
-        ? getSupportedChains()
-            .filter(({ chainId }) => !chains.excludeChainIds?.includes(chainId))
-            .map(({ chain }) => chain.chainId)
-        : chains.type === 'configured'
-        ? getConfiguredChains()
-            .filter(
-              ({ chainId, noGov }) =>
-                !chains.excludeChainIds?.includes(chainId) &&
-                (!chains.onlyGov || !noGov)
-            )
-            .map(({ chain }) => chain.chainId)
-        : chains.chainIds
+  const chainOptions = useMemo(
+    () => {
+      const chainIds =
+        chains.type === 'supported'
+          ? getSupportedChains()
+              .filter(
+                ({ chainId }) => !chains.excludeChainIds?.includes(chainId)
+              )
+              .map(({ chain }) => chain.chainId)
+          : chains.type === 'configured'
+            ? getConfiguredChains()
+                .filter(
+                  ({ chainId, noGov }) =>
+                    !chains.excludeChainIds?.includes(chainId) &&
+                    (!chains.onlyGov || !noGov)
+                )
+                .map(({ chain }) => chain.chainId)
+            : chains.chainIds
 
-    const _chainOptions = chainIds.map(
-      (chainId): FilterableItem => ({
-        key: chainId,
-        label:
-          labelMode === 'chain'
-            ? getDisplayNameForChainId(chainId)
-            : getNativeTokenForChainId(chainId).symbol,
-        iconUrl: toAccessibleImageUrl(
-          (labelMode === 'chain'
-            ? getImageUrlForChainId(chainId)
-            : getNativeTokenForChainId(chainId).imageUrl) ||
-            getFallbackImage(chainId)
-        ),
-        ...commonOptionClassFields,
-      })
-    )
+      const _chainOptions = chainIds.map(
+        (chainId): FilterableItem => ({
+          key: chainId,
+          label:
+            labelMode === 'chain'
+              ? getDisplayNameForChainId(chainId)
+              : getNativeTokenForChainId(chainId).symbol,
+          iconUrl: toAccessibleImageUrl(
+            (labelMode === 'chain'
+              ? getImageUrlForChainId(chainId)
+              : getNativeTokenForChainId(chainId).imageUrl) ||
+              getFallbackImage(chainId)
+          ),
+          ...commonOptionClassFields,
+        })
+      )
 
-    // Add none option to the top.
-    if (showNone) {
-      _chainOptions.splice(0, 0, {
-        key: NONE_KEY,
-        label: noneLabel || t('info.none'),
-        Icon: NoneIcon,
-        ...commonOptionClassFields,
-      })
-    }
+      // Add none option to the top.
+      if (showNone) {
+        _chainOptions.splice(0, 0, {
+          key: NONE_KEY,
+          label: noneLabel || t('info.none'),
+          Icon: NoneIcon,
+          ...commonOptionClassFields,
+        })
+      }
 
-    return _chainOptions.map((option) => ({
-      ...option,
-      selected: !selectedChainId
-        ? showNone && option.key === NONE_KEY
-        : option.key === selectedChainId,
-    }))
+      return _chainOptions.map((option) => ({
+        ...option,
+        selected: !selectedChainId
+          ? showNone && option.key === NONE_KEY
+          : option.key === selectedChainId,
+      }))
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, useDeepCompareMemoize([NoneIcon, chains, labelMode, noneLabel, showNone, t, selectedChainId]))
+    useDeepCompareMemoize([
+      NoneIcon,
+      chains,
+      labelMode,
+      noneLabel,
+      showNone,
+      t,
+      selectedChainId,
+    ])
+  )
 
   const selectedChain = selectedChainId
     ? chainOptions.find(({ key }) => key === selectedChainId)

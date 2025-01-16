@@ -22,17 +22,17 @@ export const useExecutedProposalTxLoadable = () => {
     !loadingExecutionTxHash
       ? constSelector(undefined)
       : // If still loading, make this cached loadable load as well by returning
-      // no selector. (See useCachedLoadable for more info.)
-      loadingExecutionTxHash.loading
-      ? undefined
-      : // If no execution hash found, likely due to either the proposal not being executed or an RPC not having the transaction, no TX events to load.
-      !loadingExecutionTxHash.data
-      ? constSelector(undefined)
-      : // Otherwise load the events for the given TX hash.
-        transactionSelector({
-          chainId,
-          txHash: loadingExecutionTxHash.data,
-        })
+        // no selector. (See useCachedLoadable for more info.)
+        loadingExecutionTxHash.loading
+        ? undefined
+        : // If no execution hash found, likely due to either the proposal not being executed or an RPC not having the transaction, no TX events to load.
+          !loadingExecutionTxHash.data
+          ? constSelector(undefined)
+          : // Otherwise load the events for the given TX hash.
+            transactionSelector({
+              chainId,
+              txHash: loadingExecutionTxHash.data,
+            })
   )
 
   return txLoadable

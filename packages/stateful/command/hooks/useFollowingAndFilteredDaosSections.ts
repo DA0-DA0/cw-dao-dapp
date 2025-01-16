@@ -101,9 +101,9 @@ export const useFollowingAndFilteredDaosSections = ({
             })
           )
       : // Otherwise when filter is empty, display featured DAOs.
-      featuredDaosLoading.loading
-      ? []
-      : featuredDaosLoading.data.map((d) => d.info)),
+        featuredDaosLoading.loading
+        ? []
+        : featuredDaosLoading.data.map((d) => d.info)),
     // Add configured chains.
     ...getConfiguredChains().flatMap(
       ({

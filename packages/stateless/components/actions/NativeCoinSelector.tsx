@@ -130,19 +130,19 @@ export const NativeCoinSelector = ({
     !isCreating || tokens.loading || !watchDenom
       ? undefined
       : customToken
-      ? t('error.customTokenNoDecimals')
-      : noBalanceWarning
-      ? undefined
-      : !selectedToken
-      ? t('error.unknownDenom', { denom: watchDenom })
-      : balance.toHumanReadable(decimals).lt(watchAmount)
-      ? insufficientFundsWarning(
-          balance.toFormattedString({
-            decimals,
-          }),
-          symbol
-        )
-      : undefined
+        ? t('error.customTokenNoDecimals')
+        : noBalanceWarning
+          ? undefined
+          : !selectedToken
+            ? t('error.unknownDenom', { denom: watchDenom })
+            : balance.toHumanReadable(decimals).lt(watchAmount)
+              ? insufficientFundsWarning(
+                  balance.toFormattedString({
+                    decimals,
+                  }),
+                  symbol
+                )
+              : undefined
 
   const minUnit = HugeDecimal.one.toHumanReadableNumber(decimals)
   const minAmount = min ?? minUnit

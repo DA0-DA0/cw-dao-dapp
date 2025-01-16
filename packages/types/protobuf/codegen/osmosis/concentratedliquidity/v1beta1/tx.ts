@@ -942,7 +942,7 @@ export const MsgWithdrawPosition = {
       message.sender = object.sender;
     }
     if (object.liquidity_amount !== undefined && object.liquidity_amount !== null) {
-      message.liquidityAmount = object.liquidity_amount;
+      message.liquidityAmount = Decimal.fromAtomics(object.liquidity_amount, 18).toString();
     }
     return message;
   },
@@ -950,7 +950,7 @@ export const MsgWithdrawPosition = {
     const obj: any = {};
     obj.position_id = message.positionId !== BigInt(0) ? message.positionId.toString() : undefined;
     obj.sender = message.sender === "" ? undefined : message.sender;
-    obj.liquidity_amount = message.liquidityAmount === "" ? undefined : message.liquidityAmount;
+    obj.liquidity_amount = message.liquidityAmount === "" ? undefined : Decimal.fromUserInput(message.liquidityAmount, 18).atomics;
     return obj;
   },
   fromAminoMsg(object: MsgWithdrawPositionAminoMsg): MsgWithdrawPosition {

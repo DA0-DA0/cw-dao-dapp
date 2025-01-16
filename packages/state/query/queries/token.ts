@@ -400,18 +400,18 @@ export const fetchTokenBalance = (
           )
           .then(({ amount }) => amount)
       : type === TokenType.Cw20
-      ? queryClient
-          .fetchQuery(
-            cw20BaseQueries.balance(queryClient, {
-              chainId,
-              contractAddress: denomOrAddress,
-              args: {
-                address,
-              },
-            })
-          )
-          .then(({ balance }) => balance)
-      : '0',
+        ? queryClient
+            .fetchQuery(
+              cw20BaseQueries.balance(queryClient, {
+                chainId,
+                contractAddress: denomOrAddress,
+                args: {
+                  address,
+                },
+              })
+            )
+            .then(({ balance }) => balance)
+        : '0',
   ]).then(
     ([token, balance]): GenericTokenBalance => ({
       token,

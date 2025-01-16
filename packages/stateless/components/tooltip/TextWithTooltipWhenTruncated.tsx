@@ -34,7 +34,7 @@ export const TextWithTooltipWhenTruncated = forwardRef<
   )
 
   return (
-    <Tooltip title={truncated ? children ?? undefined : undefined}>
+    <Tooltip title={truncated ? (children ?? undefined) : undefined}>
       <p {...props} className={clsx('truncate', className)} ref={ref}>
         {children}
       </p>

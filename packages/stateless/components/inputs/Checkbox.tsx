@@ -46,7 +46,7 @@ export const Checkbox = ({
 export type FormCheckboxWrapperProps<
   Props,
   FV extends FieldValues,
-  BooleanFieldName extends BooleanFieldNames<FV>
+  BooleanFieldName extends BooleanFieldNames<FV>,
 > = Omit<Props, 'checked' | 'onClick'> & {
   fieldName: BooleanFieldName
   value: boolean | undefined
@@ -56,7 +56,7 @@ export type FormCheckboxWrapperProps<
 
 export const FormCheckbox = <
   FV extends FieldValues,
-  BooleanFieldName extends BooleanFieldNames<FV>
+  BooleanFieldName extends BooleanFieldNames<FV>,
 >({
   fieldName,
   value,

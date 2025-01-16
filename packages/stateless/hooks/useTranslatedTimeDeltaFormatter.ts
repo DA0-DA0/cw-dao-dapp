@@ -38,22 +38,22 @@ export const useTranslatedTimeDeltaFormatter = ({
     const [value, unit] = lessThanOneMinute
       ? [1, 'minute']
       : seconds < HOUR
-      ? [Math.round(seconds / MINUTE), 'minute']
-      : seconds < DAY
-      ? [Math.round(seconds / HOUR), 'hour']
-      : seconds < MONTH
-      ? [Math.round(seconds / DAY), 'day']
-      : seconds < YEAR
-      ? [Math.round(seconds / WEEK), 'week']
-      : [Math.round(seconds / MONTH), 'month']
+        ? [Math.round(seconds / MINUTE), 'minute']
+        : seconds < DAY
+          ? [Math.round(seconds / HOUR), 'hour']
+          : seconds < MONTH
+            ? [Math.round(seconds / DAY), 'day']
+            : seconds < YEAR
+              ? [Math.round(seconds / WEEK), 'week']
+              : [Math.round(seconds / MONTH), 'month']
 
     return t(
       words
         ? suffix === 'ago'
           ? 'format.timeAgo'
           : futureMode === 'left'
-          ? 'format.timeLeft'
-          : 'format.inTime'
+            ? 'format.timeLeft'
+            : 'format.inTime'
         : 'format.time',
       {
         value: lessThanOneMinute ? '< 1' : value,

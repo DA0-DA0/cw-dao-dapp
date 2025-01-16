@@ -43,8 +43,8 @@ const getForceCompact = () =>
   window.innerWidth < FORCE_MOBILE_NAVIGATION_AT_WIDTH
     ? false
     : window.innerWidth < FORCE_COMPACT_NAVIGATION_AT_WIDTH
-    ? true
-    : undefined
+      ? true
+      : undefined
 
 export const DappNavigation = ({
   setCommandModalVisible,

@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep'
 import { Action, IActionDecoder, ProcessedMessage } from '@dao-dao/types'
 
 export class ActionDecoder<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > implements IActionDecoder<Data>
 {
   private _status: 'idle' | 'loading' | 'error' | 'ready' = 'idle'

@@ -116,7 +116,7 @@ export const CreateDaoReview = ({
           Review,
         }): DaoInfoCard | [] =>
           // If has display condition, check it. Otherwise display.
-          onlyDisplayCondition?.(newDao) ?? true
+          (onlyDisplayCondition?.(newDao) ?? true)
             ? {
                 Icon,
                 label: t(nameI18nKey),
@@ -144,7 +144,7 @@ export const CreateDaoReview = ({
               Review,
             }): DaoInfoCard | [] =>
               // If has display condition, check it. Otherwise display.
-              onlyDisplayCondition?.(newDao) ?? true
+              (onlyDisplayCondition?.(newDao) ?? true)
                 ? {
                     Icon,
                     label: t(nameI18nKey),
@@ -171,7 +171,7 @@ export const CreateDaoReview = ({
     ].flatMap(
       ({ onlyDisplayCondition, Icon, nameI18nKey, tooltipI18nKey, Review }) =>
         // If has display condition, check it. Otherwise display.
-        onlyDisplayCondition?.(newDao) ?? true
+        (onlyDisplayCondition?.(newDao) ?? true)
           ? {
               Icon,
               label: t(nameI18nKey),

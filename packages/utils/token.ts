@@ -137,9 +137,9 @@ export const sortTokensValueDescending: SortFn<
   const aPrice =
     a.lazyInfo.loading || !a.lazyInfo.data.usdUnitPrice?.usdPrice
       ? undefined
-      : a.lazyInfo.data.totalBalance.times(
-          a.lazyInfo.data.usdUnitPrice.usdPrice
-        )
+      : a.lazyInfo.data.totalBalance
+          .times(a.lazyInfo.data.usdUnitPrice.usdPrice)
+          .toHumanReadable(a.token.decimals)
 
   const bBalance = b.lazyInfo.loading
     ? b.unstakedBalance
@@ -147,9 +147,9 @@ export const sortTokensValueDescending: SortFn<
   const bPrice =
     b.lazyInfo.loading || !b.lazyInfo.data.usdUnitPrice?.usdPrice
       ? undefined
-      : b.lazyInfo.data.totalBalance.times(
-          b.lazyInfo.data.usdUnitPrice.usdPrice
-        )
+      : b.lazyInfo.data.totalBalance
+          .times(b.lazyInfo.data.usdUnitPrice.usdPrice)
+          .toHumanReadable(b.token.decimals)
 
   // If prices are equal, sort alphabetically by symbol.
   const symbolComparison = a.token.symbol
@@ -159,12 +159,12 @@ export const sortTokensValueDescending: SortFn<
   return aPrice && bPrice && aPrice.eq(bPrice)
     ? symbolComparison
     : !aPrice && bPrice?.isPositive()
-    ? 1
-    : !bPrice && aPrice?.isPositive()
-    ? -1
-    : aPrice && bPrice
-    ? compareHugeDecimalDescending(aPrice, bPrice) || symbolComparison
-    : compareHugeDecimalDescending(aBalance, bBalance) || symbolComparison
+      ? 1
+      : !bPrice && aPrice?.isPositive()
+        ? -1
+        : aPrice && bPrice
+          ? compareHugeDecimalDescending(aPrice, bPrice) || symbolComparison
+          : compareHugeDecimalDescending(aBalance, bBalance) || symbolComparison
 }
 
 /**
@@ -179,9 +179,9 @@ export const sortTokensValueAscending: SortFn<
   const aPrice =
     a.lazyInfo.loading || !a.lazyInfo.data.usdUnitPrice?.usdPrice
       ? undefined
-      : a.lazyInfo.data.totalBalance.times(
-          a.lazyInfo.data.usdUnitPrice.usdPrice
-        )
+      : a.lazyInfo.data.totalBalance
+          .times(a.lazyInfo.data.usdUnitPrice.usdPrice)
+          .toHumanReadable(a.token.decimals)
 
   const bBalance = b.lazyInfo.loading
     ? b.unstakedBalance
@@ -189,9 +189,9 @@ export const sortTokensValueAscending: SortFn<
   const bPrice =
     b.lazyInfo.loading || !b.lazyInfo.data.usdUnitPrice?.usdPrice
       ? undefined
-      : b.lazyInfo.data.totalBalance.times(
-          b.lazyInfo.data.usdUnitPrice.usdPrice
-        )
+      : b.lazyInfo.data.totalBalance
+          .times(b.lazyInfo.data.usdUnitPrice.usdPrice)
+          .toHumanReadable(b.token.decimals)
 
   // If prices are equal, sort alphabetically by symbol.
   const symbolComparison = a.token.symbol
@@ -201,19 +201,21 @@ export const sortTokensValueAscending: SortFn<
   return aPrice && bPrice && aPrice.eq(bPrice)
     ? symbolComparison
     : !aPrice && bPrice?.isPositive()
-    ? 1
-    : !bPrice && aPrice?.isPositive()
-    ? -1
-    : aPrice && bPrice
-    ? compareHugeDecimalAscending(aPrice, bPrice) || symbolComparison
-    : compareHugeDecimalAscending(aBalance, bBalance) || symbolComparison
+      ? 1
+      : !bPrice && aPrice?.isPositive()
+        ? -1
+        : aPrice && bPrice
+          ? compareHugeDecimalAscending(aPrice, bPrice) || symbolComparison
+          : compareHugeDecimalAscending(aBalance, bBalance) || symbolComparison
 }
 
 const compareHugeDecimalAscending = (a: HugeDecimal, b: HugeDecimal): number =>
   a.eq(b) ? 0 : a.gt(b) ? 1 : -1
 
-const compareHugeDecimalDescending = (a: HugeDecimal, b: HugeDecimal): number =>
-  a.eq(b) ? 0 : a.gt(b) ? -1 : 1
+const compareHugeDecimalDescending = (
+  a: HugeDecimal,
+  b: HugeDecimal
+): number => (a.eq(b) ? 0 : a.gt(b) ? -1 : 1)
 
 /**
  * Convert GenericToken into UncheckedDenom for contract calls.

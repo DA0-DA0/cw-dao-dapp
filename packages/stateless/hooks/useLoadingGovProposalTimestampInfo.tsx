@@ -37,16 +37,16 @@ export const useLoadingGovProposalTimestampInfo = (
           ),
         }
       : proposal.status === ProposalStatus.PROPOSAL_STATUS_PASSED ||
-        proposal.status === ProposalStatus.PROPOSAL_STATUS_REJECTED
-      ? {
-          label:
-            proposal.status === ProposalStatus.PROPOSAL_STATUS_PASSED
-              ? t('proposalStatusTitle.passed')
-              : t('proposalStatusTitle.rejected'),
-          tooltip: formatDateTimeTz(proposal.votingEndTime || new Date(0)),
-          content: formatDate(proposal.votingEndTime || new Date(0)),
-        }
-      : undefined
+          proposal.status === ProposalStatus.PROPOSAL_STATUS_REJECTED
+        ? {
+            label:
+              proposal.status === ProposalStatus.PROPOSAL_STATUS_PASSED
+                ? t('proposalStatusTitle.passed')
+                : t('proposalStatusTitle.rejected'),
+            tooltip: formatDateTimeTz(proposal.votingEndTime || new Date(0)),
+            content: formatDate(proposal.votingEndTime || new Date(0)),
+          }
+        : undefined
 
   const timestampInfo: ProposalTimestampInfo = {
     display: dateDisplay,

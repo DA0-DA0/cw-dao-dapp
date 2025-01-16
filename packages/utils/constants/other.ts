@@ -108,6 +108,11 @@ export const INDEXER_URL = 'https://indexer.daodao.zone'
 // Snapper API
 export const SNAPPER_API_BASE = 'https://snapper.indexer.zone'
 
+// WebSockets API
+export const WEB_SOCKET_PUSHER_APP_KEY = 'daodao'
+export const WEB_SOCKET_PUSHER_HOST = 'ws.indexer.zone'
+export const WEB_SOCKET_PUSHER_PORT = 443
+
 // KVPK prefix for saved Me page transactions.
 export const ME_SAVED_TX_PREFIX = 'savedTx:'
 
@@ -235,3 +240,12 @@ export const PROPOSAL_DESCRIPTION_METADATA_SEPARATOR = '\n~@~@~@~\n'
  * Whether or not the current environment is testing.
  */
 export const TEST_ENV = process.env.NODE_ENV === 'test'
+
+// Wallet account secp256k1 public keys are expected to be 33 bytes starting
+// with 0x02 or 0x03. This will be used when simulating requests, but not when
+// signing since we intercept messages. This may cause problems with some dApps
+// if simulation fails...
+export const EMPTY_PUB_KEY = new Uint8Array([
+  0x02,
+  ...[...new Array(32)].map(() => 0),
+])

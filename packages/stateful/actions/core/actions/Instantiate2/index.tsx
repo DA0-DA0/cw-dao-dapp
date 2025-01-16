@@ -233,14 +233,14 @@ export class Instantiate2Action extends ActionBase<Instantiate2Data> {
           instantiate2Msg
         )
       : account.type === AccountType.Ica
-      ? maybeMakeIcaExecuteMessages(
-          this.options.chain.chainId,
-          account.chainId,
-          this.options.address,
-          account.address,
-          instantiate2Msg
-        )
-      : instantiate2Msg
+        ? maybeMakeIcaExecuteMessages(
+            this.options.chain.chainId,
+            account.chainId,
+            this.options.address,
+            account.address,
+            instantiate2Msg
+          )
+        : instantiate2Msg
   }
 
   match([{ decodedMessage }]: ProcessedMessage[]): ActionMatch {

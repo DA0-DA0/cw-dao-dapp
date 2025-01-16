@@ -131,9 +131,8 @@ const main = async () => {
     srcExtensions: ['json'],
   })
 
-  const unusedTranslations = await getUnusedTranslationsForLocalePaths(
-    localePaths
-  )
+  const unusedTranslations =
+    await getUnusedTranslationsForLocalePaths(localePaths)
 
   console.log(
     `Total unused translations count: ${

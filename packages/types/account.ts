@@ -142,6 +142,7 @@ export enum AccountTabId {
   Wallet = 'wallet',
   Daos = 'daos',
   Actions = 'actions',
+  Apps = 'apps',
 }
 
 export type AccountTab = {

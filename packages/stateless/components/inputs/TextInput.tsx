@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 
 export interface TextInputProps<
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 > extends Omit<ComponentPropsWithoutRef<'input'>, 'required'> {
   fieldName?: FieldName
   register?: UseFormRegister<FV>

@@ -43,16 +43,16 @@ export const Breadcrumbs = ({
             },
           ]
       : // SDA
-      home || !dao
-      ? []
-      : [
-          {
-            href:
-              // Link to home tab if available.
-              getDaoPath(dao.coreAddress, homeTab?.id),
-            label: homeTab?.sdaLabel || t('title.home'),
-          },
-        ]
+        home || !dao
+        ? []
+        : [
+            {
+              href:
+                // Link to home tab if available.
+                getDaoPath(dao.coreAddress, homeTab?.id),
+              label: homeTab?.sdaLabel || t('title.home'),
+            },
+          ]
 
   const hasCrumbs = crumbs.length > 0
 

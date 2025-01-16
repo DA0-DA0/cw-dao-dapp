@@ -340,14 +340,14 @@ export class InstantiateAction extends ActionBase<InstantiateData> {
           instantiateMsg
         )
       : account.type === AccountType.Ica
-      ? maybeMakeIcaExecuteMessages(
-          this.options.chain.chainId,
-          account.chainId,
-          this.options.address,
-          account.address,
-          instantiateMsg
-        )
-      : instantiateMsg
+        ? maybeMakeIcaExecuteMessages(
+            this.options.chain.chainId,
+            account.chainId,
+            this.options.address,
+            account.address,
+            instantiateMsg
+          )
+        : instantiateMsg
   }
 
   match([{ decodedMessage }]: ProcessedMessage[]): ActionMatch {
@@ -396,8 +396,8 @@ export class InstantiateAction extends ActionBase<InstantiateData> {
     const funds: Coin[] | undefined = isWasmInstantiateMsg
       ? decodedMessage.wasm.instantiate.funds
       : isSecretInstantiateMsg
-      ? decodedMessage.stargate.value.initFunds
-      : undefined
+        ? decodedMessage.stargate.value.initFunds
+        : undefined
 
     const fundsTokens = funds?.length
       ? await Promise.all(

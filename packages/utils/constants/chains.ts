@@ -588,7 +588,7 @@ const BASE_SUPPORTED_CHAINS: Omit<
     ]
 
 const convertConfiguredChainToSupportedChain = (
-  chain: typeof BASE_SUPPORTED_CHAINS[number]
+  chain: (typeof BASE_SUPPORTED_CHAINS)[number]
 ): SupportedChainConfig => {
   // If testing, use the test codeIds. It's safe to require fs and path here
   // since this will only run in a node environment.

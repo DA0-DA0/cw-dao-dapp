@@ -8,7 +8,7 @@ import {
   UnifiedCosmosMsg,
 } from '@dao-dao/types'
 
-import { getAccountAddress } from './dao'
+import { getAccountAddress } from './account'
 
 /**
  * Encode actions.
@@ -102,12 +102,12 @@ export const getChainAddressForActionOptions = (
   chain.chainId === chainId
     ? address
     : // If on different chain, return DAO's polytone proxy address.
-    context.type === ActionContextType.Dao
-    ? getAccountAddress({
-        accounts: context.dao.accounts,
-        chainId,
-      })
-    : // If on different chain, return wallet's chain profile address if set.
-    context.type === ActionContextType.Wallet
-    ? context.profile?.chains[chainId]?.address
-    : undefined
+      context.type === ActionContextType.Dao
+      ? getAccountAddress({
+          accounts: context.dao.accounts,
+          chainId,
+        })
+      : // If on different chain, return wallet's chain profile address if set.
+        context.type === ActionContextType.Wallet
+        ? context.profile?.chains[chainId]?.address
+        : undefined

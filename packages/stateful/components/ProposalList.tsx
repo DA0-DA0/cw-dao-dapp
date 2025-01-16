@@ -201,10 +201,10 @@ export const ProposalList = ({
                 b.timestamp && a.timestamp
                   ? b.timestamp.getTime() - a.timestamp.getTime()
                   : !a.timestamp
-                  ? 1
-                  : !b.timestamp
-                  ? -1
-                  : 0
+                    ? 1
+                    : !b.timestamp
+                      ? -1
+                      : 0
               )
               // We loaded the most recent PROP_LOAD_LIMIT proposals from each
               // module above, and then sorted all of them against each other.
@@ -269,7 +269,7 @@ export const ProposalList = ({
             const transformIntoProps = ({
               id,
               status,
-            }: typeof newProposalInfos[number]): StatefulProposalLineProps & {
+            }: (typeof newProposalInfos)[number]): StatefulProposalLineProps & {
               status: ProposalStatus
             } => ({
               chainId: dao.chainId,
@@ -406,11 +406,11 @@ export const ProposalList = ({
         showingSearchResults
           ? []
           : // Show executable proposals at the top in place of open proposals.
-          onlyExecutable
-          ? historyProposals.filter(
-              ({ status }) => status === ProposalStatusEnum.Passed
-            )
-          : openProposals
+            onlyExecutable
+            ? historyProposals.filter(
+                ({ status }) => status === ProposalStatusEnum.Passed
+              )
+            : openProposals
       }
       searchBarProps={
         canSearch
@@ -445,21 +445,21 @@ export const ProposalList = ({
               },
             ]
           : // Show executable proposals at the top in place of open proposals.
-          onlyExecutable
-          ? []
-          : [
-              {
-                title: t('title.history'),
-                proposals: historyProposals,
-                total:
-                  !loadingProposalCounts.loading &&
-                  !loadingProposalCounts.errored
-                    ? // Remove open proposals from total history count since they
-                      // are shown above.
-                      loadingProposalCounts.data - openProposals.length
-                    : undefined,
-              },
-            ]
+            onlyExecutable
+            ? []
+            : [
+                {
+                  title: t('title.history'),
+                  proposals: historyProposals,
+                  total:
+                    !loadingProposalCounts.loading &&
+                    !loadingProposalCounts.errored
+                      ? // Remove open proposals from total history count since they
+                        // are shown above.
+                        loadingProposalCounts.data - openProposals.length
+                      : undefined,
+                },
+              ]
       }
       showingSearchResults={showingSearchResults}
     />

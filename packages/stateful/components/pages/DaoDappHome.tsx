@@ -237,44 +237,44 @@ export const DaoDappHome = () => {
             }),
           })
         : // Make proposal in parent DAO if current wallet is a member.
-        isMemberOfParent
-        ? getDaoProposalPath(parentDao.coreAddress, 'create', {
-            prefill: getDaoProposalSinglePrefill({
-              title: t('title.fixChildAdmin', {
-                child: name,
-              }),
-              description:
-                t('info.parentDaoNotAdmin', {
+          isMemberOfParent
+          ? getDaoProposalPath(parentDao.coreAddress, 'create', {
+              prefill: getDaoProposalSinglePrefill({
+                title: t('title.fixChildAdmin', {
                   child: name,
-                  parent: parentDao.name,
-                }) +
-                ' ' +
-                t('info.proposalFixesChildAdmin', {
-                  child: name,
-                  parent: parentDao.name,
                 }),
-              actions: [
-                {
-                  actionKey: ActionKey.DaoAdminExec,
-                  data: {
-                    coreAddress: coreAddress,
-                    msgs: [],
-                    _actionData: [
-                      {
-                        actionKey: ActionKey.UpdateAdmin,
-                        data: {
-                          chainId,
-                          contract: coreAddress,
-                          newAdmin: parentDao.coreAddress,
+                description:
+                  t('info.parentDaoNotAdmin', {
+                    child: name,
+                    parent: parentDao.name,
+                  }) +
+                  ' ' +
+                  t('info.proposalFixesChildAdmin', {
+                    child: name,
+                    parent: parentDao.name,
+                  }),
+                actions: [
+                  {
+                    actionKey: ActionKey.DaoAdminExec,
+                    data: {
+                      coreAddress: coreAddress,
+                      msgs: [],
+                      _actionData: [
+                        {
+                          actionKey: ActionKey.UpdateAdmin,
+                          data: {
+                            chainId,
+                            contract: coreAddress,
+                            newAdmin: parentDao.coreAddress,
+                          },
                         },
-                      },
-                    ],
+                      ],
+                    },
                   },
-                },
-              ],
-            }),
-          })
-        : undefined
+                ],
+              }),
+            })
+          : undefined
       : undefined
 
   const loadingTabs = useDaoTabs()

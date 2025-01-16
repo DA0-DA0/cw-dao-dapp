@@ -109,13 +109,13 @@ export const useLoadingProposal = (): LoadingData<ProposalWithMetadata> => {
       timelockProposalStatus === 'timelocked'
         ? ProposalStatusEnum.NeutronTimelocked
         : timelockProposalStatus === 'overruled'
-        ? ProposalStatusEnum.NeutronOverruled
-        : timelockProposalStatus === 'executed'
-        ? ProposalStatusEnum.Executed
-        : timelockProposalStatus === 'execution_failed'
-        ? ProposalStatusEnum.ExecutionFailed
-        : // Should never happen.
-          proposalStatus
+          ? ProposalStatusEnum.NeutronOverruled
+          : timelockProposalStatus === 'executed'
+            ? ProposalStatusEnum.Executed
+            : timelockProposalStatus === 'execution_failed'
+              ? ProposalStatusEnum.ExecutionFailed
+              : // Should never happen.
+                proposalStatus
   }
 
   const timeAgoFormatter = useTranslatedTimeDeltaFormatter({ words: false })
@@ -193,13 +193,13 @@ export const useLoadingProposal = (): LoadingData<ProposalWithMetadata> => {
           blockHeightLoadable.contents
         )
       : proposalStatus === ProposalStatusEnum.NeutronTimelocked &&
-        loadingNeutronTimelockInfo.data
-      ? convertExpirationToDate(
-          blocksPerYearLoadable.contents,
-          loadingNeutronTimelockInfo.data[1].proposal.proposal.expiration,
-          blockHeightLoadable.contents
-        )
-      : undefined
+          loadingNeutronTimelockInfo.data
+        ? convertExpirationToDate(
+            blocksPerYearLoadable.contents,
+            loadingNeutronTimelockInfo.data[1].proposal.proposal.expiration,
+            blockHeightLoadable.contents
+          )
+        : undefined
 
   const votingOpen =
     proposalStatus === ProposalStatusEnum.Open ||
@@ -228,49 +228,51 @@ export const useLoadingProposal = (): LoadingData<ProposalWithMetadata> => {
           ),
         }
       : 'at_height' in proposal.expiration &&
-        proposal.expiration.at_height > blockHeightLoadable.contents
-      ? {
-          label: t('title.votingEndBlock'),
-          tooltip: t('info.votingEndBlockTooltip'),
-          content: BigInt(proposal.expiration.at_height).toLocaleString(),
-        }
-      : undefined
+          proposal.expiration.at_height > blockHeightLoadable.contents
+        ? {
+            label: t('title.votingEndBlock'),
+            tooltip: t('info.votingEndBlockTooltip'),
+            content: BigInt(proposal.expiration.at_height).toLocaleString(),
+          }
+        : undefined
     : executionDate
-    ? {
-        label: t('proposalStatusTitle.executed'),
-        tooltip: formatDateTimeTz(executionDate),
-        content: formatDate(executionDate),
-      }
-    : closeDate
-    ? {
-        label: t('proposalStatusTitle.closed'),
-        tooltip: formatDateTimeTz(closeDate),
-        content: formatDate(closeDate),
-      }
-    : completionDate
-    ? {
-        label: t('title.completed'),
-        tooltip: formatDateTimeTz(completionDate),
-        content: formatDate(completionDate),
-      }
-    : expirationDate
-    ? {
-        label:
-          // If voting is closed, expiration should not be in the future, but
-          // just in case...
-          expirationDate.getTime() > Date.now()
-            ? t('title.expires')
-            : t('title.completed'),
-        tooltip: formatDateTimeTz(expirationDate),
-        content: formatDate(expirationDate),
-      }
-    : 'at_height' in proposal.expiration
-    ? {
-        label: t('title.blockCompleted'),
-        tooltip: t('info.votingEndedBlockTooltip'),
-        content: BigInt(proposal.expiration.at_height).toLocaleString(),
-      }
-    : undefined
+      ? {
+          label: t('proposalStatusTitle.executed'),
+          tooltip: formatDateTimeTz(executionDate),
+          content: formatDate(executionDate),
+        }
+      : closeDate
+        ? {
+            label: t('proposalStatusTitle.closed'),
+            tooltip: formatDateTimeTz(closeDate),
+            content: formatDate(closeDate),
+          }
+        : completionDate
+          ? {
+              label: t('title.completed'),
+              tooltip: formatDateTimeTz(completionDate),
+              content: formatDate(completionDate),
+            }
+          : expirationDate
+            ? {
+                label:
+                  // If voting is closed, expiration should not be in the future, but
+                  // just in case...
+                  expirationDate.getTime() > Date.now()
+                    ? t('title.expires')
+                    : t('title.completed'),
+                tooltip: formatDateTimeTz(expirationDate),
+                content: formatDate(expirationDate),
+              }
+            : 'at_height' in proposal.expiration
+              ? {
+                  label: t('title.blockCompleted'),
+                  tooltip: t('info.votingEndedBlockTooltip'),
+                  content: BigInt(
+                    proposal.expiration.at_height
+                  ).toLocaleString(),
+                }
+              : undefined
 
   const timestampInfo: ProposalTimestampInfo = {
     display: dateDisplay,

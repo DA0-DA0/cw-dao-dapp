@@ -57,13 +57,13 @@ export const HorizontalNftCard = forwardRef<
     imageUrl && NFT_VIDEO_EXTENSIONS.includes(imageUrl.split('.').pop() || '')
       ? imageUrl
       : metadata &&
-        objectMatchesStructure(metadata, {
-          properties: {
-            video: {},
-          },
-        })
-      ? metadata.properties.video
-      : null
+          objectMatchesStructure(metadata, {
+            properties: {
+              video: {},
+            },
+          })
+        ? metadata.properties.video
+        : null
 
   const [imageLoading, setImageLoading] = useState(!!imageUrl)
   const [imageLoadErrored, setImageLoadErrored] = useState(false)

@@ -46,8 +46,8 @@ export const NavWallet = (props: StatefulNavWalletProps) => {
             profileMergeOptions.length === 0
               ? undefined
               : profileMergeOptions.length === 1
-              ? 'add'
-              : 'merge'
+                ? 'add'
+                : 'merge'
           }
           onMergeProfiles={() => setMergeProfilesModalVisible(true)}
           profile={profile}

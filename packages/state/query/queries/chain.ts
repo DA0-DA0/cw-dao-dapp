@@ -1,5 +1,5 @@
 import { Asset } from '@chain-registry/types'
-import { fromBase64 } from '@cosmjs/encoding'
+import { fromBase64, toHex } from '@cosmjs/encoding'
 import { Block, Coin } from '@cosmjs/stargate'
 import { QueryClient, queryOptions, skipToken } from '@tanstack/react-query'
 import uniq from 'lodash.uniq'
@@ -90,7 +90,7 @@ const fetchChainModuleAddress = async ({
     throw new Error(`Failed to find ${name} module address.`)
   }
 
-  return 'baseAccount' in account ? account.baseAccount?.address ?? '' : ''
+  return 'baseAccount' in account ? (account.baseAccount?.address ?? '') : ''
 }
 
 /**
@@ -1362,6 +1362,24 @@ export const fetchTokenFactoryDenomCreationFee = async ({
   }
 }
 
+/**
+ * Fetch the hex public key for a wallet address.
+ */
+export const fetchWalletHexPublicKey = async ({
+  chainId,
+  address,
+}: {
+  chainId: string
+  address: string
+}): Promise<string> => {
+  const client = await stargateClientRouter.connect(chainId)
+  const account = await client.getAccount(address)
+  if (!account?.pubkey?.value || typeof account.pubkey.value !== 'string') {
+    throw new Error('No pubkey found for address')
+  }
+  return toHex(fromBase64(account.pubkey.value))
+}
+
 export const chainQueries = {
   /**
    * Fetch the module address associated with the specified name.
@@ -1636,5 +1654,15 @@ export const chainQueries = {
     queryOptions({
       queryKey: ['chain', 'tokenFactoryDenomCreationFee', options],
       queryFn: () => fetchTokenFactoryDenomCreationFee(options),
+    }),
+  /**
+   * Fetch the hex public key for a wallet address.
+   */
+  walletHexPublicKey: (
+    options: Parameters<typeof fetchWalletHexPublicKey>[0]
+  ) =>
+    queryOptions({
+      queryKey: ['chain', 'walletHexPublicKey', options],
+      queryFn: () => fetchWalletHexPublicKey(options),
     }),
 }

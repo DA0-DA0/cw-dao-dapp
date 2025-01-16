@@ -103,9 +103,8 @@ export const TabRenderer = ({
 
   const [showingCompleted, setShowingCompleted] = useState(false)
 
-  const [vestingPaymentModalOpen, setVestingPaymentModalOpen] = useState(
-    !!openVestingContract
-  )
+  const [vestingPaymentModalOpen, setVestingPaymentModalOpen] =
+    useState(!!openVestingContract)
 
   const openVestingPayment =
     vestingPaymentsLoading.loading ||

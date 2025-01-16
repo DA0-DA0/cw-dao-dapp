@@ -45,8 +45,8 @@ export const useMainDaoInfoCards = (): DaoInfoCard[] => {
       value: loadingMembers.loading
         ? undefined
         : loadingMembers.errored
-        ? '<error>'
-        : loadingMembers.data?.length ?? '<error>',
+          ? '<error>'
+          : (loadingMembers.data?.length ?? '<error>'),
     },
     {
       label: t('title.totalSupply'),

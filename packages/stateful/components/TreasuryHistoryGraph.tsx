@@ -173,10 +173,10 @@ export const TreasuryHistoryGraph = ({
                   ? // If all targets are before, use last one.
                     targets.length - 1
                   : // If all targets are after, no target for this timestamp.
-                  nextTargetIndex === 0
-                  ? undefined
-                  : // Otherwise use the previous one.
-                    nextTargetIndex - 1
+                    nextTargetIndex === 0
+                    ? undefined
+                    : // Otherwise use the previous one.
+                      nextTargetIndex - 1
               if (targetIndex === undefined) {
                 return null
               }

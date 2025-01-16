@@ -222,14 +222,14 @@ export class ExecuteAction extends ActionBase<ExecuteData> {
           executeMsg
         )
       : account.type === AccountType.Ica
-      ? maybeMakeIcaExecuteMessages(
-          this.options.chain.chainId,
-          account.chainId,
-          this.options.address,
-          account.address,
-          executeMsg
-        )
-      : executeMsg
+        ? maybeMakeIcaExecuteMessages(
+            this.options.chain.chainId,
+            account.chainId,
+            this.options.address,
+            account.address,
+            executeMsg
+          )
+        : executeMsg
   }
 
   match([{ decodedMessage }]: ProcessedMessage[]): ActionMatch {
@@ -275,8 +275,8 @@ export class ExecuteAction extends ActionBase<ExecuteData> {
     const executeMsg = isWasmExecute
       ? decodedMessage.wasm.execute.msg
       : isSecretExecuteMsg
-      ? decodeJsonFromBase64(decodedMessage.stargate.value.msg)
-      : undefined
+        ? decodeJsonFromBase64(decodedMessage.stargate.value.msg)
+        : undefined
 
     // Check if a CW20 execute, which is a subset of execute.
     const isCw20 =
@@ -319,8 +319,8 @@ export class ExecuteAction extends ActionBase<ExecuteData> {
     const funds: Coin[] | undefined = isWasmExecute
       ? decodedMessage.wasm.execute.funds
       : isSecretExecuteMsg
-      ? decodedMessage.stargate.value.sentFunds
-      : undefined
+        ? decodedMessage.stargate.value.sentFunds
+        : undefined
 
     const fundsTokens =
       !isCw20 && funds?.length

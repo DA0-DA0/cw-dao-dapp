@@ -169,15 +169,15 @@ export const loadableToLoadingData = <T>(
     typeof window === 'undefined'
     ? { loading: true }
     : loadable.state === 'hasValue'
-    ? {
-        loading: false,
-        updating: 'updating' in loadable ? loadable.updating : undefined,
-        data: loadable.contents,
-      }
-    : {
-        loading: false,
-        data: defaultValue,
-      }
+      ? {
+          loading: false,
+          updating: 'updating' in loadable ? loadable.updating : undefined,
+          data: loadable.contents,
+        }
+      : {
+          loading: false,
+          data: defaultValue,
+        }
 }
 
 // Combine many data loaders into one.
@@ -203,17 +203,19 @@ export const combineLoadingDataWithErrors = <T>(
         errored: false,
       }
     : loadables.some((l) => l.errored)
-    ? {
-        loading: false,
-        errored: true,
-        // First error.
-        error: loadables.flatMap((l) => (l.errored ? l.error : []))[0],
-      }
-    : {
-        loading: false,
-        errored: false,
-        data: loadables.flatMap((l) => (l.loading || l.errored ? [] : l.data)),
-      }
+      ? {
+          loading: false,
+          errored: true,
+          // First error.
+          error: loadables.flatMap((l) => (l.errored ? l.error : []))[0],
+        }
+      : {
+          loading: false,
+          errored: false,
+          data: loadables.flatMap((l) =>
+            l.loading || l.errored ? [] : l.data
+          ),
+        }
 
 /**
  * Combine react-query results into LoadingData list. Filters out any errored
@@ -243,8 +245,8 @@ export const makeCombineQueryResultsIntoLoadingData =
       firstLoad === 'all'
         ? results.some((r) => r.isPending)
         : firstLoad === 'one'
-        ? results.every((r) => r.isPending)
-        : false
+          ? results.every((r) => r.isPending)
+          : false
 
     if (isLoading) {
       return {
@@ -310,14 +312,14 @@ export const makeCombineQueryResultsIntoLoadingDataWithError =
         ? (loadIfNone && results.length === 0) ||
           results.some((r) => r.isPending)
         : firstLoad === 'one'
-        ? results.length > 0 && results.every((r) => r.isPending)
-        : false
+          ? results.length > 0 && results.every((r) => r.isPending)
+          : false
     const isError =
       errorIf === 'any'
         ? results.some((r) => r.isError)
         : errorIf === 'all'
-        ? results.length > 0 && results.every((r) => r.isError)
-        : false
+          ? results.length > 0 && results.every((r) => r.isError)
+          : false
 
     if (isLoading) {
       return {
@@ -358,21 +360,21 @@ export const loadableToLoadingDataWithError = <T>(
   typeof window === 'undefined'
     ? { loading: true, errored: false }
     : loadable.state === 'hasValue'
-    ? {
-        loading: false,
-        errored: false,
-        updating: 'updating' in loadable ? loadable.updating : undefined,
-        data: loadable.contents,
-      }
-    : {
-        loading: false,
-        errored: true,
-        error: !loadable.contents
-          ? new Error('Unknown error')
-          : loadable.contents instanceof Error
-          ? loadable.contents
-          : new Error(`${loadable.contents}`),
-      }
+      ? {
+          loading: false,
+          errored: false,
+          updating: 'updating' in loadable ? loadable.updating : undefined,
+          data: loadable.contents,
+        }
+      : {
+          loading: false,
+          errored: true,
+          error: !loadable.contents
+            ? new Error('Unknown error')
+            : loadable.contents instanceof Error
+              ? loadable.contents
+              : new Error(`${loadable.contents}`),
+        }
 
 /**
  * Transform data stored in LoadingDataWithError type into another format.
@@ -410,9 +412,9 @@ export const convertExpirationToDate = (
             1000
       )
     : 'at_time' in expiration
-    ? // Timestamp is in nanoseconds, convert to microseconds.
-      new Date(Number(expiration.at_time) / 1e6)
-    : undefined
+      ? // Timestamp is in nanoseconds, convert to microseconds.
+        new Date(Number(expiration.at_time) / 1e6)
+      : undefined
 
 export const convertBlocksToSeconds = (blocksPerYear: number, blocks: number) =>
   Math.round((blocks / blocksPerYear) * 365 * 24 * 60 * 60)

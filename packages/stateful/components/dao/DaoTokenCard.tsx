@@ -100,7 +100,7 @@ export const DaoTokenCard = ({
 
   const lazyStakes = lazyInfo.loading
     ? []
-    : lazyInfo.data.stakingInfo?.stakes ?? []
+    : (lazyInfo.data.stakingInfo?.stakes ?? [])
   const stakesWithRewards = lazyStakes.filter(({ rewards }) =>
     rewards.isPositive()
   )
@@ -231,21 +231,21 @@ export const DaoTokenCard = ({
                 },
               ]
             : // Only show deposit button if not governance token. People
-            // accidentally deposit governance tokens into the DAO when they're
-            // trying to stake them.
-            //
-            // Also hide for ICA accounts since they may or may not allow
-            // spending.
-            owner.type !== AccountType.Ica
-            ? [
-                {
-                  Icon: AccountBalance,
-                  label: t('button.deposit'),
-                  closeOnClick: true,
-                  onClick: showDeposit,
-                },
-              ]
-            : [],
+              // accidentally deposit governance tokens into the DAO when they're
+              // trying to stake them.
+              //
+              // Also hide for ICA accounts since they may or may not allow
+              // spending.
+              owner.type !== AccountType.Ica
+              ? [
+                  {
+                    Icon: AccountBalance,
+                    label: t('button.deposit'),
+                    closeOnClick: true,
+                    onClick: showDeposit,
+                  },
+                ]
+              : [],
           extraSections: extraActionSections,
         }}
         lazyInfo={lazyInfo}

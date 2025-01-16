@@ -338,7 +338,7 @@ export const walletTokenCardInfosSelector = selectorFamily<
       )
       const cw20Contracts =
         cw20ContractsLoadable.state === 'hasValue'
-          ? cw20ContractsLoadable.contents ?? []
+          ? (cw20ContractsLoadable.contents ?? [])
           : []
       const cw20s = get(
         noWait(

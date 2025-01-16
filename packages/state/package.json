@@ -38,7 +38,7 @@
     "@graphql-codegen/client-preset": "^4.1.0",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@types/lodash.uniq": "^4.5.7",
-    "typescript": "5.3.3"
+    "typescript": "5.4.5"
   },
   "prettier": "@dao-dao/config/prettier",
   "gitHead": "d7b959f412c3990123b0e2afb11f32acd9c3764c"

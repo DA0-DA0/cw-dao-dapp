@@ -66,8 +66,8 @@ export const LazyNftCard = forwardRef<HTMLDivElement, LazyNftCardProps>(
     const NftCardToUse = staked
       ? StakedNftCard
       : type === 'owner'
-      ? NftCardNoCollection
-      : NftCard
+        ? NftCardNoCollection
+        : NftCard
 
     return info.loading ? (
       <NftCardToUse

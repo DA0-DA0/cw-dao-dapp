@@ -64,9 +64,9 @@ export const ProposalVoteTally = ({
         (abstainVotes / 2 / ((quorum ? turnoutTotal : totalVotingPower) || 1)) *
           100
       : threshold.type === ProcessedTQType.Percent
-      ? threshold.value
-      : // If absolute, compute percent of total.
-        (threshold.value / totalVotingPower) * 100
+        ? threshold.value
+        : // If absolute, compute percent of total.
+          (threshold.value / totalVotingPower) * 100
   // Quorum does not have an absolute setting.
   const effectiveQuorum = quorum && {
     display: quorum.display,

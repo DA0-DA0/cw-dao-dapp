@@ -31,32 +31,32 @@ export const MembersTab = () => {
     loadingMembers.loading
       ? { loading: true, errored: false }
       : loadingMembers.errored
-      ? { loading: false, errored: true, error: loadingMembers.error }
-      : {
-          loading: false,
-          errored: false,
-          data:
-            loadingMembers.data.members?.map(({ addr, weight }) => ({
-              address: addr,
-              balanceLabel: t('title.votingWeight'),
-              balance: {
-                loading: false,
-                data: {
-                  amount: weight,
+        ? { loading: false, errored: true, error: loadingMembers.error }
+        : {
+            loading: false,
+            errored: false,
+            data:
+              loadingMembers.data.members?.map(({ addr, weight }) => ({
+                address: addr,
+                balanceLabel: t('title.votingWeight'),
+                balance: {
+                  loading: false,
+                  data: {
+                    amount: weight,
+                  },
                 },
-              },
-              votingPowerPercent:
-                totalVotingWeight === undefined
-                  ? { loading: true }
-                  : {
-                      loading: false,
-                      data: HugeDecimal.from(weight)
-                        .div(totalVotingWeight)
-                        .times(100)
-                        .toNumber(),
-                    },
-            })) || [],
-        }
+                votingPowerPercent:
+                  totalVotingWeight === undefined
+                    ? { loading: true }
+                    : {
+                        loading: false,
+                        data: HugeDecimal.from(weight)
+                          .div(totalVotingWeight)
+                          .times(100)
+                          .toNumber(),
+                      },
+              })) || [],
+          }
 
   return (
     <StatelessMembersTab

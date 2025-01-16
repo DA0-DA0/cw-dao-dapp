@@ -71,15 +71,6 @@ export const SINGLE_DAO_MODE =
 // Kado API (https://docs.kado.money)
 export const KADO_API_KEY = process.env.NEXT_PUBLIC_KADO_API_KEY as string
 
-// WebSockets API
-export const WEB_SOCKET_PUSHER_APP_KEY = process.env
-  .NEXT_PUBLIC_WEB_SOCKET_PUSHER_APP_KEY as string
-export const WEB_SOCKET_PUSHER_HOST = process.env
-  .NEXT_PUBLIC_WEB_SOCKET_PUSHER_HOST as string
-export const WEB_SOCKET_PUSHER_PORT = Number(
-  process.env.NEXT_PUBLIC_WEB_SOCKET_PUSHER_PORT || '6001'
-)
-
 // Web Push
 export const WEB_PUSH_PUBLIC_KEY = process.env
   .NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY as string

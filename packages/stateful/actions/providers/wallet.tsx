@@ -15,7 +15,10 @@ export const WalletActionsProvider = ({
   address: overrideAddress,
   children,
 }: WalletActionsProviderProps) => {
-  const { address: connectedAddress, chain } = useWallet()
+  const {
+    address: connectedAddress,
+    chain: { chainId },
+  } = useWallet()
 
   const address =
     overrideAddress === undefined ? connectedAddress : overrideAddress
@@ -26,7 +29,7 @@ export const WalletActionsProvider = ({
   const accounts = useQueryLoadingDataWithError(
     address
       ? accountQueries.list(queryClient, {
-          chainId: chain.chainId,
+          chainId,
           address,
         })
       : undefined

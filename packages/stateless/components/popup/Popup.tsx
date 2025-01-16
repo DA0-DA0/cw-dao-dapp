@@ -128,14 +128,14 @@ export const Popup = ({
       position === 'right'
         ? (rect) => rect.left - 2
         : position === 'wide'
-        ? () => 24
-        : null,
+          ? () => 24
+          : null,
     right:
       position === 'left'
         ? (rect) => window.innerWidth - rect.right - 2
         : position === 'wide'
-        ? () => 24
-        : null,
+          ? () => 24
+          : null,
     width: null,
   })
 

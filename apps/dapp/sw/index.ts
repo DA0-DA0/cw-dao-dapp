@@ -127,7 +127,7 @@ const getPathFromNotification = ({ deepLink }: PushNotificationPayload) => {
         })
     )
   })
-}.call(self))
+}).call(self)
 
 const fromCache = async (request) => {
   const matching = await (await caches.open(CACHE)).match(request)

@@ -79,12 +79,15 @@ export const parseForm = async (
   }
 
   // Select only string fields.
-  const fields = Object.entries(_fields).reduce((acc, [key, value]) => {
-    if (typeof value === 'string') {
-      acc[key] = value
-    }
-    return acc
-  }, {} as Record<string, string>)
+  const fields = Object.entries(_fields).reduce(
+    (acc, [key, value]) => {
+      if (typeof value === 'string') {
+        acc[key] = value
+      }
+      return acc
+    },
+    {} as Record<string, string>
+  )
   // Read file data from temporarily uploaded location.
   const fileData = file ? await fs.readFile(file.filepath) : undefined
 

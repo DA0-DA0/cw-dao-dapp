@@ -19,10 +19,10 @@ import { StatefulEntityDisplayProps } from './EntityDisplay'
 
 export interface AddressInputProps<
   FV extends FieldValues = FieldValues,
-  FieldName extends Path<FV> = Path<FV>
+  FieldName extends Path<FV> = Path<FV>,
 > extends Omit<ComponentPropsWithoutRef<'input'>, 'required'> {
-  fieldName: FieldName
-  register: UseFormRegister<FV>
+  fieldName?: FieldName
+  register?: UseFormRegister<FV>
   watch?: UseFormWatch<FV>
   setValue?: UseFormSetValue<FV>
   onChange?: ChangeEventHandler<HTMLInputElement>

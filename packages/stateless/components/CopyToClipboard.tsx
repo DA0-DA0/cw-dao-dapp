@@ -79,8 +79,8 @@ export const CopyToClipboard = ({
             (takeStartEnd
               ? abbreviateString(value, takeStartEnd.start, takeStartEnd.end)
               : takeAll
-              ? value
-              : abbreviateString(value, takeN ?? 7))}
+                ? value
+                : abbreviateString(value, takeN ?? 7))}
         </span>
       </button>
     </Tooltip>
@@ -125,8 +125,8 @@ export const CopyToClipboardUnderline = ({
           (takeStartEnd
             ? abbreviateString(value, takeStartEnd.start, takeStartEnd.end)
             : takeAll
-            ? value
-            : abbreviateString(value, takeN ?? 7))}
+              ? value
+              : abbreviateString(value, takeN ?? 7))}
       </p>
     </Tooltip>
   )

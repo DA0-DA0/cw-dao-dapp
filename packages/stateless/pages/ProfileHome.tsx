@@ -69,9 +69,9 @@ export const ProfileHome = ({
           window.innerWidth < 640
           ? -24
           : // Above `sm` and below the `md` tailwind selector, the larger margin takes effect (sm:-mt-10).
-          window.innerWidth < 768
-          ? -40
-          : undefined
+            window.innerWidth < 768
+            ? -40
+            : undefined
         : undefined,
   })
 

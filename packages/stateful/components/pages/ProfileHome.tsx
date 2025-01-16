@@ -2,6 +2,7 @@ import {
   ExtensionRounded,
   GroupRounded,
   WalletRounded,
+  WebRounded,
 } from '@mui/icons-material'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
@@ -27,7 +28,12 @@ import { getConfiguredChainConfig, getConfiguredChains } from '@dao-dao/utils'
 import { WalletActionsProvider } from '../../actions/providers/wallet'
 import { useManageProfile } from '../../hooks'
 import { useWallet } from '../../hooks/useWallet'
-import { ProfileActions, ProfileDaos, ProfileWallet } from '../profile'
+import {
+  ProfileActions,
+  ProfileApps,
+  ProfileDaos,
+  ProfileWallet,
+} from '../profile'
 import { SuspenseLoader } from '../SuspenseLoader'
 
 export const ProfileHome = () => {
@@ -52,6 +58,12 @@ export const ProfileHome = () => {
       label: t('title.actions'),
       Icon: ExtensionRounded,
       Component: ProfileActions,
+    },
+    {
+      id: AccountTabId.Apps,
+      label: t('title.apps'),
+      Icon: WebRounded,
+      Component: ProfileApps,
     },
   ]
 
@@ -129,8 +141,8 @@ export const ProfileHome = () => {
               profileMergeOptions.length === 0
                 ? undefined
                 : profileMergeOptions.length === 1
-                ? 'add'
-                : 'merge'
+                  ? 'add'
+                  : 'merge'
             }
             openMergeProfilesModal={() => setMergeProfilesVisible(true)}
             openProfileNftUpdate={() => setUpdateProfileNftVisible(true)}

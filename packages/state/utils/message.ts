@@ -20,12 +20,14 @@ export const processMessage: MessageProcessor = async ({
   queryClient,
   errorIfNoRemoteAccount = false,
 }) => {
-  const accounts = await queryClient.fetchQuery(
-    accountQueries.list(queryClient, {
-      chainId,
-      address: sender,
-    })
-  )
+  const accounts = sender
+    ? await queryClient.fetchQuery(
+        accountQueries.list(queryClient, {
+          chainId,
+          address: sender,
+        })
+      )
+    : []
 
   const decodedMessage = decodeMessage(message)
 
@@ -43,15 +45,17 @@ export const processMessage: MessageProcessor = async ({
     // If not found for some reason, query for it.
     if (!account) {
       // Get proxy on destination chain.
-      const proxy = await queryClient.fetchQuery(
-        polytoneNoteQueries.remoteAddress(queryClient, {
-          chainId,
-          contractAddress: decodedPolytone.polytoneConnection.note,
-          args: {
-            localAddress: sender,
-          },
-        })
-      )
+      const proxy = sender
+        ? await queryClient.fetchQuery(
+            polytoneNoteQueries.remoteAddress(queryClient, {
+              chainId,
+              contractAddress: decodedPolytone.polytoneConnection.note,
+              args: {
+                localAddress: sender,
+              },
+            })
+          )
+        : undefined
 
       if (errorIfNoRemoteAccount && !proxy) {
         throw new Error(
@@ -97,13 +101,15 @@ export const processMessage: MessageProcessor = async ({
     // If not found, query for it.
     if (!account) {
       // Get remote ICA on destination chain.
-      const remoteIcaAddress = await queryClient.fetchQuery(
-        accountQueries.remoteIcaAddress({
-          srcChainId: chainId,
-          address: sender,
-          destChainId: decodedIca.chainId,
-        })
-      )
+      const remoteIcaAddress = sender
+        ? await queryClient.fetchQuery(
+            accountQueries.remoteIcaAddress({
+              srcChainId: chainId,
+              address: sender,
+              destChainId: decodedIca.chainId,
+            })
+          )
+        : undefined
 
       if (errorIfNoRemoteAccount && !remoteIcaAddress) {
         throw new Error(

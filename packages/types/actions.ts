@@ -88,6 +88,7 @@ export enum ActionKey {
   UpdatePreProposeConfig = 'updatePreProposeConfig',
   UpdateProposalConfig = 'updateProposalConfig',
   CreateDao = 'createDao',
+
   // Valence
   CreateValenceAccount = 'createValenceAccount',
   ConfigureRebalancer = 'configureRebalancer',
@@ -95,19 +96,24 @@ export enum ActionKey {
   ResumeRebalancer = 'resumeRebalancer',
   FundRebalancer = 'fundRebalancer',
   WithdrawFromRebalancer = 'withdrawFromRebalancer',
+
   // DaoProposalSingle
   UpdatePreProposeSingleConfig = 'updatePreProposeSingleConfig',
   UpdateProposalSingleConfig = 'updateProposalSingleConfig',
+
   // DaoProposalMultiple
   UpdatePreProposeMultipleConfig = 'updatePreProposeMultipleConfig',
   UpdateProposalMultipleConfig = 'updateProposalMultipleConfig',
+
   // Press
   CreatePost = 'createPost',
   UpdatePost = 'updatePost',
   DeletePost = 'deletePost',
+
   // Become SubDAO
   AcceptSubDao = 'acceptSubDao',
   BecomeSubDao = 'becomeSubDao',
+
   // Rewards
   CreateRewardDistribution = 'createRewardDistribution',
   UpdateRewardDistribution = 'updateRewardDistribution',
@@ -119,7 +125,7 @@ export enum ActionKey {
 }
 
 export type ActionAndData<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > = {
   action: Action<Data>
   data: Data
@@ -184,8 +190,13 @@ export type ActionComponent<O = undefined, D = any> = ComponentType<
  */
 export type ActionMatch = boolean | number
 
+/**
+ * A successful match result.
+ */
+export type ActionMatchSuccess = true | number
+
 export interface Action<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > {
   /**
    * The unique key identifying the action.
@@ -333,7 +344,7 @@ export interface Action<
  * and this is the type of a class that implements it.
  */
 export type ImplementedAction<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > = {
   new (options: ActionOptions): Action<Data>
 }
@@ -442,7 +453,7 @@ export type ActionOptions<ExtraOptions extends {} = {}> = ExtraOptions & {
 
 export type ActionMaker<
   Data extends Record<string, any> = Record<string, any>,
-  ExtraOptions extends {} = {}
+  ExtraOptions extends {} = {},
 > = (options: ActionOptions<ExtraOptions>) => Action<Data> | null
 
 /**
@@ -538,7 +549,7 @@ export type GovActionsProviderProps = ActionsProviderProps & {
  * Action decoder for a single action and set of matched messages.
  */
 export interface IActionDecoder<
-  Data extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>,
 > {
   /**
    * The action that matched the messages.
@@ -618,6 +629,10 @@ export interface IActionMatcher {
    * Error if the matcher errored. Throw an error if not yet errored.
    */
   get error(): Error
+  /**
+   * Messages that are being matched.
+   */
+  get messages(): UnifiedCosmosMsg[]
 }
 
 /**

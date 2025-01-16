@@ -513,7 +513,7 @@ export const secretDaoProposalSingleQueries = {
 }
 export interface SecretDaoProposalSingleReactQuery<
   TResponse,
-  TData = TResponse
+  TData = TResponse,
 > {
   chainId: string
   contractAddress: string

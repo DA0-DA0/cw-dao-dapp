@@ -48,13 +48,13 @@ export const EntityDisplay = ({
   const href = loadingEntity.loading
     ? undefined
     : loadingEntity.data.type === EntityType.Dao
-    ? getDaoPath(loadingEntity.data.address)
-    : loadingEntity.data.type === EntityType.Wallet
-    ? config?.explorerUrlTemplates?.wallet?.replace(
-        'REPLACE',
-        loadingEntity.data.address
-      )
-    : undefined
+      ? getDaoPath(loadingEntity.data.address)
+      : loadingEntity.data.type === EntityType.Wallet
+        ? config?.explorerUrlTemplates?.wallet?.replace(
+            'REPLACE',
+            loadingEntity.data.address
+          )
+        : undefined
 
   const { textRef, truncated } = useDetectTruncate()
 
@@ -67,8 +67,8 @@ export const EntityDisplay = ({
         ? t('title.chainModule.' + loadingEntity.data.name)
         : loadingEntity.data.name
       : showFullAddress
-      ? address
-      : abbreviateAddress(address, 3)
+        ? address
+        : abbreviateAddress(address, 3)
 
   return (
     <div

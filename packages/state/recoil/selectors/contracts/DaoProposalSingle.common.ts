@@ -48,7 +48,7 @@ export const getVoteSelector = selectorFamily<
       {
         proposalId: number
         voter: string
-      }
+      },
     ]
   }
 >({
@@ -79,7 +79,7 @@ export const listVotesSelector = selectorFamily<
         limit?: number
         proposalId: number
         startAfter?: string
-      }
+      },
     ]
   }
 >({
@@ -222,7 +222,7 @@ export const proposalSelector = selectorFamily<
     params: [
       {
         proposalId: number
-      }
+      },
     ]
   }
 >({
@@ -295,7 +295,7 @@ export const reverseProposalsSelector = selectorFamily<
       {
         limit?: number
         startBefore?: number
-      }
+      },
     ]
   }
 >({

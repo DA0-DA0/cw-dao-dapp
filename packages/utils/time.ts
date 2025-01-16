@@ -66,10 +66,10 @@ export const findValueAtTimestamp = <Value extends { timestamp: number }>(
   return nextIndex === -1
     ? data[data.length - 1]
     : // If the first value is after this timestamp, there is no matching item.
-    nextIndex === 0
-    ? undefined
-    : // Otherwise just use the previous value.
-      data[nextIndex - 1]
+      nextIndex === 0
+      ? undefined
+      : // Otherwise just use the previous value.
+        data[nextIndex - 1]
 }
 
 /**

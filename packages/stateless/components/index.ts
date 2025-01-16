@@ -1,4 +1,5 @@
 export * from './actions'
+export * from './apps'
 export * from './buttons'
 export * from './chain'
 export * from './command'

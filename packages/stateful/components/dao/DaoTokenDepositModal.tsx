@@ -62,16 +62,16 @@ export const DaoTokenDepositModal = ({
     !address
       ? undefined
       : token.type === 'native'
-      ? nativeDenomBalanceWithTimestampSelector({
-          walletAddress: address,
-          chainId: token.chainId,
-          denom: token.denomOrAddress,
-        })
-      : Cw20BaseSelectors.balanceWithTimestampSelector({
-          contractAddress: token.denomOrAddress,
-          chainId: token.chainId,
-          params: [{ address }],
-        }),
+        ? nativeDenomBalanceWithTimestampSelector({
+            walletAddress: address,
+            chainId: token.chainId,
+            denom: token.denomOrAddress,
+          })
+        : Cw20BaseSelectors.balanceWithTimestampSelector({
+            contractAddress: token.denomOrAddress,
+            chainId: token.chainId,
+            params: [{ address }],
+          }),
     {
       amount: 0,
       timestamp: Date.now(),

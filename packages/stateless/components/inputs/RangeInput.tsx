@@ -9,7 +9,7 @@ import {
 
 export interface RangeInputProps<
   FV extends FieldValues,
-  FieldName extends Path<FV>
+  FieldName extends Path<FV>,
 > {
   // Required fields
   min: number

@@ -567,14 +567,14 @@ export class CreateRewardDistributionAction extends ActionBase<CreateRewardDistr
           })
           ? messages[fundLatestId].decodedMessage.wasm.execute.funds[0]?.amount
           : // Cw20
-          type === TokenType.Cw20
-          ? parseCw20SendContractMessage(
-              messages[fundLatestId].decodedMessage,
-              {
-                fund_latest: {},
-              }
-            )?.amount || 0
-          : 0
+            type === TokenType.Cw20
+            ? parseCw20SendContractMessage(
+                messages[fundLatestId].decodedMessage,
+                {
+                  fund_latest: {},
+                }
+              )?.amount || 0
+            : 0
         : 0
 
     const denomOrAddress =

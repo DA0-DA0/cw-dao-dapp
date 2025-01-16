@@ -4,14 +4,14 @@ const valueToBigNumber = (n: HugeDecimal.Value): BigNumber =>
   n === null || n === undefined
     ? new BigNumber(NaN)
     : n instanceof BigNumber
-    ? n
-    : n instanceof HugeDecimal
-    ? n['value']
-    : typeof n === 'bigint'
-    ? new BigNumber(n.toString())
-    : typeof n === 'object' && 'amount' in n
-    ? valueToBigNumber(n.amount)
-    : new BigNumber(n)
+      ? n
+      : n instanceof HugeDecimal
+        ? n['value']
+        : typeof n === 'bigint'
+          ? new BigNumber(n.toString())
+          : typeof n === 'object' && 'amount' in n
+            ? valueToBigNumber(n.amount)
+            : new BigNumber(n)
 
 interface AmountWrapper {
   amount: string

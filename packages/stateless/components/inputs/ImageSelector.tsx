@@ -39,7 +39,7 @@ export type StringFieldNames<FieldValues> = {
 
 export interface ImageSelectorModalProps<
   FV extends FieldValues,
-  StringFieldName extends StringFieldNames<FV>
+  StringFieldName extends StringFieldNames<FV>,
 > {
   fieldName: StringFieldName
   register: UseFormRegister<FV>
@@ -58,7 +58,7 @@ export interface ImageSelectorModalProps<
 
 export const ImageSelectorModal = <
   FV extends FieldValues,
-  StringFieldName extends StringFieldNames<FV>
+  StringFieldName extends StringFieldNames<FV>,
 >({
   fieldName,
   register,
@@ -160,7 +160,7 @@ export const ImageSelectorModal = <
 
 export interface ImageSelectorProps<
   FV extends FieldValues,
-  StringFieldName extends StringFieldNames<FV>
+  StringFieldName extends StringFieldNames<FV>,
 > {
   fieldName: StringFieldName
   register: UseFormRegister<FV>
@@ -177,7 +177,7 @@ export interface ImageSelectorProps<
 
 export const ImageSelector = <
   FV extends FieldValues,
-  StringFieldName extends StringFieldNames<FV>
+  StringFieldName extends StringFieldNames<FV>,
 >({
   fieldName,
   error,

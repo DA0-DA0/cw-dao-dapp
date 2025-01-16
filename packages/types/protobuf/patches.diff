@@ -26,7 +26,7 @@ index 1dc291f1a..a90db9057 100644
        obj.msgs = message.msgs;
      }
 diff --git b/packages/types/protobuf/codegen/cosmos/gov/v1/tx.ts a/packages/types/protobuf/codegen/cosmos/gov/v1/tx.ts
-index 71df399d6..4ebbe5742 100644
+index 1c6ddf6ae..6565036dc 100644
 --- b/packages/types/protobuf/codegen/cosmos/gov/v1/tx.ts
 +++ a/packages/types/protobuf/codegen/cosmos/gov/v1/tx.ts
 @@ -1,4 +1,5 @@
@@ -132,6 +132,28 @@ index 1caf8781d..9d864d753 100644
  export const getSigningNeutronClientOptions = ({
    defaultTypes = defaultRegistryTypes
  }: {
+diff --git b/packages/types/protobuf/codegen/osmosis/concentratedliquidity/v1beta1/tx.ts a/packages/types/protobuf/codegen/osmosis/concentratedliquidity/v1beta1/tx.ts
+index a4296ce65..e264c016b 100644
+--- b/packages/types/protobuf/codegen/osmosis/concentratedliquidity/v1beta1/tx.ts
++++ a/packages/types/protobuf/codegen/osmosis/concentratedliquidity/v1beta1/tx.ts
+@@ -942,7 +942,7 @@ export const MsgWithdrawPosition = {
+       message.sender = object.sender;
+     }
+     if (object.liquidity_amount !== undefined && object.liquidity_amount !== null) {
+-      message.liquidityAmount = object.liquidity_amount;
++      message.liquidityAmount = Decimal.fromAtomics(object.liquidity_amount, 18).toString();
+     }
+     return message;
+   },
+@@ -950,7 +950,7 @@ export const MsgWithdrawPosition = {
+     const obj: any = {};
+     obj.position_id = message.positionId !== BigInt(0) ? message.positionId.toString() : undefined;
+     obj.sender = message.sender === "" ? undefined : message.sender;
+-    obj.liquidity_amount = message.liquidityAmount === "" ? undefined : message.liquidityAmount;
++    obj.liquidity_amount = message.liquidityAmount === "" ? undefined : Decimal.fromUserInput(message.liquidityAmount, 18).atomics;
+     return obj;
+   },
+   fromAminoMsg(object: MsgWithdrawPositionAminoMsg): MsgWithdrawPosition {
 diff --git b/packages/types/protobuf/codegen/osmosis/poolmanager/v1beta1/module_route.ts a/packages/types/protobuf/codegen/osmosis/poolmanager/v1beta1/module_route.ts
 index a644c0f74..9bce95dea 100644
 --- b/packages/types/protobuf/codegen/osmosis/poolmanager/v1beta1/module_route.ts

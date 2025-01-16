@@ -61,7 +61,7 @@ export const getInstantiateInfo: DaoCreatorGetInstantiateInfo<CreatorData> = ({
                 activeThreshold.value,
                 govTokenType === GovernanceTokenType.New
                   ? NEW_DAO_TOKEN_DECIMALS
-                  : existingToken?.decimals ?? 0
+                  : (existingToken?.decimals ?? 0)
               ).toString(),
             },
           }
@@ -217,49 +217,52 @@ export const getInstantiateInfo: DaoCreatorGetInstantiateInfo<CreatorData> = ({
           },
         })
       : isSecret
-      ? SecretSnip20StakedVotingModule.generateModuleInstantiateInfo(chainId, {
-          ...commonConfig,
-          token: {
-            existing: {
-              address: existingTokenDenomOrAddress,
-              // Type-checked above.
-              codeHash: existingToken!.snip20CodeHash!,
-              stakingContract:
-                customStakingAddress !== undefined
-                  ? {
-                      existing: {
-                        address: customStakingAddress,
-                        // Type-checked above.
-                        codeHash: customStakingCodeHash!,
+        ? SecretSnip20StakedVotingModule.generateModuleInstantiateInfo(
+            chainId,
+            {
+              ...commonConfig,
+              token: {
+                existing: {
+                  address: existingTokenDenomOrAddress,
+                  // Type-checked above.
+                  codeHash: existingToken!.snip20CodeHash!,
+                  stakingContract:
+                    customStakingAddress !== undefined
+                      ? {
+                          existing: {
+                            address: customStakingAddress,
+                            // Type-checked above.
+                            codeHash: customStakingCodeHash!,
+                          },
+                        }
+                      : {
+                          new: {
+                            unstakingDuration,
+                          },
+                        },
+                },
+              },
+            }
+          )
+        : Cw20StakedVotingModule.generateModuleInstantiateInfo(chainId, {
+            ...commonConfig,
+            token: {
+              existing: {
+                address: existingTokenDenomOrAddress,
+                stakingContract:
+                  customStakingAddress !== undefined
+                    ? {
+                        existing: {
+                          address: customStakingAddress,
+                        },
+                      }
+                    : {
+                        new: {
+                          unstakingDuration,
+                        },
                       },
-                    }
-                  : {
-                      new: {
-                        unstakingDuration,
-                      },
-                    },
+              },
             },
-          },
-        })
-      : Cw20StakedVotingModule.generateModuleInstantiateInfo(chainId, {
-          ...commonConfig,
-          token: {
-            existing: {
-              address: existingTokenDenomOrAddress,
-              stakingContract:
-                customStakingAddress !== undefined
-                  ? {
-                      existing: {
-                        address: customStakingAddress,
-                      },
-                    }
-                  : {
-                      new: {
-                        unstakingDuration,
-                      },
-                    },
-            },
-          },
-        })
+          })
   }
 }

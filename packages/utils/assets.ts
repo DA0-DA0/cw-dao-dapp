@@ -109,11 +109,11 @@ export const shortenTokenSymbol = (
   const tokenSymbol = isIbc
     ? abbreviateString(symbol, 7, 3)
     : isFactory
-    ? // Truncate address in middle.
-      `factory/${abbreviateAddress(symbol.split('/')[1], 3)}/${
-        symbol.split('/')[2]
-      }`
-    : symbol
+      ? // Truncate address in middle.
+        `factory/${abbreviateAddress(symbol.split('/')[1], 3)}/${
+          symbol.split('/')[2]
+        }`
+      : symbol
 
   return {
     isShortened: isIbc || isFactory,

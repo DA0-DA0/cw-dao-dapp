@@ -36,17 +36,17 @@ const Template: ComponentStory<typeof DaoCreateConfigInputCard> = (args) => {
               fieldNameOrNames === undefined
                 ? getValues()
                 : typeof fieldNameOrNames === 'string'
-                ? getValues(
-                    ('proposalModuleAdapters.0.data.' +
-                      fieldNameOrNames) as `proposalModuleAdapters.${number}.data.${string}`
-                  )
-                : getValues(
-                    fieldNameOrNames.map(
-                      (fieldName) =>
-                        ('proposalModuleAdapters.0.data.' +
-                          fieldName) as `proposalModuleAdapters.${number}.data.${string}`
+                  ? getValues(
+                      ('proposalModuleAdapters.0.data.' +
+                        fieldNameOrNames) as `proposalModuleAdapters.${number}.data.${string}`
                     )
-                  )
+                  : getValues(
+                      fieldNameOrNames.map(
+                        (fieldName) =>
+                          ('proposalModuleAdapters.0.data.' +
+                            fieldName) as `proposalModuleAdapters.${number}.data.${string}`
+                      )
+                    )
             }
             newDao={newDao}
             register={(fieldName, options) =>

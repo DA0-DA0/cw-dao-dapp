@@ -275,7 +275,7 @@ const commonErrorPatterns: Record<CommonError, (string | string[])[]> = {
 }
 const commonErrorPatternsEntries = Object.entries(commonErrorPatterns) as [
   CommonError,
-  (string | string[])[]
+  (string | string[])[],
 ][]
 
 // Whether or not to send the error to Sentry. Some errors we want to clean up

@@ -70,11 +70,11 @@ export const WalletUi = (props: WalletModalProps) => {
     ? showWalletConnectQr
       ? t('title.scanQrCode')
       : current?.walletName.startsWith('web3auth_')
-      ? t('title.loggingInToService', { service: current.walletPrettyName })
-      : t('title.connectingToWallet', { wallet: current?.walletPrettyName })
+        ? t('title.loggingInToService', { service: current.walletPrettyName })
+        : t('title.connectingToWallet', { wallet: current?.walletPrettyName })
     : isWalletConnected
-    ? t('title.loggedIn')
-    : t('title.logInWith')
+      ? t('title.loggedIn')
+      : t('title.logInWith')
 
   return (
     <Modal
@@ -134,6 +134,7 @@ export const WalletUi = (props: WalletModalProps) => {
                 .filter(Boolean)
                 .map((chainId) =>
                   convertChain(
+                    // @ts-ignore
                     getChainForChainId(chainId).chainRegistry!,
                     [maybeGetAssetListForChainId(chainId)].filter(
                       (al): al is AssetList => !!al

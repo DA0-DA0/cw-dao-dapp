@@ -103,28 +103,28 @@ export const useGovernanceTokenInfo = ({
     loadingWalletBalance: loadingWalletBalance.loading
       ? { loading: true }
       : !loadingWalletBalance.data
-      ? undefined
-      : {
-          loading: false,
-          data: HugeDecimal.from(loadingWalletBalance.data.balance),
-        },
+        ? undefined
+        : {
+            loading: false,
+            data: HugeDecimal.from(loadingWalletBalance.data.balance),
+          },
     // Treasury balance
     loadingTreasuryBalance: loadingTreasuryBalance.loading
       ? { loading: true }
       : !loadingTreasuryBalance.data
-      ? undefined
-      : {
-          loading: false,
-          data: HugeDecimal.from(loadingTreasuryBalance.data.balance),
-        },
+        ? undefined
+        : {
+            loading: false,
+            data: HugeDecimal.from(loadingTreasuryBalance.data.balance),
+          },
     // Price
     loadingPrice: loadingPrice.loading
       ? { loading: true }
       : !loadingPrice.data
-      ? undefined
-      : {
-          loading: false,
-          data: loadingPrice.data,
-        },
+        ? undefined
+        : {
+            loading: false,
+            data: loadingPrice.data,
+          },
   }
 }

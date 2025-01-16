@@ -92,36 +92,36 @@ export class TokenStakedVotingModule extends VotingModuleBase<CwDao> {
                 },
               }
             : 'new' in config.token
-            ? {
-                new: {
-                  initial_balances: config.token.new.initialBalances,
-                  initial_dao_balance: config.token.new.initialDaoBalance,
-                  metadata: {
-                    additional_denom_units: [
-                      {
-                        aliases: [],
-                        denom: config.token.new.symbol,
-                        exponent: config.token.new.decimals.toString(),
-                      },
-                    ],
-                    description: 'Governance Token',
-                    display: config.token.new.symbol,
-                    name: config.token.new.name,
-                    symbol: config.token.new.symbol,
+              ? {
+                  new: {
+                    initial_balances: config.token.new.initialBalances,
+                    initial_dao_balance: config.token.new.initialDaoBalance,
+                    metadata: {
+                      additional_denom_units: [
+                        {
+                          aliases: [],
+                          denom: config.token.new.symbol,
+                          exponent: config.token.new.decimals.toString(),
+                        },
+                      ],
+                      description: 'Governance Token',
+                      display: config.token.new.symbol,
+                      name: config.token.new.name,
+                      symbol: config.token.new.symbol,
+                    },
+                    subdenom: config.token.new.symbol.toLowerCase(),
+                    token_issuer_code_id: codeIds.CwTokenfactoryIssuer,
                   },
-                  subdenom: config.token.new.symbol.toLowerCase(),
-                  token_issuer_code_id: codeIds.CwTokenfactoryIssuer,
+                }
+              : {
+                  factory: encodeJsonToBase64({
+                    execute: {
+                      contract_addr: config.token.factory.address,
+                      funds: config.token.factory.funds || [],
+                      msg: encodeJsonToBase64(config.token.factory.message),
+                    },
+                  } as WasmMsg),
                 },
-              }
-            : {
-                factory: encodeJsonToBase64({
-                  execute: {
-                    contract_addr: config.token.factory.address,
-                    funds: config.token.factory.funds || [],
-                    msg: encodeJsonToBase64(config.token.factory.message),
-                  },
-                } as WasmMsg),
-              },
         unstaking_duration: config.unstakingDuration,
       } as InstantiateMsg),
       funds:

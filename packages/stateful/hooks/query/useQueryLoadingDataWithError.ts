@@ -10,7 +10,7 @@ import { LoadingDataWithError } from '@dao-dao/types'
  */
 export const useQueryLoadingDataWithError = <
   TQueryFnData extends unknown,
-  TTransformedData extends unknown = TQueryFnData
+  TTransformedData extends unknown = TQueryFnData,
 >(
   /**
    * Query options to passthrough to useQuery.

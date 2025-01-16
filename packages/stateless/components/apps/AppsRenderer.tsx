@@ -1,55 +1,141 @@
 import { CloseFullscreen, OpenInFull } from '@mui/icons-material'
 import clsx from 'clsx'
 import {
+  ComponentType,
   Dispatch,
+  ReactNode,
   RefCallback,
   SetStateAction,
   useEffect,
+  useRef,
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
-import { DAO_APPS, toAccessibleImageUrl } from '@dao-dao/utils'
+import { AddressInputProps } from '@dao-dao/types'
+import { APPS, toAccessibleImageUrl } from '@dao-dao/utils'
 
-import { useQuerySyncedState } from '../../../hooks'
-import { Button } from '../../buttons'
-import { IconButton } from '../../icon_buttons'
-import { TextInput } from '../../inputs'
-import { StatusCard } from '../../StatusCard'
-import { Tooltip } from '../../tooltip'
+import { useQuerySyncedState } from '../../hooks'
+import { Button } from '../buttons'
+import { IconButton } from '../icon_buttons'
+import { SegmentedControls, TextInput } from '../inputs'
+import { StatusCard } from '../StatusCard'
+import { Tooltip } from '../tooltip'
 
-export type AppsTabProps = {
+export type AppsRendererExecutionType = 'normal' | 'authzExec' | 'daoAdminExec'
+
+export type AppsRendererProps = {
+  /**
+   * The reference to set the iframe for the apps passthrough functionality.
+   */
   iframeRef: RefCallback<HTMLIFrameElement | null>
+  /**
+   * Whether the apps renderer is in full screen mode.
+   */
   fullScreen: boolean
+  /**
+   * Set the full screen mode.
+   */
   setFullScreen: Dispatch<SetStateAction<boolean>>
+  /**
+   * The type of execution.
+   */
+  executionType: AppsRendererExecutionType
+  /**
+   * Set the execution type.
+   */
+  setExecutionType: Dispatch<SetStateAction<AppsRendererExecutionType>>
+  /**
+   * The other (non-normal execution type) address.
+   */
+  otherAddress: string
+  /**
+   * Set the other (non-normal execution type) address.
+   */
+  setOtherAddress: Dispatch<SetStateAction<string>>
+  /**
+   * Stateful AddressInput component.
+   */
+  AddressInput: ComponentType<AddressInputProps>
+  /**
+   * The chain picker node.
+   */
+  chainPicker: ReactNode
 }
 
-export const AppsTab = (props: AppsTabProps) => {
+export const AppsRenderer = ({
+  iframeRef,
+  fullScreen,
+  setFullScreen,
+  executionType,
+  setExecutionType,
+  otherAddress,
+  setOtherAddress,
+  AddressInput,
+  chainPicker,
+}: AppsRendererProps) => {
   const [url, setUrl] = useQuerySyncedState({
     param: 'url',
     defaultValue: '',
   })
 
-  return props.fullScreen ? (
+  let urlValid = false
+  try {
+    urlValid = !!url && !!new URL(url).href && ALLOWED_URL_REGEX.test(url)
+  } catch {
+    // Ignore.
+  }
+
+  // Set full screen first time when URL is set. If the user manually closes the
+  // full screen app, we don't want to open it again.
+  const openedFullScreenRef = useRef(false)
+  useEffect(() => {
+    if (urlValid && !openedFullScreenRef.current) {
+      setFullScreen(true)
+      openedFullScreenRef.current = true
+    }
+  }, [setFullScreen, urlValid, url])
+
+  // If URL is set on mount, open full screen.
+  useEffect(() => {
+    if (urlValid) {
+      setFullScreen(true)
+      openedFullScreenRef.current = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const props: InnerAppsRendererProps = {
+    fullScreen,
+    iframeRef,
+    setFullScreen,
+    setUrl,
+    url,
+    urlValid,
+    executionType,
+    setExecutionType,
+    otherAddress,
+    setOtherAddress,
+    AddressInput,
+    chainPicker,
+  }
+
+  return fullScreen ? (
     createPortal(
       <div className="hd-screen wd-screen fixed top-0 left-0 z-[38] bg-background-base p-safe pt-safe-or-4">
-        <InnerAppsTab
-          className="h-full w-full"
-          setUrl={setUrl}
-          url={url}
-          {...props}
-        />
+        <InnerAppsRenderer {...props} className="h-full w-full" />
       </div>,
       document.body
     )
   ) : (
-    <InnerAppsTab setUrl={setUrl} url={url} {...props} />
+    <InnerAppsRenderer {...props} />
   )
 }
 
-type InnerAppsTabProps = AppsTabProps & {
+type InnerAppsRendererProps = AppsRendererProps & {
   url: string
+  urlValid: boolean
   setUrl: Dispatch<SetStateAction<string>>
   className?: string
 }
@@ -58,14 +144,21 @@ type InnerAppsTabProps = AppsTabProps & {
 // URLs.
 const ALLOWED_URL_REGEX = /^https?:\/\/.+$/
 
-const InnerAppsTab = ({
+const InnerAppsRenderer = ({
   iframeRef,
   fullScreen,
   setFullScreen,
   url,
+  urlValid,
   setUrl,
   className,
-}: InnerAppsTabProps) => {
+  executionType,
+  setExecutionType,
+  otherAddress,
+  setOtherAddress,
+  AddressInput,
+  chainPicker,
+}: InnerAppsRendererProps) => {
   const { t } = useTranslation()
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null)
   const [inputUrl, setInputUrl] = useState<string>(url)
@@ -76,20 +169,16 @@ const InnerAppsTab = ({
     }
   }
 
-  // On first iframe mount, go to URL.
+  // On URL change, navigate iframe to it if valid.
   useEffect(() => {
     try {
-      if (
-        iframe &&
-        (url === '' || (url && new URL(url).href)) &&
-        ALLOWED_URL_REGEX.test(url)
-      ) {
+      if (iframe && urlValid) {
         iframe.src = url
       }
     } catch {
       // Ignore.
     }
-  }, [iframe, url])
+  }, [iframe, url, urlValid])
 
   // Add event handler to inform iframe that it's wrapped in DAO DAO if it asks.
   useEffect(() => {
@@ -121,11 +210,11 @@ const InnerAppsTab = ({
   }, [setInputUrl, url])
 
   // If no app URL matching, choose the last one (custom) with empty URL.
-  const selectedAppIndex = DAO_APPS.findIndex(
+  const selectedAppIndex = APPS.findIndex(
     ({ url: appUrl }) => appUrl === url || !appUrl
   )
 
-  const customSelected = !!url && selectedAppIndex === DAO_APPS.length - 1
+  const customSelected = !!url && selectedAppIndex === APPS.length - 1
 
   return (
     <div className={clsx('flex flex-col gap-2', className)}>
@@ -135,7 +224,7 @@ const InnerAppsTab = ({
           fullScreen && 'px-safe-offset-4'
         )}
       >
-        {DAO_APPS.map(({ platform, name, imageUrl, url: appUrl }, index) => {
+        {APPS.map(({ platform, name, imageUrl, url: appUrl }, index) => {
           const isCustom = !appUrl
           const selected = index === selectedAppIndex
 
@@ -226,6 +315,36 @@ const InnerAppsTab = ({
             variant="ghost"
           />
         </Tooltip>
+      </div>
+
+      <div
+        className={clsx(
+          'flex flex-col gap-3 p-3 bg-background-tertiary rounded-md',
+          fullScreen && 'mx-safe-offset-4'
+        )}
+      >
+        <SegmentedControls<AppsRendererExecutionType>
+          onSelect={(value) => setExecutionType(value)}
+          selected={executionType}
+          tabs={[
+            { label: t('title.normal'), value: 'normal' },
+            { label: t('title.authzExec'), value: 'authzExec' },
+            { label: t('title.daoAdminExec'), value: 'daoAdminExec' },
+          ]}
+        />
+
+        {executionType !== 'normal' && (
+          <div className="flex flex-row gap-2 items-stretch">
+            {chainPicker}
+
+            <AddressInput
+              containerClassName="grow"
+              setValue={(_, value) => setOtherAddress(value)}
+              type={executionType === 'daoAdminExec' ? 'contract' : undefined}
+              value={otherAddress}
+            />
+          </div>
+        )}
       </div>
 
       <iframe

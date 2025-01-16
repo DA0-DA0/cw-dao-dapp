@@ -84,8 +84,8 @@ export const useStakingInfo = ({
   const claims = loadingClaims.loading
     ? []
     : !loadingClaims.data
-    ? undefined
-    : loadingClaims.data.claims
+      ? undefined
+      : loadingClaims.data.claims
 
   const claimsPending = blockHeight
     ? claims?.filter((c) => !claimAvailable(c, blockHeight))
@@ -141,19 +141,19 @@ export const useStakingInfo = ({
     loadingTotalStakedValue: loadingTotalStakedValue.loading
       ? { loading: true }
       : !loadingTotalStakedValue.data
-      ? undefined
-      : {
-          loading: false,
-          data: HugeDecimal.from(loadingTotalStakedValue.data.total),
-        },
+        ? undefined
+        : {
+            loading: false,
+            data: HugeDecimal.from(loadingTotalStakedValue.data.total),
+          },
     // Wallet staked value
     loadingWalletStakedValue: loadingWalletStakedValue.loading
       ? { loading: true }
       : !loadingWalletStakedValue.data
-      ? undefined
-      : {
-          loading: false,
-          data: HugeDecimal.from(loadingWalletStakedValue.data.value),
-        },
+        ? undefined
+        : {
+            loading: false,
+            data: HugeDecimal.from(loadingWalletStakedValue.data.value),
+          },
   }
 }

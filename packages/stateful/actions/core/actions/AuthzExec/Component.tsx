@@ -11,13 +11,12 @@ import {
   useChain,
 } from '@dao-dao/stateless'
 import {
-  AddressInputProps,
   NestedActionsEditorFormData,
   StatefulEntityDisplayProps,
   UnifiedCosmosMsg,
 } from '@dao-dao/types'
 import { ActionComponent } from '@dao-dao/types/actions'
-import { isValidBech32Address, makeValidateAddress } from '@dao-dao/utils'
+import { isValidBech32Address } from '@dao-dao/utils'
 
 export type AuthzExecData = {
   chainId: string
@@ -35,7 +34,6 @@ export type AuthzExecOptions = {
   // to render.
   msgPerSenderIndex?: number
 
-  AddressInput: ComponentType<AddressInputProps<AuthzExecData>>
   EntityDisplay: ComponentType<StatefulEntityDisplayProps>
 } & NestedActionsEditorOptions &
   Omit<NestedActionsRendererProps, 'msgsFieldName'>
@@ -45,59 +43,49 @@ export const AuthzExecComponent: ActionComponent<AuthzExecOptions> = (
 ) => {
   const { t } = useTranslation()
   const { bech32Prefix } = useChain()
-  const { watch, register } = useFormContext<AuthzExecData>()
+  const { watch } = useFormContext<AuthzExecData>()
   const {
     fieldNamePrefix,
-    errors,
     isCreating,
-    options: { msgPerSenderIndex, AddressInput, EntityDisplay, ...options },
+    options: { msgPerSenderIndex, EntityDisplay, ...options },
   } = props
 
   const address = watch((fieldNamePrefix + 'address') as 'address')
   const msgsPerSender = watch((fieldNamePrefix + '_msgs') as '_msgs') || []
 
+  const sender = !isCreating
+    ? msgsPerSender[msgPerSenderIndex!]?.sender
+    : undefined
+
   return (
     <>
-      {/* When creating, show common address field for all messages. When not creating, msgs will be grouped by sender and displayed in order, which if created via this action, will look the same with one address at the top and many actions below it. */}
-      {isCreating && (
+      {isValidBech32Address(address, bech32Prefix) && isCreating ? (
         <>
-          <InputLabel className="-mb-3" name={t('title.account')} />
+          <InputLabel className="-mb-2" name={t('title.actions')} />
 
-          <AddressInput
-            autoFocus
-            error={errors?.address}
-            fieldName={(fieldNamePrefix + 'address') as 'address'}
-            register={register}
-            validation={[makeValidateAddress(bech32Prefix)]}
-          />
+          <NestedActionsEditor {...props} />
         </>
-      )}
+      ) : (
+        !isCreating && (
+          <div className="flex flex-col gap-4">
+            <InputLabel className="-mb-2" name={t('title.account')} />
+            {sender ? (
+              <EntityDisplay address={sender} />
+            ) : (
+              <p className="body-text italic">
+                {t('info.failedToDecodeAddressUnrecognizedMessage')}
+              </p>
+            )}
 
-      {(isValidBech32Address(address, bech32Prefix) || !isCreating) && (
-        <>
-          {isCreating ? (
-            <>
-              <InputLabel className="-mb-2" name={t('title.actions')} />
-
-              <NestedActionsEditor {...props} />
-            </>
-          ) : (
-            <div className="flex flex-col gap-4">
-              <InputLabel className="-mb-2" name={t('title.account')} />
-              <EntityDisplay
-                address={msgsPerSender[msgPerSenderIndex!].sender}
-              />
-
-              <InputLabel className="-mb-2" name={t('title.actions')} />
-              <NestedActionsRenderer
-                {...options}
-                msgsFieldName={
-                  fieldNamePrefix + `_msgs.${msgPerSenderIndex!}.msgs`
-                }
-              />
-            </div>
-          )}
-        </>
+            <InputLabel className="-mb-2" name={t('title.actions')} />
+            <NestedActionsRenderer
+              {...options}
+              msgsFieldName={
+                fieldNamePrefix + `_msgs.${msgPerSenderIndex!}.msgs`
+              }
+            />
+          </div>
+        )
       )}
     </>
   )

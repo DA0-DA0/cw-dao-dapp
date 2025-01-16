@@ -244,33 +244,35 @@ export const fetchVestingPaymentInfo = async (
           },
         ]
       : 'saturating_linear' in vest.vested
-      ? [
-          {
-            timestamp: startTimeMs + vest.vested.saturating_linear.min_x * 1000,
-            amount: HugeDecimal.from(vest.vested.saturating_linear.min_y),
-          },
-          {
-            timestamp: startTimeMs + vest.vested.saturating_linear.max_x * 1000,
-            amount: HugeDecimal.from(vest.vested.saturating_linear.max_y),
-          },
-        ]
-      : vest.vested.piecewise_linear.steps.reduce(
-          (acc, [seconds, amount], index): VestingStep[] => {
-            // Ignore first step if hardcoded 0 amount at 1 second.
-            if (index === 0 && seconds === 1 && amount === '0') {
-              return acc
-            }
+        ? [
+            {
+              timestamp:
+                startTimeMs + vest.vested.saturating_linear.min_x * 1000,
+              amount: HugeDecimal.from(vest.vested.saturating_linear.min_y),
+            },
+            {
+              timestamp:
+                startTimeMs + vest.vested.saturating_linear.max_x * 1000,
+              amount: HugeDecimal.from(vest.vested.saturating_linear.max_y),
+            },
+          ]
+        : vest.vested.piecewise_linear.steps.reduce(
+            (acc, [seconds, amount], index): VestingStep[] => {
+              // Ignore first step if hardcoded 0 amount at 1 second.
+              if (index === 0 && seconds === 1 && amount === '0') {
+                return acc
+              }
 
-            return [
-              ...acc,
-              {
-                timestamp: startTimeMs + seconds * 1000,
-                amount: HugeDecimal.from(amount),
-              },
-            ]
-          },
-          [] as VestingStep[]
-        )
+              return [
+                ...acc,
+                {
+                  timestamp: startTimeMs + seconds * 1000,
+                  amount: HugeDecimal.from(amount),
+                },
+              ]
+            },
+            [] as VestingStep[]
+          )
 
   const endDate = new Date(steps[steps.length - 1].timestamp)
 

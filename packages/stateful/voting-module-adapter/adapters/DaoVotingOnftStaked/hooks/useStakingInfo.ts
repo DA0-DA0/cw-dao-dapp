@@ -284,21 +284,21 @@ export const useStakingInfo = ({
       !fetchTotalStakedValue || loadingTotalStakedValue.errored
         ? undefined
         : loadingTotalStakedValue.loading
-        ? { loading: true }
-        : {
-            loading: false,
-            data: HugeDecimal.from(loadingTotalStakedValue.data.power),
-          },
+          ? { loading: true }
+          : {
+              loading: false,
+              data: HugeDecimal.from(loadingTotalStakedValue.data.power),
+            },
     // Wallet staked value
     loadingWalletStakedValue:
       !fetchWalletStakedValue || loadingWalletStakedNfts.errored
         ? undefined
         : loadingWalletStakedNfts.loading
-        ? { loading: true }
-        : {
-            loading: false,
-            data: HugeDecimal.from(loadingWalletStakedNfts.data.length),
-          },
+          ? { loading: true }
+          : {
+              loading: false,
+              data: HugeDecimal.from(loadingWalletStakedNfts.data.length),
+            },
     loadingWalletStakedNfts,
     loadingWalletUnstakedNfts,
   }

@@ -89,10 +89,10 @@ export const treasuryTransactionsSelector = selectorFamily<
           b.timestamp && a.timestamp
             ? b.timestamp.getTime() - a.timestamp.getTime()
             : !a.timestamp
-            ? 1
-            : !b.timestamp
-            ? -1
-            : b.tx.height - a.tx.height
+              ? 1
+              : !b.timestamp
+                ? -1
+                : b.tx.height - a.tx.height
         )
     },
 })
@@ -341,7 +341,9 @@ export const treasuryValueHistorySelector = selectorFamily<
     range: TokenPriceHistoryRange
     filter?: {
       // Filter by any of the account properties.
-      account?: Partial<Pick<Account, typeof ACCOUNT_FILTER_PROPERTIES[number]>>
+      account?: Partial<
+        Pick<Account, (typeof ACCOUNT_FILTER_PROPERTIES)[number]>
+      >
       // If defined, only show these tokens.
       tokens?: GenericTokenSource[]
     }

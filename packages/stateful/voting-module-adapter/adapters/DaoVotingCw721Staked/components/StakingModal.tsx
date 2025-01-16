@@ -225,8 +225,8 @@ const InnerStakingModal = ({
   StakingMode.Stake
     ? loadingWalletUnstakedNfts
     : mode === StakingMode.Unstake
-    ? loadingWalletStakedNfts
-    : undefined) ?? {
+      ? loadingWalletStakedNfts
+      : undefined) ?? {
     loading: false,
     errored: true,
     error: new Error('Unexpected failure to load NFTs'),
@@ -245,8 +245,8 @@ const InnerStakingModal = ({
           mode === StakingMode.Stake
             ? t('button.stake')
             : mode === StakingMode.Unstake
-            ? t('title.unstake')
-            : '',
+              ? t('title.unstake')
+              : '',
         onClick: onAction,
       }}
       header={{
@@ -257,8 +257,8 @@ const InnerStakingModal = ({
           mode === StakingMode.Stake
             ? t('title.stakingModeNfts.stakeHeaderSubtitle')
             : mode === StakingMode.Unstake
-            ? t('title.stakingModeNfts.unstakeHeaderSubtitle')
-            : '',
+              ? t('title.stakingModeNfts.unstakeHeaderSubtitle')
+              : '',
       }}
       headerDisplay={
         !(

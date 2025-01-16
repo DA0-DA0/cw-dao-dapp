@@ -95,16 +95,16 @@ export const CreateRewardDistributionComponent: ActionComponent<
     token.updating
       ? undefined
       : !selectedToken
-      ? t('error.unknownDenom', { denom: denomOrAddress })
-      : initialFunds &&
-        selectedBalance.toHumanReadable(decimals).lt(initialFunds)
-      ? t('error.insufficientFundsWarning', {
-          amount: selectedBalance.toFormattedString({
-            decimals,
-          }),
-          tokenSymbol: selectedToken.token.symbol,
-        })
-      : undefined
+        ? t('error.unknownDenom', { denom: denomOrAddress })
+        : initialFunds &&
+            selectedBalance.toHumanReadable(decimals).lt(initialFunds)
+          ? t('error.insufficientFundsWarning', {
+              amount: selectedBalance.toFormattedString({
+                decimals,
+              }),
+              tokenSymbol: selectedToken.token.symbol,
+            })
+          : undefined
 
   return (
     <>

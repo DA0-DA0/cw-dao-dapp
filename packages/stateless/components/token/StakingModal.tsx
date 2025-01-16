@@ -77,9 +77,9 @@ export const StakingModal = ({
         ? undefined
         : loadingStakableTokens.data
       : // Unstaking or restaking.
-      !loadingUnstakableTokens || loadingUnstakableTokens.loading
-      ? undefined
-      : loadingUnstakableTokens.data
+        !loadingUnstakableTokens || loadingUnstakableTokens.loading
+        ? undefined
+        : loadingUnstakableTokens.data
 
   const invalidAmount = (): string | undefined => {
     if (mode === StakingMode.Claim) {

@@ -94,7 +94,7 @@ const eslintConfig = {
               regex: '\\@\\/\\.\\.\\/\\.\\.\\/packages',
               replacement: '@dao-dao',
               message:
-                'Import from @dao-dao/* instead of a relative path (i.e. replace "@/../../packages" with "@dao-dao").',
+                'Import from @dao-dao/* instead of a relative path (i.e. replace "../../packages" with "@dao-dao").',
             },
             {
               regex: '\\@dao\\-dao\\/stateless\\/(components|theme)[^\'"]*',
@@ -107,31 +107,6 @@ const eslintConfig = {
               },
               message:
                 'Import from root @dao-dao/stateless instead of a direct path. Ensure the export has been added to its sibling index.',
-            },
-            {
-              regex: '(?:\\.\\.\\/)+(atoms|components|hooks|util)',
-              replacement: {
-                function: '"@/" + $[1]',
-              },
-              files: {
-                // Only in apps.
-                inspect: 'apps\\/.+',
-              },
-              message:
-                'Import from root using prefix @/ instead of a relative path.',
-            },
-            {
-              regex:
-                '(?:(?:\\.\\.\\/)+|\\@\\/)(atoms|components|hooks|util)/[^\'"]+',
-              replacement: {
-                function: '"@/" + $[1]',
-              },
-              files: {
-                // Only in apps.
-                inspect: 'apps\\/.+',
-              },
-              message:
-                'Import from root @/ instead of a direct path. Ensure the export has been added to its sibling index.',
             },
             {
               regex: '(\\bt\\(\\s*\'[^\\.\']+\'|i18nKey="[^\\."]+")',

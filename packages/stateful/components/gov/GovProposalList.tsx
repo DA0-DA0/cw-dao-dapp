@@ -190,12 +190,12 @@ export const GovProposalList = ({ className }: { className: string }) => {
             ? searchedGovProposals.error
             : undefined
           : loadingPaginatedGovProposals.errored
-          ? loadingPaginatedGovProposals.error
-          : openGovProposalsVotingPeriod.errored
-          ? openGovProposalsVotingPeriod.error
-          : govProposalsDepositPeriod.errored
-          ? govProposalsDepositPeriod.error
-          : undefined
+            ? loadingPaginatedGovProposals.error
+            : openGovProposalsVotingPeriod.errored
+              ? openGovProposalsVotingPeriod.error
+              : govProposalsDepositPeriod.errored
+                ? govProposalsDepositPeriod.error
+                : undefined
       }
       isMember={true}
       loadMore={goToNextPage}

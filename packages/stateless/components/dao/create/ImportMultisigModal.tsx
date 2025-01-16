@@ -46,17 +46,17 @@ export const ImportMultisigModal = ({
     loadingMultisig.loading || loadingMultisig.errored || !processedMultisigTQ
       ? 'unknown'
       : 'absolute_count' in loadingMultisig.data.config.threshold
-      ? t('info.xOfYMultisig', {
-          x: processedMultisigTQ.threshold.display,
-          y: loadingMultisig.data.config.totalWeight,
-        })
-      : [
-          t('title.threshold') + ': ' + processedMultisigTQ.threshold.display,
-          processedMultisigTQ.quorum &&
-            t('info.quorum') + ': ' + processedMultisigTQ.quorum.display,
-        ]
-          .filter(Boolean)
-          .join(', ')
+        ? t('info.xOfYMultisig', {
+            x: processedMultisigTQ.threshold.display,
+            y: loadingMultisig.data.config.totalWeight,
+          })
+        : [
+            t('title.threshold') + ': ' + processedMultisigTQ.threshold.display,
+            processedMultisigTQ.quorum &&
+              t('info.quorum') + ': ' + processedMultisigTQ.quorum.display,
+          ]
+            .filter(Boolean)
+            .join(', ')
 
   return (
     <Modal
