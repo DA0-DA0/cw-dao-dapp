@@ -18,7 +18,7 @@ import {
 import { useTranslation } from 'react-i18next'
 
 import { OverrideHandler } from '@dao-dao/cosmiframe'
-import { chainQueries } from '@dao-dao/state/query'
+import { chainQueries, entityQueries } from '@dao-dao/state/query'
 import {
   ActionMatcherProvider,
   AppsRendererExecutionType,
@@ -61,7 +61,6 @@ import {
 
 import { AuthzExecAction, DaoAdminExecAction } from '../../actions/core/actions'
 import { useQueryLoadingDataWithError, useWallet } from '../../hooks'
-import { entityQueries } from '../../queries'
 import { AddressInput } from '../AddressInput'
 import { WalletChainSwitcher } from '../wallet'
 
