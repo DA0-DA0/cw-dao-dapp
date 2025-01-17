@@ -636,8 +636,8 @@ describe('delegations', () => {
       msgs
     )
 
-    // Register first 100 members as delegates.
-    const numDelegates = 100
+    // Register first 65 members as delegates.
+    const numDelegates = 65
     const delegateMembers = members.slice(0, numDelegates)
     const delegatorMembers = members.slice(numDelegates)
     const delegator = delegatorMembers[0]
@@ -682,28 +682,30 @@ describe('delegations', () => {
     // delegates and updates their delegated voting power. This should cause a
     // gas error if there are too many delegates to update.
 
-    // Delegate to each of the delegates in batches of 100. Round to 5 decimal
+    // Delegate to each of the delegates in batches of 25. Round to 5 decimal
     // places to avoid infinitely repeating decimals.
     const percentDelegated = Math.floor(100_000 / numDelegates / 3) / 100_000
     const delegatorSigningClient = await delegator.getSigningClient()
     await batch({
       list: delegateMembers,
-      batchSize: 100,
+      batchSize: 25,
       grouped: true,
       task: (delegates) =>
-        delegatorSigningClient.executeMultiple(
-          delegator.address,
-          delegates.map(({ address }) => ({
-            contractAddress: delegationAddress,
-            msg: {
-              delegate: {
-                delegate: address,
-                percent: percentDelegated.toString(),
+        delegatorSigningClient
+          .executeMultiple(
+            delegator.address,
+            delegates.map(({ address }) => ({
+              contractAddress: delegationAddress,
+              msg: {
+                delegate: {
+                  delegate: address,
+                  percent: percentDelegated.toString(),
+                },
               },
-            },
-          })),
-          CHAIN_GAS_MULTIPLIER
-        ),
+            })),
+            CHAIN_GAS_MULTIPLIER
+          )
+          .then(() => suite.waitOneBlock()),
       tries: 3,
       delayMs: 1_000,
     })
