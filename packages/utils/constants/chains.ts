@@ -959,7 +959,7 @@ export const _addSupportedChain = ({
   version: ContractVersion
   factoryContractAddress: string
   explorerUrl: string
-}) => {
+}): SupportedChainConfig => {
   const anyChain =
     'chain_id' in chain ? convertChainRegistryChainToAnyChain(chain) : chain
 
@@ -970,22 +970,24 @@ export const _addSupportedChain = ({
     (c) => c.chainId !== anyChain.chainId && c.name !== anyChain.chainName
   )
 
+  const config = convertConfiguredChainToSupportedChain({
+    chainId: anyChain.chainId,
+    name: anyChain.chainName,
+    mainnet: false,
+    accentColor: '',
+    factoryContractAddress,
+    noIndexer: true,
+    explorerUrlTemplates: {
+      tx: `${baseExplorerUrl}/tx/REPLACE`,
+      gov: `${baseExplorerUrl}/gov`,
+      govProp: `${baseExplorerUrl}/gov/REPLACE`,
+      wallet: `${baseExplorerUrl}/account/REPLACE`,
+    },
+    latestVersion: version,
+  })
+
   // Add to supported chains.
-  SUPPORTED_CHAINS.push(
-    convertConfiguredChainToSupportedChain({
-      chainId: anyChain.chainId,
-      name: anyChain.chainName,
-      mainnet: false,
-      accentColor: '',
-      factoryContractAddress,
-      noIndexer: true,
-      explorerUrlTemplates: {
-        tx: `${baseExplorerUrl}/tx/REPLACE`,
-        gov: `${baseExplorerUrl}/gov`,
-        govProp: `${baseExplorerUrl}/gov/REPLACE`,
-        wallet: `${baseExplorerUrl}/account/REPLACE`,
-      },
-      latestVersion: version,
-    })
-  )
+  SUPPORTED_CHAINS.push(config)
+
+  return config
 }

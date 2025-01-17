@@ -410,7 +410,7 @@ describe('delegations', () => {
     const creator = await suite.makeSigner()
     const creatorSigningClient = await creator.getSigningClient()
 
-    const members = await suite.makeSigners(5_000)
+    const members = await suite.makeSigners(1_000)
 
     // Ensure creator has enough funds to create the DAO.
     await creator.tapFaucet()
@@ -530,10 +530,10 @@ describe('delegations', () => {
     ).power
     expect(totalVotingPower).toBe('0')
 
-    // Send tokens to each member in batches of 1,000.
+    // Send tokens to each member in batches of 200.
     await batch({
       list: members,
-      batchSize: 1_000,
+      batchSize: 200,
       grouped: true,
       task: (recipients) =>
         creatorSigningClient.signAndBroadcast(

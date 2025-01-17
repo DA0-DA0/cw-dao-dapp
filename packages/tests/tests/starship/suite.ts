@@ -41,7 +41,6 @@ import {
   getChainForChainName,
   instantiateSmartContract,
   isErrorWithSubstring,
-  mustGetSupportedChainConfig,
 } from '@dao-dao/utils'
 
 const SUITE_LOCK_PATH = path.join(__dirname, 'suite.ts')
@@ -371,41 +370,34 @@ export class StarshipSuite {
       },
     })
 
-    // Ensure the contracts are deployed. Upload them if not.
-    try {
-      await this.client.getCodeDetails(1)
-    } catch (err) {
-      if (isErrorWithSubstring(err, 'no such code')) {
-        console.log('Contracts not uploaded. Uploading... (eta <1 min)')
-        await this.uploadContracts()
-        console.log('Uploaded contracts.')
-      } else {
-        throw err
-      }
-    }
-
-    _addSupportedChain({
+    let config = _addSupportedChain({
       chain: this.chain,
       version: this.contractVersion,
       factoryContractAddress: '',
       explorerUrl: this.chainInfo.chain.explorers?.[0]?.url!,
     })
 
-    let config = mustGetSupportedChainConfig(this.chainId)
-    if (!config.codeIds.CwAdminFactory) {
-      console.log('Contracts not configured. Uploading... (eta <1 min)')
-      await this.uploadContracts()
-      console.log('Uploaded contracts.')
+    // Ensure the contracts are deployed. Upload them if not.
+    try {
+      for (const codeId of Object.values(config.codeIds)) {
+        await this.client.getCodeDetails(codeId)
+      }
+    } catch (err) {
+      if (isErrorWithSubstring(err, 'no such code')) {
+        console.log('Contracts not uploaded. Uploading... (eta <1 min)')
+        await this.uploadContracts()
+        console.log('Uploaded contracts.')
 
-      // Add again now that the contracts are uploaded.
-      _addSupportedChain({
-        chain: this.chain,
-        version: this.contractVersion,
-        factoryContractAddress: '',
-        explorerUrl: this.chainInfo.chain.explorers?.[0]?.url!,
-      })
-
-      config = mustGetSupportedChainConfig(this.chainId)
+        // Add again now that the contracts are uploaded.
+        config = _addSupportedChain({
+          chain: this.chain,
+          version: this.contractVersion,
+          factoryContractAddress: '',
+          explorerUrl: this.chainInfo.chain.explorers?.[0]?.url!,
+        })
+      } else {
+        throw err
+      }
     }
 
     if (!config.codeIds.CwAdminFactory) {
