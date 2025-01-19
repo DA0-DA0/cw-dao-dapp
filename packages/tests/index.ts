@@ -1,1 +1,1 @@
-export * from './tests/starship/suite'
+export * from './tests/suite'

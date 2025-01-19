@@ -229,7 +229,7 @@ export const uploadContract = async ({
 
   if (!codeId) {
     log(chalk.red, 'not found')
-    throw new Error('Code ID not found')
+    throw new Error(`Code ID not found for ${id} in TX ${transactionHash}`)
   }
 
   log(chalk.green, codeId)

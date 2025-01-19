@@ -104,14 +104,15 @@ export const getLcdForChainId = (
       CHAIN_ENDPOINTS[chainId as keyof typeof CHAIN_ENDPOINTS]) ||
     {}
   )?.rest
-  if (lcd && offset === 0) {
+  // Try preferred LCD 3 times before falling back to chain registry.
+  if (lcd && offset < 3) {
     return lcd
   }
 
-  // If LCD was found but not used, offset > 0, and subtract 1 from offset so we
-  // try the first LCD in the chain registry list.
+  // If LCD was found but not used, offset > 3, so subtract 3 so we start trying
+  // the first LCD in the chain registry list.
   if (lcd) {
-    offset -= 1
+    offset -= 3
   }
 
   // Fallback to chain registry.
@@ -120,10 +121,12 @@ export const getLcdForChainId = (
     throw new Error(`Unknown chain ID "${chainId}"`)
   }
 
-  const lcds = chain?.chainRegistry?.apis?.rest ?? []
-  if (lcds.length === 0) {
-    throw new Error(`No LCD found for chain ID "${chainId}"`)
-  }
+  const lcds = [
+    // Try cosmos.directory LCD first.
+    { address: 'https://rest.cosmos.directory/' + chain.chainName },
+    // Fallback to chain registry.
+    ...(chain?.chainRegistry?.apis?.rest ?? []),
+  ]
 
   return lcds[offset % lcds.length].address.replace(/http:\/\//, 'https://')
 }

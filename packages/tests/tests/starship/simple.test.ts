@@ -23,7 +23,10 @@ describe('simple', () => {
       suite.chainId
     )
 
-    const { address, getSigningClient } = await suite.makeSigner()
+    const { address, getSigningClient } = await suite.makeSigner({
+      // Ensure signer has enough tokens to create the DAO.
+      balance: 100_000,
+    })
     const signingClient = await getSigningClient()
 
     const votingModuleInfo = Cw4VotingModule.generateModuleInstantiateInfo(
@@ -123,7 +126,7 @@ describe('simple', () => {
     const signers = await suite.makeSigners(5)
 
     // Ensure first signer has enough funds to create the DAO.
-    await signers[0].tapFaucet()
+    await signers[0].ensureHasTokens(100_000)
 
     const totalSupply = 1_000_000
     const initialBalance = 100

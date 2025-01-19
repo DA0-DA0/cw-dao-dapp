@@ -1,8 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 
-import { ChainInfo } from '@chain-registry/client'
-import { Asset } from '@chain-registry/types'
 import {
   CosmWasmClient,
   SigningCosmWasmClient,
@@ -11,6 +9,7 @@ import { stringToPath as stringToHdPath } from '@cosmjs/crypto'
 import { DirectSecp256k1HdWallet, coins } from '@cosmjs/proto-signing'
 import { GasPrice, calculateFee } from '@cosmjs/stargate'
 import { QueryClient } from '@tanstack/react-query'
+import dotenv from 'dotenv'
 import jsYaml from 'js-yaml'
 import lockfile from 'proper-lockfile'
 import {
@@ -22,6 +21,7 @@ import {
 import { expect } from 'vitest'
 
 import { CodeIdConfig, DeploySet, getDispatchConfig } from '@dao-dao/dispatch'
+import { HugeDecimal } from '@dao-dao/math'
 import {
   CwDao,
   DaoVoteDelegationClient,
@@ -35,38 +35,86 @@ import { AnyChain, ContractVersion, UnifiedCosmosMsg } from '@dao-dao/types'
 import { MsgSend } from '@dao-dao/types/protobuf/codegen/cosmos/bank/v1beta1/tx'
 import { TxRaw } from '@dao-dao/types/protobuf/codegen/cosmos/tx/v1beta1/tx'
 import {
+  CHAIN_GAS_MULTIPLIER,
   _addChain,
   _addSupportedChain,
   batch,
+  getChainForChainId,
   getChainForChainName,
+  getLcdForChainId,
+  getNativeTokenForChainId,
+  getRpcForChainId,
   instantiateSmartContract,
   isErrorWithSubstring,
 } from '@dao-dao/utils'
 
 const SUITE_LOCK_PATH = path.join(__dirname, 'suite.ts')
+const MNEMONIC_FILE_PATH = path.join(__dirname, '../mnemonics')
 
-export type StarshipSuiteSigner = {
+export type TestSuiteSigner = {
   mnemonic: string
   signer: DirectSecp256k1HdWallet
   address: string
-  tapFaucet: () => Promise<void>
+  /**
+   * Ensure the signer has tokens, tapping the faucet if necessary.
+   */
+  ensureHasTokens: (
+    /**
+     * Amount of tokens to ensure are available.
+     */
+    amount: number,
+    /**
+     * Denom of the token. Defaults to the chain's native denom.
+     */
+    denom?: string
+  ) => Promise<void>
+  /**
+   * Get token balance.
+   */
+  getBalance: (
+    /**
+     * Denom of the token. Defaults to the chain's native denom.
+     */
+    denom?: string
+  ) => Promise<HugeDecimal>
+  /**
+   * Get a signing client.
+   */
   getSigningClient: () => Promise<SigningCosmWasmClient>
 }
 
-export class StarshipSuite {
+export class TestSuite {
   public readonly queryClient: QueryClient
+  public readonly codeIdConfig: CodeIdConfig
+
+  /**
+   * The index of the mnemonic to use next when making signers from the
+   * mnemonics file.
+   */
+  private nextMnemonicIndex: number = 0
 
   constructor(
-    public readonly starshipConfig: ChainConfig,
     public readonly chain: AnyChain,
-    public readonly chainInfo: ChainInfo,
-    public readonly coin: Asset,
+    /**
+     * Native denom for the chain.
+     */
+    public readonly denom: string,
     public readonly rpcEndpoint: string,
     public readonly restEndpoint: string,
-    public readonly genesisMnemonic: string,
     public readonly tapFaucet: (
+      /**
+       * Address to send tokens to.
+       */
       address: string,
-      denom?: string
+      /**
+       * Denom to send tokens in. Defaults to the chain's native denom.
+       */
+      denom?: string,
+      /**
+       * Amount of tokens to send. Defaults to at least 10,000 in microunits
+       * (more if the faucet sends more than that at minimum).
+       */
+      amount?: number
     ) => Promise<void>,
     public readonly client: CosmWasmClient,
     /**
@@ -80,23 +128,37 @@ export class StarshipSuite {
         gcTime: 0,
       },
     })
+
+    this.codeIdConfig = new CodeIdConfig(
+      undefined,
+      path.join(__dirname, '../../utils/constants/codeIds.test.json')
+    )
+
+    // Ensure mnemonics file exists.
+    if (!fs.existsSync(MNEMONIC_FILE_PATH)) {
+      fs.writeFileSync(MNEMONIC_FILE_PATH, '')
+    }
   }
 
-  static async init(chainName: string, contractVersion: ContractVersion) {
+  /**
+   * Initialize the test suite for a local chain powered by Starship.
+   */
+  static async initStarship(
+    chainName: string,
+    contractVersion: ContractVersion
+  ) {
     // Initialize the starshipjs config.
-    await ConfigContext.init(path.join(__dirname, '../../starship.config.yml'))
+    await ConfigContext.init(path.join(__dirname, '../starship.config.yml'))
 
     const {
       chain: _chain,
-      chainInfo,
       getCoin,
       getRpcEndpoint,
       getRestEndpoint,
-      getGenesisMnemonic,
     } = useChain(chainName)
 
     // Parallelize all the async calls.
-    const [coin, { rpcEndpoint, client }, restEndpoint, genesisMnemonic] =
+    const [{ base: denom }, { rpcEndpoint, client }, restEndpoint] =
       await Promise.all([
         getCoin(),
         getRpcEndpoint().then(async (rpcEndpoint) => ({
@@ -104,7 +166,6 @@ export class StarshipSuite {
           client: await CosmWasmClient.connect(rpcEndpoint),
         })),
         getRestEndpoint(),
-        getGenesisMnemonic(),
       ])
 
     // Add to main chain lists.
@@ -120,7 +181,12 @@ export class StarshipSuite {
       fs.readFileSync(ConfigContext.configFile, 'utf8')
     ) as ChainConfig
 
-    const tapFaucet = async (address: string, denom?: string) => {
+    const tapFaucet = async (
+      address: string,
+      denom?: string,
+      // The Starship faucet sends 10,000 tokens (in macrounits) by default.
+      amount = 10_000_000_000
+    ) => {
       const chainConfig = config.chains.find((c) => c.id === chain.chainId)
       if (!chainConfig) {
         throw new Error(`Chain config not found for ${chain.chainId}`)
@@ -128,41 +194,45 @@ export class StarshipSuite {
       const faucetEndpoint = `http://localhost:${chainConfig.ports.faucet}/credit`
 
       if (!denom) {
-        denom = (await getCoin()).base
+        denom = suite.denom
       }
 
-      const res = await fetch(faucetEndpoint, {
-        method: 'POST',
-        body: JSON.stringify({
-          address,
-          denom,
-        }),
-        headers: {
-          'Content-type': 'application/json',
-        },
-      })
+      // How much the Starship faucet sends in one request.
+      const faucetAmount = 10_000_000_000
 
-      if (!res.ok) {
-        throw new Error(
-          `Failed to tap faucet for ${address}: ${res.status} ${res.statusText}`
-        )
-      }
+      while (amount > 0) {
+        const res = await fetch(faucetEndpoint, {
+          method: 'POST',
+          body: JSON.stringify({
+            address,
+            denom,
+          }),
+          headers: {
+            'Content-type': 'application/json',
+          },
+        })
 
-      const data = await res.text()
+        if (!res.ok) {
+          throw new Error(
+            `Failed to tap faucet for ${address}: ${res.status} ${res.statusText}`
+          )
+        }
 
-      if (data !== 'ok') {
-        throw new Error(`Failed to tap faucet for ${address}: ${data}`)
+        const data = await res.text()
+
+        if (data !== 'ok') {
+          throw new Error(`Failed to tap faucet for ${address}: ${data}`)
+        }
+
+        amount -= faucetAmount
       }
     }
 
-    const suite = new StarshipSuite(
-      config,
+    const suite = new TestSuite(
       chain,
-      chainInfo,
-      coin,
+      denom,
       rpcEndpoint,
       restEndpoint,
-      genesisMnemonic,
       tapFaucet,
       client,
       contractVersion
@@ -171,8 +241,62 @@ export class StarshipSuite {
     return suite
   }
 
-  get denom() {
-    return this.coin.base
+  /**
+   * Initialize the test suite for an existing chain.
+   */
+  static async initExisting(chainId: string, contractVersion: ContractVersion) {
+    const { parsed: { WALLET_FAUCET_MNEMONIC: faucetMnemonic } = {} } =
+      dotenv.config()
+    if (!faucetMnemonic) {
+      throw new Error(
+        'WALLET_FAUCET_MNEMONIC is not set. Please set it in the .env file.'
+      )
+    }
+
+    const chain = getChainForChainId(chainId)
+    const nativeToken = getNativeTokenForChainId(chainId)
+    const rpcEndpoint = getRpcForChainId(chainId)
+    const restEndpoint = getLcdForChainId(chainId)
+    const client = await CosmWasmClient.connect(rpcEndpoint)
+
+    // Send tokens to the address from the configured address. Most chains don't
+    // have public faucet APIs, so instead we'll just send tokens from an
+    // existing signer with tokens.
+    const tapFaucet = async (
+      address: string,
+      denom = nativeToken.denomOrAddress,
+      amount = 10_000
+    ) => {
+      const faucetSigner = await DirectSecp256k1HdWallet.fromMnemonic(
+        faucetMnemonic,
+        { prefix: chain.bech32Prefix }
+      )
+      const faucetSignerAddress = (await faucetSigner.getAccounts())[0].address
+      const signingClient = await SigningCosmWasmClient.connectWithSigner(
+        rpcEndpoint,
+        faucetSigner,
+        makeGetSignerOptions(suite.queryClient)(chain.chainName)
+      )
+
+      await signingClient.sendTokens(
+        faucetSignerAddress,
+        address,
+        coins(amount, denom),
+        CHAIN_GAS_MULTIPLIER
+      )
+    }
+
+    const suite = new TestSuite(
+      chain,
+      nativeToken.denomOrAddress,
+      rpcEndpoint,
+      restEndpoint,
+      tapFaucet,
+      client,
+      contractVersion
+    )
+
+    return suite
   }
 
   get bech32Prefix() {
@@ -189,16 +313,41 @@ export class StarshipSuite {
 
   get gasPrice() {
     const price =
-      this.chainInfo.chain.fees?.fee_tokens?.[0].fixed_min_gas_price || 0
+      this.chain.chainRegistry?.fees?.fee_tokens?.[0].fixed_min_gas_price || 0
     return GasPrice.fromString(`${price}${this.denom}`)
   }
 
   /**
-   * Generate a signer and potentially provide it with tokens from the faucet.
+   * Ensure an address has tokens, tapping the faucet if necessary.
+   */
+  async ensureHasTokens(
+    /**
+     * The address to ensure has tokens.
+     */
+    address: string,
+    /**
+     * The amount of tokens to ensure are available.
+     */
+    amount: number,
+    /**
+     * Denom of the token. Defaults to the chain's native denom.
+     */
+    denom = this.denom
+  ) {
+    const balance = await this.getBalance(address, denom)
+    if (balance.lt(amount)) {
+      await this.tapFaucet(address, denom, amount - balance.toNumber())
+    }
+  }
+
+  /**
+   * Generate a signer and potentially provide it with at least 10,000 tokens
+   * (in microunits) from the faucet.
    */
   async makeSigner({
     mnemonic,
     noFaucet = false,
+    balance = 10_000,
   }: {
     /**
      * If undefined, will generate a random mnemonic.
@@ -208,12 +357,58 @@ export class StarshipSuite {
      * If true, will not tap the faucet. Defaults to false.
      */
     noFaucet?: boolean
-  } = {}): Promise<StarshipSuiteSigner> {
-    mnemonic ||= generateMnemonic()
+    /**
+     * Amount of tokens to ensure are available. Defaults to 10,000 in
+     * microunits.
+     */
+    balance?: number
+  } = {}): Promise<TestSuiteSigner> {
+    // If no mnemonic provided, reuse if possible, or generate a new one. This
+    // reuse mechanic is primarily conserve fees when testing on existing
+    // chains. It can be difficult to acquire lots of test tokens, so we want to
+    // conserve tokens where possible across tests.
+    if (!mnemonic) {
+      // Establish lock before reading and writing mnemonics.
+      const releaseLock = await lockfile.lock(MNEMONIC_FILE_PATH, {
+        retries: {
+          forever: true,
+          minTimeout: 100,
+          factor: 1.1,
+          randomize: true,
+        },
+      })
+
+      try {
+        // Read the mnemonics file.
+        const mnemonics = fs
+          .readFileSync(MNEMONIC_FILE_PATH, 'utf8')
+          .trim()
+          .split('\n')
+          .filter(Boolean)
+
+        // If no mnemonic is available, generate a new one and save it. Otherwise
+        // reuse the next available mnemonic.
+        if (this.nextMnemonicIndex >= mnemonics.length) {
+          mnemonic = generateMnemonic()
+          mnemonics.push(mnemonic)
+          fs.writeFileSync(MNEMONIC_FILE_PATH, mnemonics.join('\n'))
+        } else {
+          mnemonic = mnemonics[this.nextMnemonicIndex]
+        }
+
+        // Increment the index to avoid using the same mnemonic next time.
+        this.nextMnemonicIndex++
+      } finally {
+        // Release lock.
+        await releaseLock()
+      }
+    }
 
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
       prefix: this.bech32Prefix,
-      hdPaths: [stringToHdPath(`m/44'/${this.chainInfo.chain.slip44}'/0'/0/0`)],
+      hdPaths: [
+        stringToHdPath(`m/44'/${this.chain.chainRegistry?.slip44}'/0'/0/0`),
+      ],
     })
 
     const address = (await signer.getAccounts())[0].address
@@ -225,17 +420,22 @@ export class StarshipSuite {
         makeGetSignerOptions(this.queryClient)(this.chainName)
       )
 
-    const tapFaucet = () => this.tapFaucet(address)
+    const ensureHasTokens: TestSuiteSigner['ensureHasTokens'] = (...params) =>
+      this.ensureHasTokens(address, ...params)
+
+    const getBalance: TestSuiteSigner['getBalance'] = async (...params) =>
+      this.getBalance(address, ...params)
 
     if (!noFaucet) {
-      await tapFaucet()
+      await ensureHasTokens(balance)
     }
 
     return {
       mnemonic,
       signer,
       address,
-      tapFaucet,
+      ensureHasTokens,
+      getBalance,
       getSigningClient,
     }
   }
@@ -252,7 +452,7 @@ export class StarshipSuite {
      */
     count: number,
     {
-      amount = 1_000_000,
+      amount = 10_000,
       noLock = false,
     }: {
       /**
@@ -266,7 +466,7 @@ export class StarshipSuite {
        */
       noLock?: boolean
     } = {}
-  ): Promise<StarshipSuiteSigner[]> {
+  ): Promise<TestSuiteSigner[]> {
     // Make signers in parallel.
     const signers = await Promise.all(
       [...new Array(count)].map(() => this.makeSigner({ noFaucet: true }))
@@ -287,64 +487,98 @@ export class StarshipSuite {
             },
           })
 
-      const faucetSigner = await this.makeSigner()
-      const faucetSignerClient = await faucetSigner.getSigningClient()
+      try {
+        // Get the signers with insufficient balance.
+        const insufficientBalanceSigners: {
+          signer: TestSuiteSigner
+          missing: number
+        }[] = []
 
-      // Tap faucet enough times to generate the amount for each signer.
-      const faucetTapsNeeded = Math.ceil((amount * count) / 10_000_000_000)
-      for (let i = 0; i < faucetTapsNeeded; i++) {
-        await faucetSigner.tapFaucet()
-      }
+        // Parallelize balance checks in batches of 100.
+        await batch({
+          list: signers,
+          batchSize: 100,
+          grouped: true,
+          task: (group) =>
+            Promise.all(
+              group.map(async (signer) => {
+                const balance = await signer.getBalance()
+                if (balance.lt(amount)) {
+                  insufficientBalanceSigners.push({
+                    signer,
+                    missing: amount - balance.toNumber(),
+                  })
+                }
+              })
+            ),
+          tries: 3,
+          delayMs: 1_000,
+        })
 
-      // Send tokens to each signer, batched by 200.
-      const batchSize = 200
-      const batches = Math.ceil(signers.length / batchSize)
-      const getMessagesForBatch = (batch: number) =>
-        signers
-          .slice(batch * batchSize, (batch + 1) * batchSize)
-          .map((signer) => ({
-            typeUrl: MsgSend.typeUrl,
-            value: MsgSend.fromPartial({
-              fromAddress: faucetSigner.address,
-              toAddress: signer.address,
-              amount: coins(amount, this.denom),
-            }),
-          }))
+        if (insufficientBalanceSigners.length === 0) {
+          return signers
+        }
 
-      // Retrieve account number, sequence, and fee only once to avoid redundant
-      // queries. Use first batch to estimate gas.
-      const { accountNumber, sequence } = await faucetSignerClient.getSequence(
-        faucetSigner.address
-      )
-      const gasEstimation = await faucetSignerClient.simulate(
-        faucetSigner.address,
-        getMessagesForBatch(0),
-        undefined
-      )
-      const fee = calculateFee(
-        Math.round(gasEstimation * 2),
-        faucetSignerClient['gasPrice']
-      )
-
-      // Broadcast the transactions in sequence.
-      for (let i = 0; i < batches; i++) {
-        const txRaw = await faucetSignerClient.sign(
-          faucetSigner.address,
-          getMessagesForBatch(i),
-          fee,
-          '',
-          {
-            accountNumber,
-            sequence: sequence + i,
-            chainId: this.chainId,
-          }
+        const totalMissing = insufficientBalanceSigners.reduce(
+          (sum, signer) => sum + signer.missing,
+          0
         )
-        const txBytes = TxRaw.encode(txRaw).finish()
-        await faucetSignerClient.broadcastTx(txBytes)
-      }
 
-      // Release lock.
-      await releaseLock()
+        const faucetSigner = await this.makeSigner({
+          // 100,000 tokens for own gas, and then tokens for each signer.
+          balance: 100_000 + totalMissing,
+        })
+        const faucetSignerClient = await faucetSigner.getSigningClient()
+
+        // Send tokens to each signer, batched by 200.
+        const batchSize = 200
+        const batches = Math.ceil(insufficientBalanceSigners.length / batchSize)
+        const getMessagesForBatch = (batch: number) =>
+          insufficientBalanceSigners
+            .slice(batch * batchSize, (batch + 1) * batchSize)
+            .map(({ signer, missing }) => ({
+              typeUrl: MsgSend.typeUrl,
+              value: MsgSend.fromPartial({
+                fromAddress: faucetSigner.address,
+                toAddress: signer.address,
+                amount: coins(missing, this.denom),
+              }),
+            }))
+
+        // Retrieve account number, sequence, and fee only once to avoid redundant
+        // queries. Use first batch to estimate gas.
+        const { accountNumber, sequence } =
+          await faucetSignerClient.getSequence(faucetSigner.address)
+        const gasEstimation = await faucetSignerClient.simulate(
+          faucetSigner.address,
+          getMessagesForBatch(0),
+          undefined
+        )
+        const fee = calculateFee(
+          Math.round(gasEstimation * 2),
+          faucetSignerClient['gasPrice']
+        )
+
+        // Broadcast the transactions in sequence.
+        for (let i = 0; i < batches; i++) {
+          const txRaw = await faucetSignerClient.sign(
+            faucetSigner.address,
+            getMessagesForBatch(i),
+            fee,
+            '',
+            {
+              accountNumber,
+              sequence: sequence + i,
+              chainId: this.chainId,
+            }
+          )
+          const txBytes = TxRaw.encode(txRaw).finish()
+          await faucetSignerClient.broadcastTx(txBytes)
+        }
+      } finally {
+        // Release lock.
+        await releaseLock()
+      }
     }
 
     return signers
@@ -374,15 +608,39 @@ export class StarshipSuite {
       chain: this.chain,
       version: this.contractVersion,
       factoryContractAddress: '',
-      explorerUrl: this.chainInfo.chain.explorers?.[0]?.url!,
+      explorerUrl: this.chain.chainRegistry?.explorers?.[0]?.url!,
     })
 
     // Ensure the contracts are deployed. Upload them if not.
+    const deploySets = DeploySet.getAutoDeploySets(this.chainId)
+    const deployContracts = deploySets.flatMap(
+      (deploySet) => deploySet.contracts
+    )
+
     try {
-      for (const codeId of Object.values(config.codeIds)) {
+      // Ensure code ID exists in the config for every contract.
+      const allCodeIds = await Promise.all(
+        deployContracts.map((contract) =>
+          this.codeIdConfig
+            .getCodeId({
+              chainId: this.chainId,
+              name: contract.name,
+              version: this.contractVersion,
+            })
+            .then((codeId) =>
+              codeId === null
+                ? Promise.reject(new Error('no such code'))
+                : codeId
+            )
+        )
+      )
+
+      // Ensure all code IDs exist on-chain.
+      for (const codeId of allCodeIds) {
         await this.client.getCodeDetails(codeId)
       }
     } catch (err) {
+      // If any code ID is missing, upload the contracts.
       if (isErrorWithSubstring(err, 'no such code')) {
         console.log('Contracts not uploaded. Uploading... (eta <1 min)')
         await this.uploadContracts()
@@ -393,7 +651,7 @@ export class StarshipSuite {
           chain: this.chain,
           version: this.contractVersion,
           factoryContractAddress: '',
-          explorerUrl: this.chainInfo.chain.explorers?.[0]?.url!,
+          explorerUrl: this.chain.chainRegistry?.explorers?.[0]?.url!,
         })
       } else {
         throw err
@@ -401,6 +659,7 @@ export class StarshipSuite {
     }
 
     if (!config.codeIds.CwAdminFactory) {
+      console.log(config)
       throw new Error(
         `CwAdminFactory code ID still not found for chain ${this.chainId}`
       )
@@ -423,7 +682,7 @@ export class StarshipSuite {
     const contracts = await this.client.getContracts(
       config.codeIds.CwAdminFactory
     )
-    if (contracts.length > 0) {
+    if (deployContracts.length > 0) {
       config.factoryContractAddress = contracts[0]
     } else {
       console.log('Deploying new factory contract...')
@@ -444,16 +703,12 @@ export class StarshipSuite {
   private async uploadContracts() {
     const contractDirs = getDispatchConfig().default.contract_dirs
 
-    const codeIds = new CodeIdConfig(
-      undefined,
-      path.join(__dirname, '../../../utils/constants/codeIds.test.json')
-    )
-
     const deploySets = DeploySet.getAutoDeploySets(this.chainId)
-
     const contracts = deploySets.flatMap((deploySet) => deploySet.contracts)
+
     // Make a signer for each contract so we can parallelize the uploads.
     const signers = await this.makeSigners(contracts.length, {
+      amount: 100_000,
       noLock: true,
     })
 
@@ -469,13 +724,31 @@ export class StarshipSuite {
         })
 
         // Save the code ID.
-        await codeIds.setCodeId({
+        await this.codeIdConfig.setCodeId({
           chainId: this.chainId,
           version: this.contractVersion,
           name: contract.name,
           codeId,
         })
       })
+    )
+  }
+
+  /**
+   * Get the balance of an address.
+   */
+  async getBalance(
+    /**
+     * The address to get the balance of.
+     */
+    address: string,
+    /**
+     * Denom of the token. Defaults to the chain's native denom.
+     */
+    denom = this.denom
+  ) {
+    return HugeDecimal.from(
+      (await this.client.getBalance(address, denom)).amount
     )
   }
 
@@ -513,7 +786,7 @@ export class StarshipSuite {
    */
   async createSingleChoiceProposal(
     dao: CwDao,
-    proposer: StarshipSuiteSigner,
+    proposer: TestSuiteSigner,
     title: string,
     msgs: UnifiedCosmosMsg[] = []
   ) {
@@ -553,7 +826,7 @@ export class StarshipSuite {
   async voteOnSingleChoiceProposal(
     proposalModule: SingleChoiceProposalModule,
     proposalNumber: number,
-    voters: StarshipSuiteSigner | StarshipSuiteSigner[],
+    voters: TestSuiteSigner | TestSuiteSigner[],
     vote: 'yes' | 'no' | 'abstain'
   ) {
     // Vote on the proposal in batches of 100.
@@ -584,7 +857,7 @@ export class StarshipSuite {
   async executeSingleChoiceProposal(
     proposalModule: SingleChoiceProposalModule,
     proposalNumber: number,
-    proposer: StarshipSuiteSigner
+    proposer: TestSuiteSigner
   ) {
     await proposalModule.execute({
       proposalId: proposalNumber,
@@ -604,8 +877,8 @@ export class StarshipSuite {
    */
   async createAndExecuteSingleChoiceProposal(
     dao: CwDao,
-    proposer: StarshipSuiteSigner,
-    voters: StarshipSuiteSigner[],
+    proposer: TestSuiteSigner,
+    voters: TestSuiteSigner[],
     title: string,
     msgs?: UnifiedCosmosMsg[],
     expectExecutionResult: 'success' | 'failure' | 'any' = 'success'
@@ -645,7 +918,7 @@ export class StarshipSuite {
    */
   async stakeNativeTokens(
     contract: string,
-    signer: StarshipSuiteSigner,
+    signer: TestSuiteSigner,
     amount: number | string,
     denom: string
   ) {
@@ -661,7 +934,7 @@ export class StarshipSuite {
    */
   async unstakeNativeTokens(
     contract: string,
-    signer: StarshipSuiteSigner,
+    signer: TestSuiteSigner,
     amount: number | string
   ) {
     await new DaoVotingTokenStakedClient(
@@ -676,7 +949,7 @@ export class StarshipSuite {
   /**
    * Register as a delegate.
    */
-  async registerAsDelegate(contract: string, delegate: StarshipSuiteSigner) {
+  async registerAsDelegate(contract: string, delegate: TestSuiteSigner) {
     await new DaoVoteDelegationClient(
       await delegate.getSigningClient(),
       delegate.address,
@@ -687,7 +960,7 @@ export class StarshipSuite {
   /**
    * Unregister as a delegate.
    */
-  async unregisterAsDelegate(contract: string, delegate: StarshipSuiteSigner) {
+  async unregisterAsDelegate(contract: string, delegate: TestSuiteSigner) {
     await new DaoVoteDelegationClient(
       await delegate.getSigningClient(),
       delegate.address,
@@ -700,7 +973,7 @@ export class StarshipSuite {
    */
   async delegate(
     contract: string,
-    delegator: StarshipSuiteSigner,
+    delegator: TestSuiteSigner,
     delegate: string,
     percent: string
   ) {
@@ -719,7 +992,7 @@ export class StarshipSuite {
    */
   async undelegate(
     contract: string,
-    delegator: StarshipSuiteSigner,
+    delegator: TestSuiteSigner,
     delegate: string
   ) {
     await new DaoVoteDelegationClient(
